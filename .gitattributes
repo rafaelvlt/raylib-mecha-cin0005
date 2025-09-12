@@ -1,0 +1,4 @@
+resources/textures/base_texture.png filter=lfs diff=lfs merge=lfs -text
+resources/textures/floor.png filter=lfs diff=lfs merge=lfs -text
+resources/textures/sand.png filter=lfs diff=lfs merge=lfs -text
+resources/models/environment/hangar.glb filter=lfs diff=lfs merge=lfs -text
