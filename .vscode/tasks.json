@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Raylib Game (Linux)",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            // 1. Comando do Compilador (sem .exe)
+            "command": "gcc",
+            "args": [
+				//todos os arquivos com .c serão linkados
+                "*.c",
+                "-o",
+                //nome do executavel
+                "jogo", 
+				//path até raylib
+                "-I",
+                "include/raylib/src",
+                "-L",
+                "include/raylib/src",
+                // bibliotecas importadas
+                "-lraylib",
+                "-lGL",
+                "-lm",
+                "-lpthread",
+                "-ldl",
+                "-lrt",
+                "-lX11",
+
+                // flags de debug
+                "-g",
+                "-Wall"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}
