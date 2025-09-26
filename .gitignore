@@ -36,6 +36,12 @@
 *.x86_64
 *.hex
 
+# Arquivos de Build
+*.exe
+mechaGame
+*.o
+*.obj
+
 # Debug files
 *.dSYM/
 *.su
@@ -50,6 +56,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Arquivos de Sistema
+.DS_Store
+Thumbs.db
 
 # debug information files
 *.dwo
