@@ -2,26 +2,32 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build Raylib Game (Linux)",
+            "label": "Build Raylib Game (WSL)",
             "type": "shell",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            // 1. Comando do Compilador (sem .exe)
             "command": "gcc",
             "args": [
-				//todos os arquivos com .c serão linkados
-                "*.c",
+                // Compila todos os arquivos .c da pasta src/
+                "src/*.c",
                 "-o",
-                //nome do executavel
-                "jogo", 
-				//path até raylib
+                // Gera o executável na pasta raiz
+                "mechaGame",
+                
+                // Adiciona a sua pasta de headers ao caminho de busca
                 "-I",
-                "include/raylib/src",
+                "include",
+                // Adiciona a pasta de headers da Raylib ao caminho de busca
+                "-I",
+                "lib/raylib/src",
+                
+                // Path para as bibliotecas compiladas do raylib
                 "-L",
-                "include/raylib/src",
-                // bibliotecas importadas
+                "lib/raylib/src",
+                
+                // Bibliotecas para o Linux
                 "-lraylib",
                 "-lGL",
                 "-lm",
@@ -30,7 +36,7 @@
                 "-lrt",
                 "-lX11",
 
-                // flags de debug
+                // Flags de debug
                 "-g",
                 "-Wall"
             ],

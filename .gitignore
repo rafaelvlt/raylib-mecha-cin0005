@@ -38,7 +38,7 @@
 
 # Arquivos de Build
 *.exe
-jogo
+mechaGame
 *.o
 *.obj
 
