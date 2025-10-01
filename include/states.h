@@ -1,7 +1,7 @@
 #ifndef GAME_STATES_H
 #define GAME_STATES_H
 
-#include "raylib.h" // Inclui raylib para tipos como Color, Rectangle, etc.
+#include "raylib.h"
 
 // Enumeração para os diferentes estados do jogo
 typedef enum GameScreen {
@@ -11,7 +11,6 @@ typedef enum GameScreen {
 } GameScreen;
 
 // Variável global para controlar o estado atual do jogo
-// É crucial que seja extern para ser declarada aqui e definida em game_states.c
 extern GameScreen currentScreen;
 
 // Funções para cada estado
@@ -35,4 +34,4 @@ void UnloadTitleScreen(void);
 void UnloadGameplayScreen(void);
 void UnloadEndingScreen(void);
 
-#endif // GAME_STATES_H
+#endif
