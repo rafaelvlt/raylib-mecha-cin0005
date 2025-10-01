@@ -1,10 +1,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
-// Inclua seu novo arquivo de cabeçalho da máquina de estados
 #include "states.h"
 
-// --- DEFINES E MACROS DO SEU JOGO (mantidos aqui) ---
+// DEFINES E MACROS DE GAMEPLAU
 #define GRAVITY         32.0f
 #define MAX_SPEED       20.0f
 #define CROUCH_SPEED    5.0f
@@ -18,7 +17,7 @@
 #define BOTTOM_HEIGHT    0.5f
 #define NORMALIZE_INPUT  0
 
-// --- ESTRUTURAS DO SEU JOGO (mantidas aqui) ---
+// ESTRUTURAS DO JOGO
 typedef struct {
     Vector3 position;
     Vector3 velocity;
@@ -26,8 +25,7 @@ typedef struct {
     bool isGrounded;
 } Body;
 
-// --- VARIÁVEIS GLOBAIS DO SEU JOGO (mantidas aqui) ---
-// Note que 'player', 'lookRotation', etc. agora são globais ou podem ser passadas para funções
+// VARIÁVEIS GLOBAIS
 static Vector2 sensitivity = { 0.001f, 0.001f };
 static Body player = { 0 };
 static Vector2 lookRotation = { 0 };
@@ -36,26 +34,24 @@ static float walkLerp = 0.0f;
 static float headLerp = STAND_HEIGHT;
 static Vector2 lean = { 0 };
 
-// --- DECLARAÇÕES DE FUNÇÕES DO SEU JOGO (mantidas aqui) ---
-// Note que estas funções serão chamadas dentro do estado GAMEPLAY
+// DECLARAÇÕES DE GAMEPLAY
 static void DrawLevel(void);
 static void UpdateCameraFPS(Camera *camera);
 static void UpdateBody(Body *body, float rot, char side, char forward, bool jumpPressed, bool crouchHold);
 
-// --- Câmera do jogo (agora global para ser acessível pelas funções de estado) ---
+//CAMERA
 static Camera camera = { 0 };
 
-//------------------------------------------------------------------------------------
-// Ponto de entrada principal do programa
-//------------------------------------------------------------------------------------
+
+
 int main(void)
 {
     // Inicialização da janela
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera fps with State Machine");
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera fps");
 
-    // Inicialização da câmera (realizada apenas uma vez)
+    // Inicialização da câmera
     camera.fovy = 60.0f;
     camera.projection = CAMERA_PERSPECTIVE;
     camera.position = (Vector3){
@@ -63,31 +59,30 @@ int main(void)
         player.position.y + (BOTTOM_HEIGHT + headLerp),
         player.position.z,
     };
-    UpdateCameraFPS(&camera); // Atualiza os parâmetros iniciais da câmera
+    UpdateCameraFPS(&camera);
 
     DisableCursor(); // Cursor invisível e limitado à janela (apenas durante o gameplay)
 
-    SetTargetFPS(60); // Define a taxa de quadros por segundo
+    SetTargetFPS(60);
 
-    // --- MÁQUINA DE ESTADOS: INICIALIZAÇÃO DA PRIMEIRA TELA ---
+    // MÁQUINA DE ESTADOS: INICIALIZAÇÃO DA PRIMEIRA TELA
     switch (currentScreen)
     {
         case TITLE: InitTitleScreen(); break;
         case GAMEPLAY: InitGameplayScreen(); break;
         case ENDING: InitEndingScreen(); break;
-        default: break; // Should not happen
+        default: break;
     }
 
-    // Loop principal do jogo (roda até o usuário fechar a janela)
+    // Loop principal
     while (!WindowShouldClose())
     {
-        // --- MÁQUINA DE ESTADOS: ATUALIZAÇÃO ---
+        //MÁQUINA DE ESTADOS: ATUALIZAÇÃO
         switch (currentScreen)
         {
             case TITLE: UpdateTitleScreen(); break;
             case GAMEPLAY:
             {
-                // Lógica de atualização do seu jogo FPS existente
                 Vector2 mouseDelta = GetMouseDelta();
                 lookRotation.x -= mouseDelta.x*sensitivity.x;
                 lookRotation.y += mouseDelta.y*sensitivity.y;
@@ -122,13 +117,12 @@ int main(void)
 
                 UpdateCameraFPS(&camera);
                 UpdateGameplayScreen(); // Chama a função de atualização específica do estado
-                //----------------------------------------------------------------------------------
             } break;
             case ENDING: UpdateEndingScreen(); break;
             default: break;
         }
 
-        // --- MÁQUINA DE ESTADOS: DESENHO ---
+        //MÁQUINA DE ESTADOS: DESENHO
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
@@ -138,7 +132,6 @@ int main(void)
                 case TITLE: DrawTitleScreen(); break;
                 case GAMEPLAY:
                 {
-                    // Lógica de desenho do seu jogo FPS existente
                     BeginMode3D(camera);
                         DrawLevel();
                     EndMode3D();
@@ -158,10 +151,9 @@ int main(void)
             }
 
         EndDrawing();
-        //----------------------------------------------------------------------------------
     }
 
-    // --- MÁQUINA DE ESTADOS: DESINICIALIZAÇÃO FINAL ---
+    //MÁQUINA DE ESTADOS: DESINICIALIZAÇÃO FINAL
     switch (currentScreen)
     {
         case TITLE: UnloadTitleScreen(); break;
@@ -170,12 +162,11 @@ int main(void)
         default: break;
     }
 
-    CloseWindow(); // Fecha a janela e o contexto OpenGL
+    CloseWindow();
     return 0;
 }
 
-// --- Funções de MÓDULO (do seu jogo FPS) ---
-// (Estas funções permanecem aqui, pois são específicas da lógica de gameplay)
+// --- Funções de MÓDULO ---
 
 void UpdateBody(Body *body, float rot, char side, char forward, bool jumpPressed, bool crouchHold)
 {
