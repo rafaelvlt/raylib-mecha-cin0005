@@ -1,3 +1,0 @@
-#include "EntityComponent.h"
-
-
