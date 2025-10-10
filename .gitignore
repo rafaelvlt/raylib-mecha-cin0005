@@ -63,3 +63,8 @@ Thumbs.db
 
 # debug information files
 *.dwo
+
+
+# Raylib Examples
+lib/raylib/examples/
+
