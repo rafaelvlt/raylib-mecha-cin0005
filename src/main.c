@@ -1,14 +1,13 @@
-#include "raylib.h"
-#include "raymath.h"
+#include <raylib.h>
+#include <raymath.h>
+#include "utility.h"
 #include "ecs_systems.h"       
 #include "ecs_entitymanager.h" 
 #include "states.h"
 
 int main(void) {
     // --- Window Initialization ---
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
-    InitWindow(screenWidth, screenHeight, "Mecha Game");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
 
     // Camera Initialization (Same as Raylib Examples)
     Camera camera = { 0 };
@@ -21,7 +20,7 @@ int main(void) {
     // --- MENU -------
     // State Machine Definition
     GameScreen gameScreen = TITLE;
-
+    MenuButton menuButtonSelected = NONE;
     // TITLE/MENU Variables
     int framesCounter = 0;
     
@@ -34,7 +33,7 @@ int main(void) {
 
     // Test variables for the Menu Orbit Target
     // An Asset Manager will be made for this in the future.
-    Mesh playerMesh = GenMeshCube(4.0f, 6.0f, 4.0f);
+    Mesh playerMesh = GenMeshCube(2.0f, 4.0f, 2.0f);
     Model playerModel = LoadModelFromMesh(playerMesh);
 
     // --- Game Loop ---
@@ -58,25 +57,24 @@ int main(void) {
             } break;
             case MENU:
             {
-                UpdateMenuScreen(&gameScreen, &camera);
+                UpdateMenuScreen(&gameScreen, &camera, &menuButtonSelected);
             } break;
             case FIRST_LEVEL:
             {
                 // TODO
                 if (IsKeyPressed(KEY_ENTER))
                 {
-                    gameScreen = CREDITS_SCREEN;
+                    gameScreen = MENU;
                 }
             } break;
             case CREDITS_SCREEN:
             {
                 // TODO
 
-                // Press enter to return to TITLE screen
+                // Press enter to return to MENU screen
                 if (IsKeyPressed(KEY_ENTER))
                 {
                     gameScreen = MENU;
-                    InitTitleScreen(&framesCounter);
                 }
             } break;
             default: break;
@@ -93,11 +91,16 @@ int main(void) {
                 } break;
                 case MENU:
                 {
-                    DrawMenuScreen(&camera, &entityManager, framesCounter);
+                    DrawMenuScreen(&camera, &entityManager, &menuButtonSelected, framesCounter);
                 } break;
                 case FIRST_LEVEL:
                 {
-                    // TODO
+                    //TODO
+
+                    // Dummy text for testing
+                    DrawText("FIRST LEVEL", SCREEN_WIDTH/2 - MeasureText(GAME_TITLE, 100)/2, SCREEN_HEIGHT/2, 100, WHITE);
+                    DrawText("Press Enter to go to Menu", SCREEN_WIDTH/2 - MeasureText("Press Enter to go to Menu", 30)/2, SCREEN_HEIGHT/2 + 100, 30, WHITE);
+
                 } break;
                 case CREDITS_SCREEN:
                 {

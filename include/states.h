@@ -15,6 +15,15 @@ typedef enum GameScreen {
     CREDITS_SCREEN
 } GameScreen;
 
+typedef enum MenuButton{
+    NONE = 0,
+    START_GAME,
+    LOADOUT,
+    OPTIONS,
+    CREDITS,
+    EXIT
+} MenuButton;
+
 // Funções para cada estado
 // Inicialização
 void InitTitleScreen(int* framesCounter);
@@ -23,12 +32,12 @@ void InitCreditsScreen(void);
 
 // Atualização (lógica)
 void UpdateTitleScreen(GameScreen* Screen);
-void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera);
+void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera, MenuButton* menuButtonPressed);
 void UpdateCreditsScreen(GameScreen* Screen);
 
 // Desenho (renderização)
 void DrawTitleScreen(int framesCounter);
-void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, int framesCounter);
+void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, MenuButton* menuButtonPressed, int framesCounter);
 void DrawCreditsScreen(void);
 
 // Desinicialização (liberação de recursos)
