@@ -36,6 +36,12 @@
 *.x86_64
 *.hex
 
+# Build Files
+*.exe
+mechaGame
+*.o
+*.obj
+
 # Debug files
 *.dSYM/
 *.su
@@ -51,5 +57,14 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# System Files
+.DS_Store
+Thumbs.db
+
 # debug information files
 *.dwo
+
+
+# Raylib Examples
+lib/raylib/examples/
+
