@@ -28,7 +28,7 @@ void DestroyEntity(EntityManager* entityManager, Entity entity) {
 
 /* ===========================
   Add Components Functions
-  Paramêtros - EntityManager, Entity, Dados do componente...
+  Parameters - EntityManager, Entity, Component Data...
 ============================== */
 
 void AddTransformComponent(EntityManager* entityManager, Entity entity, Vector3 position) {

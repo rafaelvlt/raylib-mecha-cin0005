@@ -2,36 +2,38 @@
 #define GAME_STATES_H
 
 #include "raylib.h"
+#include "ecs_components.h"
+#include "ecs_entitymanager.h"
+#include "ecs_systems.h"
 
-// Enumeração para os diferentes estados do jogo
+// Enum for all Game States
 typedef enum GameScreen {
     TITLE = 0,
-    GAMEPLAY,
-    ENDING
+    MENU,
+    FIRST_LEVEL,
+    SECOND_LEVEL,
+    CREDITS_SCREEN
 } GameScreen;
-
-// Variável global para controlar o estado atual do jogo
-extern GameScreen currentScreen;
 
 // Funções para cada estado
 // Inicialização
-void InitTitleScreen(void);
-void InitGameplayScreen(void);
-void InitEndingScreen(void);
+void InitTitleScreen(int* framesCounter);
+void InitMenuScreen(Camera3D* camera, EntityManager* entitymanager, Model* playerModel);
+void InitCreditsScreen(void);
 
 // Atualização (lógica)
-void UpdateTitleScreen(void);
-void UpdateGameplayScreen(void);
-void UpdateEndingScreen(void);
+void UpdateTitleScreen(GameScreen* Screen);
+void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera);
+void UpdateCreditsScreen(GameScreen* Screen);
 
 // Desenho (renderização)
-void DrawTitleScreen(void);
-void DrawGameplayScreen(void);
-void DrawEndingScreen(void);
+void DrawTitleScreen(int framesCounter);
+void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, int framesCounter);
+void DrawCreditsScreen(void);
 
 // Desinicialização (liberação de recursos)
 void UnloadTitleScreen(void);
-void UnloadGameplayScreen(void);
-void UnloadEndingScreen(void);
+void UnloadMenuScreen(void);
+void UnloadCreditsScreen(void);
 
 #endif

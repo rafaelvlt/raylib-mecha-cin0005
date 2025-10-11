@@ -1,109 +1,117 @@
-#include "states.h"
 #include "raylib.h"
-
-// Definição da variável global de estado (declarada em game_states.h)
-GameScreen currentScreen = TITLE;
-
-// Variáveis do MENU
-static int framesCounter = 0;
-static int finishScreen = 0; // 0-Nenhuma, 1-Pronto, 2-Sair do jogo
+#include "states.h"
 
 
-// Funções do MENU
-void InitTitleScreen(void)
+
+// Funções de título(Inicialização)
+void InitTitleScreen(int* framesCounter)
 {
-    framesCounter = 0;
-    finishScreen = 0;
+    *framesCounter = 0;
 }
 
-void UpdateTitleScreen(void)
+void UpdateTitleScreen(GameScreen* Screen)
 {
-    framesCounter++;
-
-    // Lógica para transição de estados no menu
-    if (IsKeyPressed(KEY_ENTER))
-    {
-        currentScreen = GAMEPLAY;
-        finishScreen = 1; 
-    }
-    if (IsKeyPressed(KEY_E))
-    {
-        currentScreen = ENDING;
-    }
-    if (IsKeyPressed(KEY_ESCAPE))
-    {
-        currentScreen = ENDING;
-        finishScreen = 2;
-    }
+    
 }
 
-void DrawTitleScreen(void)
+void DrawTitleScreen(int framesCounter)
 {
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), LIGHTGRAY);
-    DrawText("MENU PRINCIPAL", GetScreenWidth()/2 - MeasureText("MENU PRINCIPAL", 40)/2, GetScreenHeight()/4, 40, DARKBLUE);
-    DrawText("Pressione ENTER para JOGAR", GetScreenWidth()/2 - MeasureText("Pressione ENTER para JOGAR", 20)/2, GetScreenHeight()/2, 20, BLACK);
-    DrawText("Pressione E para os CRÉDITOS", GetScreenWidth()/2 - MeasureText("Pressione E para os CRÉDITOS", 20)/2, GetScreenHeight()/2 + 30, 20, BLACK);
-    DrawText("Pressione ESC para SAIR", GetScreenWidth()/2 - MeasureText("Pressione ESC para SAIR", 20)/2, GetScreenHeight()/2 + 60, 20, BLACK);
-    DrawText(TextFormat("Contador: %04i", framesCounter/60), GetScreenWidth()/2 - 100, GetScreenHeight() - 30, 20, MAROON);
+    const float maxAlpha = 1.0f;
+    const int twoSeconds = 120;
+
+    float alphaValue;
+    if (framesCounter  <= twoSeconds) alphaValue = 0.01 * framesCounter;
+    else if (framesCounter > twoSeconds) alphaValue = maxAlpha - (0.01*(framesCounter - twoSeconds));
+
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+    DrawText("MECHA GAME", GetScreenWidth()/2 - MeasureText("MECHA GAME", 100)/2, GetScreenHeight()/2 - 100, 100, Fade(WHITE, alphaValue));
 }
 
 void UnloadTitleScreen(void)
 {
+
+}
+
+// Menu Functions
+void InitMenuScreen(Camera3D* camera, EntityManager* entityManager, Model* playerModel)
+{
+    InitEntityManager(entityManager);
+
+    Entity player = CreateEntity(entityManager);
+    AddTransformComponent(entityManager, player, (Vector3){ 0.0f, 2.0f, 0.0f });
+    AddRenderComponent(entityManager, player, *playerModel, DARKGREEN);
+
+    camera->position = (Vector3){ 10.0f, 3.0f, 10.0f };
+    camera->target = (Vector3){ 0.0f, 2.0f, 0.0f }; // Camera Targeting Mecha Position
+    camera->up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    camera->fovy = 60.0f;
+    camera->projection = CAMERA_PERSPECTIVE;
     
-}
-
-
-// Funções da tela de GAMEPLAY
-void InitGameplayScreen(void)
-{
 
 }
 
-void UpdateGameplayScreen(void)
-{
-    
-}
-
-void DrawGameplayScreen(void)
+void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera)
 {
 
-}
-
-void UnloadGameplayScreen(void)
-{
-
-}
-
-// Funções de Tela Final
-void InitEndingScreen(void)
-{
-    framesCounter = 0;
-    finishScreen = 0;
-}
-
-void UpdateEndingScreen(void)
-{
-    framesCounter++;
+    UpdateCamera(camera, CAMERA_ORBITAL);
+    // Changing State Logic
     if (IsKeyPressed(KEY_ENTER))
     {
-        currentScreen = TITLE; // Voltar para o menu
-        finishScreen = 1;
+        *Screen = FIRST_LEVEL;
+    }
+    if (IsKeyPressed(KEY_E))
+    {
+        *Screen = CREDITS_SCREEN;
     }
     if (IsKeyPressed(KEY_ESCAPE))
     {
-        finishScreen = 2; // Sair do jogo
+        *Screen = CREDITS_SCREEN;
     }
 }
 
-void DrawEndingScreen(void)
+void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, int framesCounter)
 {
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
-    DrawText("TELA FINAL", GetScreenWidth()/2 - MeasureText("TELA FINAL", 40)/2, GetScreenHeight()/4, 40, WHITE);
-    DrawText("Pressione ENTER para voltar ao MENU", GetScreenWidth()/2 - MeasureText("Pressione ENTER para voltar ao MENU", 20)/2, GetScreenHeight()/2, 20, GRAY);
-    DrawText("Pressione ESC para SAIR", GetScreenWidth()/2 - MeasureText("Pressione ESC para SAIR", 20)/2, GetScreenHeight()/2 + 30, 20, GRAY);
+    BeginMode3D(*camera);
+        RenderSystem_Draw(entityManager);
+    EndMode3D();
+
+
+    // 2D UI Text
+    DrawText("MAIN MENU", GetScreenWidth()/5 - MeasureText("MAIN MENU", 40)/2, GetScreenHeight()/4, 40, WHITE);
+    DrawText("Press ENTER to PLAY", GetScreenWidth()/5 - MeasureText("Press ENTER to PLAY", 20)/2, GetScreenHeight()/2, 20, WHITE);
+    DrawText("Press E to go to CREDITS", GetScreenWidth()/5 - MeasureText("Press E to go to CREDITS", 20)/2, GetScreenHeight()/2 + 30, 20, WHITE);
+    DrawText("Press ESC to QUIT", GetScreenWidth()/5 - MeasureText("Press ESC to QUIT", 20)/2, GetScreenHeight()/2 + 60, 20, WHITE);
 }
 
-void UnloadEndingScreen(void)
+void UnloadMenuScreen(void)
 {
-    // Descarregar recursos específicos da tela final
+    
+}
+
+
+
+void InitCreditsScreen(void)
+{
+    
+}
+
+void UpdateCreditsScreen(GameScreen* Screen)
+{
+    if (IsKeyPressed(KEY_ENTER))
+    {
+        *Screen = TITLE;
+    }
+}
+
+void DrawCreditsScreen(void)
+{
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+    DrawText("Credits Screen", GetScreenWidth()/2 - MeasureText("Credits Screen", 40)/2, GetScreenHeight()/4, 40, WHITE);
+    DrawText("Press ENTER to go back to the MENU", GetScreenWidth()/2 - MeasureText("Press ENTER to go back to the MENU", 20)/2, GetScreenHeight()/2, 20, GRAY);
+    DrawText("Press ESC to QUIT", GetScreenWidth()/2 - MeasureText("Press ESC to QUIT", 20)/2, GetScreenHeight()/2 + 30, 20, GRAY);
+}
+
+void UnloadCreditsScreen(void)
+{
+
 }
