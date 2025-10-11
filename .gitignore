@@ -36,7 +36,7 @@
 *.x86_64
 *.hex
 
-# Arquivos de Build
+# Build Files
 *.exe
 mechaGame
 *.o
@@ -57,7 +57,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Arquivos de Sistema
+# System Files
 .DS_Store
 Thumbs.db
 
