@@ -39,8 +39,8 @@ void InitMenuScreen(Camera3D* camera, EntityManager* entityManager, Model* playe
     InitEntityManager(entityManager);
 
     Entity player = CreateEntity(entityManager);
-    AddTransformComponent(entityManager, player, (Vector3){ 0.0f, 2.0f, 0.0f });
-    AddRenderComponent(entityManager, player, *playerModel, DARKGREEN);
+    AddTransformComponent(entityManager, player, (Vector3){ 0.0f, 3.0f, 0.0f });
+    AddRenderComponent(entityManager, player, *playerModel, GREEN);
 
     camera->position = (Vector3){ 5.0f, 3.0f, 10.0f };
     camera->target = (Vector3){ 0.0f, 2.0f, 0.0f }; // Camera Targeting Mecha Position
@@ -69,22 +69,24 @@ void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera, MenuButton* menuButt
 
 }
 
-void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, MenuButton* menuButtonSelected, int framesCounter)
+void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, MenuButton* menuButtonSelected, RenderTexture splitScreen[], int framesCounter)
 {
+    // Source Rect to be drawn over at the end 
+    Rectangle splitScreenRect = { 0.0f, 0.0f, (float)splitScreen[0].texture.width, (float)-splitScreen[0].texture.height};
+
     //-------- 3D Background -----------
-    BeginMode3D(*camera);
-        DrawGrid(10, 0.45f);
-        RenderSystem_Draw(entityManager);
-    EndMode3D();
-
-
-    //------- 2D GUI ----------
+    BeginTextureMode(splitScreen[1]);
+    ClearBackground(BLACK);
+        BeginMode3D(*camera);
+            DrawGrid(15, 0.45f);
+            RenderSystem_Draw(entityManager);
+        EndMode3D();
+    EndTextureMode();
     
-    // ------- Title Specs + Draw ----------
-    const float titleX = SCREEN_WIDTH/2 - MeasureText(GAME_TITLE, 60)/2;
-    const float titleY = 25;
-    const float titleFontSize = 60;
-    DrawText(GAME_TITLE, titleX, titleY, titleFontSize, WHITE);
+    
+    //------- 2D GUI ----------
+    BeginTextureMode(splitScreen[0]);
+    ClearBackground(BLACK);
     
     // ------- Menu Panel Specs ----------
     const float panelWidth = SCREEN_WIDTH / 3.0f;
@@ -104,19 +106,32 @@ void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, MenuButton* 
     const float buttonHeight = 50.0f;
     const float buttonSpacing = 20.0f;
     const float buttonX = menuPanel.x + (menuPanel.width - buttonWidth) / 2.0f;
-
+    
     Rectangle startButtonRect = { buttonX, menuPanel.y + 60, buttonWidth, buttonHeight };
     Rectangle loadoutButtonRect = { buttonX, startButtonRect.y + buttonHeight + buttonSpacing, buttonWidth, buttonHeight };
     Rectangle optionsButtonRect = { buttonX, loadoutButtonRect.y + buttonHeight + buttonSpacing, buttonWidth, buttonHeight };
     Rectangle creditsButtonRect = { buttonX, optionsButtonRect.y + buttonHeight + buttonSpacing, buttonWidth, buttonHeight };
     Rectangle exitButtonRect = { buttonX, creditsButtonRect.y + buttonHeight + buttonSpacing, buttonWidth, buttonHeight };
-
+    
     // Checks if the button is pressed and draw them too
     if (GuiButton(startButtonRect, "START GAME")) *menuButtonSelected = START_GAME;
     if (GuiButton(loadoutButtonRect, "LOADOUT"))  *menuButtonSelected = LOADOUT;
     if (GuiButton(optionsButtonRect, "OPTIONS"))  *menuButtonSelected = OPTIONS;
     if (GuiButton(creditsButtonRect, "CREDITS"))  *menuButtonSelected = CREDITS;
     if (GuiButton(exitButtonRect, "EXIT"))        *menuButtonSelected = EXIT;
+    
+    EndTextureMode();
+
+    // -------- Draw both screens ----------
+    ClearBackground(BLACK);
+    DrawTextureRec(splitScreen[0].texture, splitScreenRect, (Vector2){0, 0}, WHITE);
+    DrawTextureRec(splitScreen[1].texture, splitScreenRect, (Vector2){SCREEN_WIDTH/2.0f, 0 }, WHITE);
+
+    // ------- Title Specs + Draw ----------
+    const float titleX = SCREEN_WIDTH/2 - MeasureText(GAME_TITLE, 60)/2;
+    const float titleY = 25;
+    const float titleFontSize = 60;
+    DrawText(GAME_TITLE, titleX, titleY, titleFontSize, WHITE);
 }
 
 void UnloadMenuScreen(void)

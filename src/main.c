@@ -33,9 +33,13 @@ int main(void) {
 
     // Test variables for the Menu Orbit Target
     // An Asset Manager will be made for this in the future.
-    Mesh playerMesh = GenMeshCube(2.0f, 4.0f, 2.0f);
+    Mesh playerMesh = GenMeshCube(3.0f, 6.0f, 3.0f);
     Model playerModel = LoadModelFromMesh(playerMesh);
 
+    //--------- Split Screen(MENU) -----------
+    RenderTexture splitScreen[2]; 
+    splitScreen[0] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
+    splitScreen[1] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
     // --- Game Loop ---
     while (!WindowShouldClose()) {
         // Delta Time (Attribute to no give a warning to the compiler about not being used)
@@ -91,7 +95,7 @@ int main(void) {
                 } break;
                 case MENU:
                 {
-                    DrawMenuScreen(&camera, &entityManager, &menuButtonSelected, framesCounter);
+                    DrawMenuScreen(&camera, &entityManager, &menuButtonSelected, splitScreen, framesCounter);
                 } break;
                 case FIRST_LEVEL:
                 {
@@ -113,7 +117,8 @@ int main(void) {
 
     // ---  Cleaning Memory ---
     UnloadModel(playerModel);
-    
+    UnloadRenderTexture(splitScreen[0]);
+    UnloadRenderTexture(splitScreen[1]);
     CloseWindow();
     return 0;
 }
