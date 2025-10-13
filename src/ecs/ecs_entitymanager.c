@@ -1,5 +1,6 @@
-#include "ecs_entitymanager.h"
+#include <raylib.h>
 #include <raymath.h>
+#include "ecs/ecs_entitymanager.h"
 #include <string.h>
 
 
@@ -26,6 +27,11 @@ void DestroyEntity(EntityManager* entityManager, Entity entity) {
   }
 }
 
+// Same as init, just to Doccument Better
+void ClearEntityManager(EntityManager* entityManager) {
+  memset(entityManager, 0, sizeof(EntityManager));
+}
+
 /* ===========================
   Add Components Functions
   Parameters - EntityManager, Entity, Component Data...
@@ -43,7 +49,7 @@ void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 ve
     entityManager->componentMasks[entity] |= COMPONENT_PHYSICS;
 }
 
-void AddRenderComponent(EntityManager* entityManager, Entity entity, Model model, Color tint) {
+void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* model, Color tint) {
     entityManager->renderComponents[entity].model = model;
     entityManager->renderComponents[entity].tint = tint;
     entityManager->renderComponents[entity].isVisible = true;

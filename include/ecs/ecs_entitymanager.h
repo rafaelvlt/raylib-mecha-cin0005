@@ -1,6 +1,6 @@
 #ifndef ECS_ENTITYMANAGER_H
 #define ECS_ENTITYMANAGER_H
-#include "ecs_components.h"
+#include "ecs/ecs_components.h"
 
 typedef struct  {
   // Array for every component
@@ -35,10 +35,13 @@ Entity CreateEntity(EntityManager* entityManager);
 // Entity ID gets on the "discard pile". Can be used by the manager to create new entities
 void DestroyEntity(EntityManager* entityManager, Entity entity);
 
+// Same as Init, but better name
+void ClearEntityManager(EntityManager* entityManager);
+
 // Functions to add components to entities.
 void AddTransformComponent(EntityManager* entityManager, Entity entity, Vector3 position);
 void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity);
-void AddRenderComponent(EntityManager* entityManager, Entity entity, Model model, Color tint);
+void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* model, Color tint);
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot);
 void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity);
 void AddHealthComponent(EntityManager* entityManager, Entity entity, float health);
