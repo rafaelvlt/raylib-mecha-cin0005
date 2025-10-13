@@ -1,6 +1,6 @@
 # Blender 4.5.3 LTS
 # www.blender.org
-mtllib mechafullmenu.mtl
+# mtllib mechafullmenu.mtl
 o head
 v -1.958981 4.942546 -0.154879
 v -0.888981 4.942546 -0.154879
