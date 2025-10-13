@@ -53,7 +53,6 @@ void InitMenuScreen(Camera3D* camera, EntityManager* entityManager, Model* playe
 
 void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera, MenuButton* menuButtonSelected)
 {
-
     UpdateCamera(camera, CAMERA_ORBITAL);
     // Changing State Logic
     if (*menuButtonSelected == START_GAME)
