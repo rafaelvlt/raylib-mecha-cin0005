@@ -33,9 +33,7 @@ int main(void) {
 
     // Test variables for the Menu Orbit Target
     // An Asset Manager will be made for this in the future.
-    Mesh playerMesh = GenMeshCube(3.0f, 6.0f, 3.0f);
-    Model playerModel = LoadModelFromMesh(playerMesh);
-
+    Model playerModel = LoadModel("resources\\models\\player\\mechafullmenu.obj");
     //--------- Split Screen(MENU) -----------
     RenderTexture splitScreen[2]; 
     splitScreen[0] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
