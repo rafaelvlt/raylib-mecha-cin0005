@@ -1,4 +1,5 @@
-#include "ecs_systems.h"
+#include <raylib.h>
+#include "ecs/ecs_systems.h"
 #include "raymath.h" 
 
 // Query all components with Transform and Physics Components, make them move based on their data
@@ -50,7 +51,7 @@ void RenderSystem_Draw(EntityManager* entityManager) {
             QuaternionToAxisAngle(transform->orientation, &axis, &angle);
             
             // Angle needs to be converted from Rad to Degree, the Vector3 is the scale component
-            DrawModelEx(render->model, transform->position, axis, angle * RAD2DEG, (Vector3){ 1.0f, 1.0f, 1.0f }, render->tint);
+            DrawModelEx(*(render->model), transform->position, axis, angle * RAD2DEG, (Vector3){ 1.0f, 1.0f, 1.0f }, render->tint);
         }
     }
 }

@@ -25,7 +25,7 @@ typedef struct  {
 
 // Used for model drawing in the world
 typedef struct  {
-    Model model;
+    Model* model;
     Color tint;
     bool isVisible;
 } RenderComponent;

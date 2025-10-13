@@ -1,6 +1,6 @@
 #ifndef ECS_SYSTEMS_H
 #define ECS_SYSTEMS_H
-#include "ecs_entitymanager.h"
+#include "ecs/ecs_entitymanager.h"
 
 // Movement System: Update every position applying physics
 void MovementSystem_Update(EntityManager* entityManager, float deltaTime);

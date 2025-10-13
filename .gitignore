@@ -4,7 +4,6 @@
 # Object files
 *.o
 *.ko
-*.obj
 *.elf
 
 # Linker output
@@ -28,6 +27,9 @@
 *.so.*
 *.dylib
 
+# Development Configuration
+.vscode/
+
 # Executables
 *.exe
 *.out
@@ -40,7 +42,6 @@
 *.exe
 mechaGame
 *.o
-*.obj
 
 # Debug files
 *.dSYM/

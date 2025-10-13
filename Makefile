@@ -14,7 +14,12 @@ INCLUDE_DIR := include
 LIB_DIR := lib
 
 # Find all C code to be linked and compiled
-SOURCES := $(wildcard $(SRC_DIR)/*.c)
+SOURCES := $(shell find $(SRC_DIR) -name '*.c')
+
+# The compiler
+CC := gcc
+
+CFLAGS := -g -Wall -I$(INCLUDE_DIR) -I$(LIB_DIR) -I$(LIB_DIR)/raylib/src
 
 # Find the Host OS
 OS := $(shell uname -s)
@@ -41,11 +46,8 @@ else
     RM := rm -f
 endif
 
-# The compiler
-CC := gcc
 
 # Compiler Flags and where to find include 
-CFLAGS := -g -Wall -I$(INCLUDE_DIR) -I$(LIB_DIR) -I$(LIB_DIR)/raylib/src
 
 # Flags for the linker
 LDFLAGS := -L$(LIB_DIR)/raylib/src
