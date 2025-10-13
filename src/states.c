@@ -42,6 +42,7 @@ void InitMenuScreen(Camera3D* camera, EntityManager* entityManager, Model* playe
     AddTransformComponent(entityManager, player, (Vector3){ 0.0f, 2.0f, 0.0f });
     AddRenderComponent(entityManager, player, *playerModel, DARKGREEN);
 
+    
     camera->position = (Vector3){ 5.0f, 3.0f, 10.0f };
     camera->target = (Vector3){ 0.0f, 2.0f, 0.0f }; // Camera Targeting Mecha Position
     camera->up = (Vector3){ 0.0f, 1.0f, 0.0f };
@@ -53,7 +54,6 @@ void InitMenuScreen(Camera3D* camera, EntityManager* entityManager, Model* playe
 
 void UpdateMenuScreen(GameScreen* Screen, Camera3D* camera, MenuButton* menuButtonSelected)
 {
-
     UpdateCamera(camera, CAMERA_ORBITAL);
     // Changing State Logic
     if (*menuButtonSelected == START_GAME)
