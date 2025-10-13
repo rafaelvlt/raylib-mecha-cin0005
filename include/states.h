@@ -37,7 +37,7 @@ void UpdateCreditsScreen(GameScreen* Screen);
 
 // Desenho (renderização)
 void DrawTitleScreen(int framesCounter);
-void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, MenuButton* menuButtonPressed, int framesCounter);
+void DrawMenuScreen(Camera3D* camera, EntityManager* entityManager, MenuButton* menuButtonSelected, RenderTexture splitScreen[], int framesCounter);
 void DrawCreditsScreen(void);
 
 // Desinicialização (liberação de recursos)
