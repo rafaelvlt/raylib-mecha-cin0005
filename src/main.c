@@ -8,6 +8,8 @@
 int main(void) {
     // --- Window Initialization ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
+    
+    InitAudioDevice();// Initialize audio device
 
     // Camera Initialization (Same as Raylib Examples)
     Camera camera = { 0 };
@@ -21,6 +23,11 @@ int main(void) {
     // State Machine Definition
     GameScreen gameScreen = TITLE;
     MenuButton menuButtonSelected = NONE;
+    Music music = LoadMusicStream("C:/raylib-mecha-cin0005/The King of fighters 96 16   Protector Demo 1.mp3");
+    float timePlayed = 0.0f;
+    music.looping = false;
+    PlayMusicStream(music);
+
     // TITLE/MENU Variables
     int framesCounter = 0;
     
@@ -42,7 +49,8 @@ int main(void) {
         [[maybe_unused]] float deltaTime = GetFrameTime();
 
         // Update Phase
-         switch (gameScreen)
+        UpdateMusicStream(music);      // Update music buffer with new stream data
+        switch (gameScreen)
         {
             case TITLE:
             {
@@ -113,6 +121,8 @@ int main(void) {
 
     // ---  Cleaning Memory ---
     UnloadModel(playerModel);
+    UnloadMusicStream(music);          // Unload music stream buffers from RAM
+    CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
     
     CloseWindow();
     return 0;
