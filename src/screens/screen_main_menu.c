@@ -3,6 +3,7 @@
 
 
 
+//Auxiliar function just to draw all the menu buttons, doesn't do any logic
 void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuButton current){
     Color textColor = (data->buttonHovered == current) ? data->buttonHoverColor : data->buttonNormalColor;
     Font font = *data->buttonsFont;
@@ -18,7 +19,7 @@ void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuBut
 
 void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
-    //Menu Splitscreen
+    //Menu Splitscreen loading from the resource manager.
     data->splitScreenMenuPtr = GetRenderTexture(&(systems->resourceManager), RENDERTEXTURE_ID_SPLITSCREEN_MENU);
     if (data->splitScreenMenuPtr == NULL)
     {
@@ -49,14 +50,14 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
     AddRenderComponent(&(systems->entityManager), player, data->mechaModelPtr, GREENISH_BLACK);
 
 
-    //Camera
+    // Init the camera vars to target the mecha and be located sligtly above
     data->camera.position = (Vector3){ 8.0f, 7.0f, 5.0f };
     data->camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };
     data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     data->camera.fovy = 60.0f;
     data->camera.projection = CAMERA_PERSPECTIVE;
     
-    // Menu Buttons
+    // Menu Buttons variables initialization
     data->buttonsFont = GetFont(&(systems->resourceManager), FONT_ID_CAPTURE_IT);
     if (data->buttonsFont == NULL){
         TraceLog(LOG_FATAL, "Failed to load Main Menu font.");
@@ -64,8 +65,8 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
     }
     data->buttonHovered = BUTTON_NONE;
     data->buttonPressed = BUTTON_NONE;
-    data->buttonNormalColor = GRAY;
-    data->buttonHoverColor = WHITE;
+    data->buttonNormalColor = WHITE;
+    data->buttonHoverColor = GRAY;
     data->fontSize = 50.0f;
     data->fontSpacing = 2.0f;
     EnableCursor();
@@ -74,10 +75,12 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
 
 void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
-
+    // This line makes the camera rotate around the mecha
     UpdateCamera(&(data->camera), CAMERA_ORBITAL);
+
     data->mousePos = GetMousePosition();
     
+    // Iterates over every button to see if the mouse is hovering it/pressing it
     for (int i = BUTTON_START_GAME; i < BUTTON_COUNT; i++)
     {
         if (CheckCollisionPointRec(data->mousePos, data->buttonRects[i]))
@@ -92,6 +95,7 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
         }
     }
 
+    // If any button is pressed, change state/quit game
     if (data->buttonPressed == BUTTON_START_GAME)
     {
         data->buttonPressed = BUTTON_NONE;
@@ -119,15 +123,26 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
     }
 }
 
+/***************************************************************************
+The Menu is drawn over two different screens                               *
+The first one has only a black background and the menu buttons             *
+The second one has an orbital camera rotating around the mecha             *
+both are drawn of two different renderTexture                              *
+It was made this way to offset the mecha position to the right of the menu *
+****************************************************************************/
+
 void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
+    
+
     // Source Rect to be drawn over at the end 
     Rectangle splitScreenRect = { 0.0f, 0.0f, (float)data->splitScreenMechaPtr->texture.width, (float)-data->splitScreenMechaPtr->texture.height};
-    //-------- 3D Background -----------
+
+    //-------- 3D Mecha Screen-----------
     BeginTextureMode(*(data->splitScreenMechaPtr));
     ClearBackground(BLACK);
         BeginMode3D(data->camera);
-            //PROVISORY CODE Draw model wires to be a neon outline before drawing
+            //Draw model wires to be a neon outline before drawing
             DrawModelWires(*(systems->entityManager.renderComponents->model), systems->entityManager.transformComponents->position, 1.0f, GREEN);
             //====================================================================
             RenderSystem_Draw(&(systems->entityManager));
@@ -135,7 +150,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
         EndMode3D();
     EndTextureMode();
     
-    //------- 2D GUI ----------
+    //------- 2D GUI Screeb ----------
     BeginTextureMode(*(data->splitScreenMenuPtr));
     ClearBackground(BLACK);
     
@@ -171,7 +186,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
         data->buttonRects[i + 1] = (Rectangle){contentAreaX, buttonY, contentAreaWidth, singleButtonHeight};
     }
     
-    // Draw Buttons
+    // Draw Buttons (Maybe change to draw in a better way)
     DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], "START GAME", BUTTON_START_GAME);
     DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], "LOADOUT", BUTTON_LOADOUT);
     DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], "OPTIONS", BUTTON_OPTIONS);

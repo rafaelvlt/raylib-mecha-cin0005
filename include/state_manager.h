@@ -25,6 +25,10 @@ typedef enum GameScreen {
     SCREEN_SECOND_LEVEL,
 } GameScreen;
 
+
+// Every screen has a data struct associated, all screen functions have a pointer to the struct as an argument
+// If you want to add some data that isn't present in any of the Systems, add it to the struct at the include/screen folder
+// and initialize it to a value in the screen Init function.
 typedef union {
     TitleData title;
     MainMenuData mainMenu;
@@ -35,6 +39,8 @@ typedef union {
     SecondLevelData secondLevel;
 } ScreenData;
 
+// The state manager hold the union to the screen data, the current state and the next state for switches
+// State manager is a component of systems struct as a pointer
 typedef struct {
     GameScreen currentScreen;
     ScreenData data;
