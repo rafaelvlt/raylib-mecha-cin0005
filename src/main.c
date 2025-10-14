@@ -11,25 +11,22 @@
 int main(void) {
     // --- Window Initialization ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
-    InitAudioDevice();
     
+    // Systems initialization(MUST BE IN THIS ORDER)
     struct Systems systems = {0};
+    InitAudioManager(&systems);
     InitResourceManager(&systems.resourceManager);
     InitStateManager(&systems, SCREEN_TITLE);
 
     SetTargetFPS(60);
 
-    //Title + Menu Music
-    Music* MainMenuMusicPtr = GetMusic(&(systems.resourceManager), MUSIC_ID_MENU);
-    MainMenuMusicPtr->looping = true;
     // --- Game Loop ---
     systems.shouldExit = false;
     while (!systems.shouldExit) {
         systems.shouldExit = WindowShouldClose();
         // Update Phase
-        UpdateMusicStream(*MainMenuMusicPtr);      // Update music buffer with new stream data
         UpdateStateManager(&systems);
-
+        UpdateAudioManager(&systems);
         // Drawing Phase
         BeginDrawing();
             ClearBackground(BLACK);
@@ -38,11 +35,11 @@ int main(void) {
     }
 
     //Shutdown struct Systems
+    ShutdownAudioManager();
     ShutdownStateManager(&systems);
     ClearEntityManager(&systems.entityManager);
     ShutdownResourceManager(&systems.resourceManager);
 
-    CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
     CloseWindow();
     return 0;
 }
