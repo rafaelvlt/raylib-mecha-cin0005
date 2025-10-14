@@ -18,15 +18,21 @@ typedef enum GameScreen {
     SCREEN_NONE = 0,
     SCREEN_TITLE,
     SCREEN_MAIN_MENU,
+    SCREEN_LOADOUT,
+    SCREEN_OPTIONS,
+    SCREEN_CREDITS,
     SCREEN_FIRST_LEVEL,
     SCREEN_SECOND_LEVEL,
-    SCREEN_CREDITS
 } GameScreen;
 
 typedef union {
     TitleData title;
     MainMenuData mainMenu;
+    LoadoutData loadout;
+    OptionsData options;
     CreditsData credits;
+    FirstLevelData firstLevel;
+    SecondLevelData secondLevel;
 } ScreenData;
 
 typedef struct {

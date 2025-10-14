@@ -1,6 +1,9 @@
 #ifndef UTILITY_H_11102025
 #define UTILITY_H_11102025
 
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
+
 #include <raylib.h>
 #include <stdlib.h>
 #include "resource_manager.h"
@@ -9,8 +12,6 @@
 #include "ecs/ecs_entitymanager.h"
 #include "ecs/ecs_systems.h"
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
 #define GAME_TITLE "MECHA GAME"
 
 //Cores
@@ -22,7 +23,9 @@ struct Systems{
     ResourceManager resourceManager;
 
     //TBD Below
-    //EventSystem eventSystem  
+    //EventSystem eventSystem
+    
+    bool shouldExit;
 };
 
 

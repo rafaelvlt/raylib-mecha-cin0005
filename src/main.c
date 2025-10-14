@@ -21,10 +21,11 @@ int main(void) {
 
     //Title + Menu Music
     Music* MainMenuMusicPtr = GetMusic(&(systems.resourceManager), MUSIC_ID_MENU);
-    
+    MainMenuMusicPtr->looping = true;
     // --- Game Loop ---
-    while (!WindowShouldClose()) {
-
+    systems.shouldExit = false;
+    while (!systems.shouldExit) {
+        systems.shouldExit = WindowShouldClose();
         // Update Phase
         UpdateMusicStream(*MainMenuMusicPtr);      // Update music buffer with new stream data
         UpdateStateManager(&systems);
