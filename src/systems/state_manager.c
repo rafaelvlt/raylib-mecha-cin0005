@@ -1,6 +1,11 @@
 #include <raylib.h>
 #include "utility.h"
 
+/*==========================
+See the state_manager.h for how to use guideline
+don't change anything here, its already complete
+===========================*/
+
 void DestroyCurrentScreen(struct Systems* systems) {
     StateManager* stateManager = &systems->stateManager;
     // Calls the destroy function based on the current screen

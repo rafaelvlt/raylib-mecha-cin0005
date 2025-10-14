@@ -1,6 +1,13 @@
 #include <raylib.h>
 #include "utility.h"
 
+/************************************
+TO-DO:                              *
+-Add a option to change resolution  *
+-Add a audio slider                 *
+-Maybe add an background, 3d Pref   *
+*************************************/
+
 void InitOptionsScreen(struct Systems* systems, OptionsData* data)
 {
     
