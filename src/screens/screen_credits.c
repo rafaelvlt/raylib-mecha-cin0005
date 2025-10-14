@@ -3,7 +3,7 @@
 
 void InitCreditsScreen(struct Systems* systems, CreditsData* data)
 {
-    
+    data->creditsFont = GetFont(&(systems->resourceManager), FONT_ID_CAPTURE_IT);
 }
 
 void UpdateCreditsScreen(struct Systems* systems, CreditsData* data)

@@ -19,6 +19,7 @@ typedef enum {
 
 typedef enum {
     MUSIC_ID_MENU = 0,
+    MUSIC_ID_FASE_1,
     MUSIC_ID_COUNT
 } AssetMusicID;
 
