@@ -5,7 +5,8 @@
 struct Systems;
 
 typedef struct{
-
+    Font* creditsFont;
+    Music* creditsMusic;
 } CreditsData;
 
 void InitCreditsScreen(struct Systems* systems, CreditsData* data);

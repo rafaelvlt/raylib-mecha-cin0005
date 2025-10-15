@@ -11,12 +11,22 @@ typedef enum MenuButton{
     BUTTON_LOADOUT,
     BUTTON_OPTIONS,
     BUTTON_CREDITS,
-    BUTTON_EXIT
+    BUTTON_EXIT,
+    BUTTON_COUNT
 } MenuButton;
 
 typedef struct {
     Camera3D camera;
+    //Buttons
+    MenuButton buttonHovered;
     MenuButton buttonPressed;
+    Color buttonNormalColor;
+    Color buttonHoverColor;
+    Rectangle buttonRects[BUTTON_COUNT];
+    Vector2 mousePos;
+    Font* buttonsFont;
+    float fontSize;
+    float fontSpacing;
     //Assets
     Model* mechaModelPtr;
     RenderTexture* splitScreenMenuPtr;
