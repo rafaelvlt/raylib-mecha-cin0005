@@ -1,6 +1,11 @@
 #include <raylib.h>
 #include "utility.h"
 
+/*==========================
+See the state_manager.h for how to use guideline
+don't change anything here, its already complete
+===========================*/
+
 void DestroyCurrentScreen(struct Systems* systems) {
     StateManager* stateManager = &systems->stateManager;
     // Calls the destroy function based on the current screen
@@ -12,8 +17,17 @@ void DestroyCurrentScreen(struct Systems* systems) {
         case SCREEN_MAIN_MENU:
             DestroyMainMenuScreen(systems, &stateManager->data.mainMenu);
             break;
+        case SCREEN_LOADOUT:
+            DestroyLoadoutScreen(systems, &stateManager->data.loadout);
+            break;
+        case SCREEN_OPTIONS:
+            DestroyOptionsScreen(systems, &stateManager->data.options);
+            break;
         case SCREEN_CREDITS:
             DestroyCreditsScreen(systems, &stateManager->data.credits);
+            break;
+        case SCREEN_FIRST_LEVEL:
+            DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
             break;
         default:
             break;
@@ -38,8 +52,17 @@ void SwitchScreen(struct Systems* systems) {
         case SCREEN_MAIN_MENU:
             InitMainMenuScreen(systems, &stateManager->data.mainMenu);
             break;
+        case SCREEN_LOADOUT:
+            InitLoadoutScreen(systems, &stateManager->data.loadout);
+            break;
+        case SCREEN_OPTIONS:
+            InitOptionsScreen(systems, &stateManager->data.options);
+            break;
         case SCREEN_CREDITS:
             InitCreditsScreen(systems, &stateManager->data.credits);
+            break;
+        case SCREEN_FIRST_LEVEL:
+            InitFirstLevelScreen(systems, &stateManager->data.firstLevel);
             break;
         default:
             break;
@@ -72,8 +95,17 @@ void UpdateStateManager(struct Systems* systems) {
         case SCREEN_MAIN_MENU:
             UpdateMainMenuScreen(systems, &stateManager->data.mainMenu);
             break;
+        case SCREEN_LOADOUT:
+            UpdateLoadoutScreen(systems, &stateManager->data.loadout);
+            break;
+        case SCREEN_OPTIONS:
+            UpdateOptionsScreen(systems, &stateManager->data.options);
+            break;
         case SCREEN_CREDITS:
             UpdateCreditsScreen(systems, &stateManager->data.credits);
+            break;
+        case SCREEN_FIRST_LEVEL:
+            UpdateFirstLevelScreen(systems, &stateManager->data.firstLevel);
             break;
         default:
             break;
@@ -90,8 +122,17 @@ void DrawStateManager(struct Systems* systems) {
         case SCREEN_MAIN_MENU:
             DrawMainMenuScreen(systems, &stateManager->data.mainMenu);
             break;
+        case SCREEN_LOADOUT:
+            DrawLoadoutScreen(systems, &stateManager->data.loadout);
+            break;
+        case SCREEN_OPTIONS:
+            DrawOptionsScreen(systems, &stateManager->data.options);
+            break;
         case SCREEN_CREDITS:
             DrawCreditsScreen(systems, &stateManager->data.credits);
+            break;
+        case SCREEN_FIRST_LEVEL:
+            DrawFirstLevelScreen(systems, &stateManager->data.firstLevel);
             break;
         default:
             break;

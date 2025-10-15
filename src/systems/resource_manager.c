@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include "utility.h"
 
+/****************************************************
+See the resource_manager.h for how to use guideline *
+Only Change the init function to add more assets    *
+Don't forget to add the ID to the enum              *
+*****************************************************/
+
 void InitResourceManager(ResourceManager* resourceManager) {
     //Models
     resourceManager->models[MODEL_ID_MENU] = LoadModel("resources\\models\\player\\mechafullmenu.obj");
