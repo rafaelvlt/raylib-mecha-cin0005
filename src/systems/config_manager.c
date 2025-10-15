@@ -34,3 +34,7 @@ Vector2 GetScreenResolution(ConfigManager* configManager) {
 bool GetFullscreen(ConfigManager* configManager) {
     return configManager->fullscreen;
 }
+
+int GetLanguage(ConfigManager* configManager) {
+    return configManager->language;
+}
