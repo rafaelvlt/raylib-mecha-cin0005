@@ -16,5 +16,5 @@ typedef struct{
 
 void InitAudioManager(struct Systems* systems);
 void UpdateAudioManager(struct Systems* systems);
-
+void ShutdownAudioManager();
 #endif
