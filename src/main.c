@@ -7,7 +7,6 @@
 #include "ecs/ecs_entitymanager.h"
 #include "ecs/ecs_systems.h"
 
-
 int main(void) {
     // --- Window Initialization ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
