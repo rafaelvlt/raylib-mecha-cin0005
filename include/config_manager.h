@@ -1,6 +1,5 @@
 #ifndef CONFIG_MANAGER_H
 #define CONFIG_MANAGER_H
-#define OPTION_LINES 5
 
 #include <raylib.h>
 
@@ -18,26 +17,15 @@ typedef enum {
     CONFIG_ID_COUNT
 } ConfigID;
 
-// Struct to hold configuration values
-typedef struct {
-    int language; //0 = EN, 1 = PT-BR
-    float audioVolume;
-    Vector2 screenResolution;
-    bool fullscreen;
-} ConfigManager;
 
-typedef struct OptionsData {
-    Font* creditsFont;
-    int selectedOption[2]; // [line, option]
-    int rangeOptions[OPTION_LINES]; //number of options in each line
-} OptionsData;
 
 typedef enum options {
     OPTION_LANGUAGE = 0,
     OPTION_SCREEN_RESOLUTION,
     OPTION_FULLSCREEN,
     OPTION_AUDIO_VOLUME,
-    OPTION_BACK_TO_MENU
+    OPTION_BACK_TO_MENU,
+    OPTION_LINES
 } Option;
 
 typedef enum Language {
@@ -50,6 +38,14 @@ typedef enum ScreenResolution {
     RESOLUTION_1600x900,
     RESOLUTION_1920x1080
 } ScreenResolution;
+
+// Struct to hold configuration values
+typedef struct {
+    Language language; //0 = EN, 1 = PT-BR
+    float audioVolume;
+    Vector2 screenResolution;
+    bool fullscreen;
+} ConfigManager;
 
 void InitConfigManager(struct Systems* systems);
 void UpdateConfigManager(struct Systems* systems);
