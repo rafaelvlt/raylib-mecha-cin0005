@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include "utility.h"
-#include "config_manager.h"
 
 /************************************
 TO-DO:                              *
@@ -12,8 +11,12 @@ TO-DO:                              *
 void InitOptionsScreen(struct Systems* systems, OptionsData* data)
 {
     data->creditsFont = GetFont(&(systems->resourceManager), FONT_ID_CAPTURE_IT);
-    data->selectedOption[] = {0,0};
-    data->rangeOptions[] = {2,3,2,100,1}; //number of options in each line
+    data->selectedOption[0] = 0, data->selectedOption[1] = 0;
+    data->rangeOptions[0] = 2;
+    data->rangeOptions[1] = 3;
+    data->rangeOptions[2] = 2;
+    data->rangeOptions[3] = 100;
+    data->rangeOptions[4] = 1; //number of options in each line
 }
 
 void optionSelect(struct Systems* systems, int selectedOption[]){
@@ -72,17 +75,16 @@ void UpdateOptionsScreen(struct Systems* systems, OptionsData* data)
 void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
 {
     DrawText("Options", SCREEN_WIDTH/2 - MeasureText("Options", 100)/2, SCREEN_HEIGHT/2, 100, WHITE);
-    DrawText("language: EN / PT", SCREEN_WIDTH/2 - MeasureText("language: EN / PT", 30)/2, SCREEN_HEIGHT/2 + 100, 30, WHITE);
-    DrawText("resolution: 1280x720 / 1600x900 / 1920x1080", SCREEN_WIDTH/2 - MeasureText("resolution: 1280x720 / 1600x900 / 1920x1080", 30)/2, SCREEN_HEIGHT/2 + 130, 30, WHITE);
-    DrawText("fullscreen: ON / OFF", SCREEN_WIDTH/2 - MeasureText("fullscreen: ON / OFF", 30)/2, SCREEN_HEIGHT/2 + 160, 30, WHITE);
-    DrawText("audio volume: %d", (int)(systems->configManager.audioVolume * 100), SCREEN_WIDTH/2 - MeasureText("audio volume: 000",  30)/2, SCREEN_HEIGHT/2 + 190, 30, WHITE);
-    DrawText("back to Menu", SCREEN_WIDTH/2 - MeasureText("back to Menu", 30)/2, SCREEN_HEIGHT/2 + 220, 30, WHITE);
+    DrawText("Language: EN / PT", SCREEN_WIDTH/2 - MeasureText("language: EN / PT", 30)/2, SCREEN_HEIGHT/2 + 100, 30, WHITE);
+    DrawText("Resolution: 1280x720 / 1600x900 / 1920x1080", SCREEN_WIDTH/2 - MeasureText("resolution: 1280x720 / 1600x900 / 1920x1080", 30)/2, SCREEN_HEIGHT/2 + 130, 30, WHITE);
+    DrawText("Fullscreen: ON / OFF", SCREEN_WIDTH/2 - MeasureText("fullscreen: ON / OFF", 30)/2, SCREEN_HEIGHT/2 + 160, 30, WHITE);
+    DrawText(TextFormat("Audio volume: %d", (int)(systems->configManager.audioVolume * 100)), SCREEN_WIDTH/2 - MeasureText("audio volume: 000",  30)/2, SCREEN_HEIGHT/2 + 190, 30, WHITE);
+    DrawText("Back to Menu", SCREEN_WIDTH/2 - MeasureText("back to Menu", 30)/2, SCREEN_HEIGHT/2 + 220, 30, WHITE);
     //highlight selected option
     DrawRectangleLines(SCREEN_WIDTH/2 - 200, SCREEN_HEIGHT/2 + 100 + (data->selectedOption[0] * 30), 400, 30, RED);
 }
 
 void DestroyOptionsScreen(struct Systems* systems, OptionsData* data)
 {
-    // Unload fonts
-    UnloadFont(*data->creditsFont);
+
 }
