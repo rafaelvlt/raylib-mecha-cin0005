@@ -12,10 +12,11 @@
 #include "ecs/ecs_entitymanager.h"
 #include "ecs/ecs_systems.h"
 #include "audio_manager.h"
+#include "config_manager.h"
 
 #define GAME_TITLE "MECHA GAME"
 
-//Cores
+// Colors
 #define GREENISH_BLACK  CLITERAL(Color){ 0, 25, 0, 255 }
 
 
@@ -25,6 +26,7 @@ struct Systems{
     StateManager stateManager;
     ResourceManager resourceManager;
     AudioManager audioManager;
+    ConfigManager configManager;
     //TBD Below
     //EventSystem eventSystem
     
