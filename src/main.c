@@ -10,9 +10,10 @@
 int main(void) {
     // --- Window Initialization ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
-    
+
     // Systems initialization(MUST BE IN THIS ORDER)
     struct Systems systems = {0};
+    InitConfigManager(&systems);
     InitAudioManager(&systems);
     InitResourceManager(&systems.resourceManager);
     InitStateManager(&systems, SCREEN_TITLE);
