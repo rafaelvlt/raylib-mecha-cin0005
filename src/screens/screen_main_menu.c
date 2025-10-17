@@ -63,7 +63,6 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
         TraceLog(LOG_FATAL, "Failed to load Main Menu font.");
         exit(1);
     }
-    data->buttonHovered = BUTTON_NONE;
     data->buttonPressed = BUTTON_NONE;
     data->buttonHovered = BUTTON_NONE;
     data->buttonNormalColor = WHITE;
@@ -106,23 +105,23 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
         data->buttonHovered++;
         if (data->buttonHovered >= BUTTON_COUNT)
         {
-            data->buttonHovered = BUTTON_START_GAME; // Volta para o primeiro
+            data->buttonHovered = BUTTON_START_GAME; // Go back to the first
         }
-        keyboardSelection = data->buttonHovered; // Salva a seleção do teclado
+        keyboardSelection = data->buttonHovered; // Saves the selection
     }
     else if (IsKeyPressed(KEY_UP))
     {
         data->buttonHovered--;
         if (data->buttonHovered < BUTTON_START_GAME)
         {
-            data->buttonHovered = BUTTON_EXIT; // Vai para o último
+            data->buttonHovered = BUTTON_EXIT; // Go to the end
         }
-        keyboardSelection = data->buttonHovered; // Salva a seleção do teclado
+        keyboardSelection = data->buttonHovered; // Saves the selection
     }
     
     if (IsKeyPressed(KEY_ENTER))
     {
-        // Se um botão estiver selecionado pelo mouse ou teclado, pressione-o
+        // If a button is selected by both the mouse and keyboard, go to it
         if (data->buttonHovered != BUTTON_NONE)
         {
             data->buttonPressed = data->buttonHovered;
