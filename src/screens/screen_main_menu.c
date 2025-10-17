@@ -65,6 +65,7 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
     }
     data->buttonHovered = BUTTON_NONE;
     data->buttonPressed = BUTTON_NONE;
+    data->buttonHovered = BUTTON_NONE;
     data->buttonNormalColor = WHITE;
     data->buttonHoverColor = GRAY;
     data->fontSize = 50.0f;
@@ -95,6 +96,39 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
         }
     }
 
+    static MenuButton keyboardSelection = BUTTON_START_GAME;
+    if (data->buttonHovered == BUTTON_NONE) {
+        data->buttonHovered = keyboardSelection;
+    }
+
+    if (IsKeyPressed(KEY_DOWN))
+    {
+        data->buttonHovered++;
+        if (data->buttonHovered >= BUTTON_COUNT)
+        {
+            data->buttonHovered = BUTTON_START_GAME; // Volta para o primeiro
+        }
+        keyboardSelection = data->buttonHovered; // Salva a seleção do teclado
+    }
+    else if (IsKeyPressed(KEY_UP))
+    {
+        data->buttonHovered--;
+        if (data->buttonHovered < BUTTON_START_GAME)
+        {
+            data->buttonHovered = BUTTON_EXIT; // Vai para o último
+        }
+        keyboardSelection = data->buttonHovered; // Salva a seleção do teclado
+    }
+    
+    if (IsKeyPressed(KEY_ENTER))
+    {
+        // Se um botão estiver selecionado pelo mouse ou teclado, pressione-o
+        if (data->buttonHovered != BUTTON_NONE)
+        {
+            data->buttonPressed = data->buttonHovered;
+        }
+    }
+    
     // If any button is pressed, change state/quit game
     if (data->buttonPressed == BUTTON_START_GAME)
     {
