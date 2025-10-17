@@ -2,7 +2,6 @@
 #define SCREEN_FIRST_LEVEL_H
 #include <raylib.h>
 
-
 struct Systems;
 
 
