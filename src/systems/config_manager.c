@@ -3,7 +3,7 @@
 #include "utility.h"
 
 // Default configuration values
-#define DEFAULT_AUDIO_VOLUME 1.0f
+#define DEFAULT_AUDIO_VOLUME 0.5f
 #define DEFAULT_SCREEN_RESOLUTION (Vector2){1280, 720}
 #define DEFAULT_FULLSCREEN false
 

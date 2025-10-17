@@ -4,6 +4,7 @@
 # Object files
 *.o
 *.ko
+*.obj
 *.elf
 
 # Linker output
@@ -27,9 +28,12 @@
 *.so.*
 *.dylib
 
+<<<<<<< HEAD
 # Development Configuration
 .vscode/
 
+=======
+>>>>>>> 902377b02b6f5584e773d06f0b8021d0742444b5
 # Executables
 *.exe
 *.out
@@ -38,11 +42,14 @@
 *.x86_64
 *.hex
 
+<<<<<<< HEAD
 # Build Files
 *.exe
 mechaGame
 *.o
 
+=======
+>>>>>>> 902377b02b6f5584e773d06f0b8021d0742444b5
 # Debug files
 *.dSYM/
 *.su
@@ -58,6 +65,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+<<<<<<< HEAD
 # System Files
 .DS_Store
 Thumbs.db
@@ -69,3 +77,7 @@ Thumbs.db
 # Raylib Examples
 lib/raylib/examples/
 
+=======
+# debug information files
+*.dwo
+>>>>>>> 902377b02b6f5584e773d06f0b8021d0742444b5

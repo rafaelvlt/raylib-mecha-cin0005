@@ -18,16 +18,6 @@ typedef enum {
 } ConfigID;
 
 
-
-typedef enum options {
-    OPTION_LANGUAGE = 0,
-    OPTION_SCREEN_RESOLUTION,
-    OPTION_FULLSCREEN,
-    OPTION_AUDIO_VOLUME,
-    OPTION_BACK_TO_MENU,
-    OPTION_LINES
-} Option;
-
 typedef enum Language {
     LANGUAGE_EN = 0,
     LANGUAGE_PT_BR
