@@ -19,6 +19,7 @@ void InitTitleScreen(struct Systems* systems, TitleData* data)
         TraceLog(LOG_FATAL, "Failed to load title music");
         exit(1);
     }
+
     PlayMusicStream(*data->titleMusicPtr);
 }
 
