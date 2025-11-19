@@ -1,11 +1,14 @@
 #ifndef ECS_SYSTEMS_H
 #define ECS_SYSTEMS_H
-#include "ecs/ecs_entitymanager.h"
 
+struct Systems;
 // Movement System: Update every position applying physics
-void MovementSystem_Update(EntityManager* entityManager, float deltaTime);
+void MovementSystem(struct Systems* systems);
 
 // Drawing System: Draw every visible Entity
-void RenderSystem_Draw(EntityManager* entityManager);
+void RenderSystem(struct Systems* systems);
+
+//Player Systems
+void PlayerControlSystem(struct Systems* systems);
 
 #endif // ECS_SYSTEMS_H

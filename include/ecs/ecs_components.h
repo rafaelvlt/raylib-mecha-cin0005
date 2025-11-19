@@ -13,28 +13,28 @@ typedef uint32_t Entity;
 
 // Used for position drawn in the world
 typedef struct  {
-    Vector3 position;
-    Quaternion orientation;
+  Vector3 position;
+  Quaternion orientation;
 } TransformComponent;
 
 // Used for movement systems
 typedef struct  {
-    Vector3 velocity;
-    Vector3 acceleration;
-    float drag;
+  Vector3 velocity;
+  Vector3 acceleration;
+  float drag;
 } PhysicsComponent;
 
 // For Collision system suport
 typedef struct {
-    BoundingBox bounds;
-    bool isStatic; 
+  BoundingBox bounds;
+  bool isStatic; 
 } CollisionComponent;
 
 // Used for model drawing in the world
 typedef struct  {
-    Model* model;
-    Color tint;
-    bool isVisible;
+  Model* model;
+  Color tint;
+  bool isVisible;
 } RenderComponent;
 
 // Used by multi-model objects to know where to attach themselves (i.e mech with multiple parts)
@@ -46,23 +46,28 @@ typedef struct {
 
 // Used in player control for camera movement
 typedef struct {
-    Camera *camera;          
+  Camera *camera;          
 
-    float mouseSensitivity;
-    float maxSpeed;
-    float turnSpeed;
+  float mouseSensitivity;
+  float maxSpeed;
+  float turnSpeed;
 
-    float throttle;       
-    float turnState;      
-    
-    float torsoYaw;       
-    float torsoPitch;     
+  float throttle;       
+  float turnState;      
 
-    // Camera Animation 
-    float headTimer;
-    float walkLerp;
-    float headLerp;
-    Vector2 lean;
+  float torsoYaw;       
+  float torsoPitch;     
+
+  //flags
+  bool isShooting;
+  bool isZooming;
+  bool lockTargetRequested;
+
+  // Camera Animation 
+  float headTimer;
+  float walkLerp;
+  float headLerp;
+  Vector2 lean;
 } PlayerControlComponent;
 
 // Used in damage calculations and destroyed parts(maybe)
