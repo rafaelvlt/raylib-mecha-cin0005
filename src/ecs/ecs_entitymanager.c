@@ -43,9 +43,10 @@ void AddTransformComponent(EntityManager* entityManager, Entity entity, Vector3 
     entityManager->componentMasks[entity] |= COMPONENT_TRANSFORM;
 }
 
-void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity) {
+void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity, float drag) {
     entityManager->physicsComponents[entity].velocity = velocity;
     entityManager->physicsComponents[entity].acceleration = (Vector3){0, 0, 0};
+    entityManager->physicsComponents[entity].drag = drag; // Novo campo
     entityManager->componentMasks[entity] |= COMPONENT_PHYSICS;
 }
 

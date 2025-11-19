@@ -1,6 +1,7 @@
 #ifndef ECS_ENTITYMANAGER_H
 #define ECS_ENTITYMANAGER_H
 #include "ecs/ecs_components.h"
+#include "raylib.h"
 
 typedef struct  {
   // Array for every component
@@ -15,6 +16,7 @@ typedef struct  {
   WeaponControlComponent  weaponControlComponents[MAX_ENTITIES];
   AIControlComponent      aiControlComponents[MAX_ENTITIES];
   CockpitHUDComponent     cockpitHUDComponents[MAX_ENTITIES];
+  CollisionComponent      collisionComponents[MAX_ENTITIES];
   
   // Bitmask for every Entity
   uint32_t                componentMasks[MAX_ENTITIES];
@@ -40,14 +42,16 @@ void ClearEntityManager(EntityManager* entityManager);
 
 // Functions to add components to entities.
 void AddTransformComponent(EntityManager* entityManager, Entity entity, Vector3 position);
-void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity);
+void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity, float drag);
 void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* model, Color tint);
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot);
-void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity);
+void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity, float maxSpeed, float turnSpeed);
 void AddHealthComponent(EntityManager* entityManager, Entity entity, float health);
 void AddWeaponComponent(EntityManager* entityManager, Entity entity, float fireRate, float projSpeed, float projDamage);
 void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, Entity primary, Entity secondary);
 void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range);
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown);
+void AddCollisionComponent(EntityManager* entityManager, Entity entity, BoundingBox bounds, bool isStatic);
+
 
 #endif // ECS_ENTITYMANAGER_H
