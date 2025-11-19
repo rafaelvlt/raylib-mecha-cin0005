@@ -17,6 +17,42 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   BoundingBox bounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
   AddCollisionComponent(&systems->entityManager, player, bounds, false);
 
+  // =====================
+  // Create Enemy
+  // =====================
+
+  // Carrega o modelo
+  data->enemyModel = LoadModel("assets/models/sentinel.glb");
+
+  // --- AJUSTE CRÍTICO DE ESCALA ---
+  // Aumenta o modelo 2x caso ele seja muito pequeno.
+  // Se ficar gigante, mude para 0.5f ou 0.1f
+  data->enemyModel.transform = MatrixScale(0.5f, 0.5f, 0.5f);
+
+  Entity enemy = CreateEntity(&systems->entityManager);
+
+  // --- AJUSTE CRÍTICO DE POSIÇÃO ---
+  // Coloca o inimigo em Z=15 (Na frente do Player que olha para Z+)
+  // Y=0 (No chão)
+  AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+
+  // Física e Colisão
+  AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
+  
+  BoundingBox enemyBox = {
+      (Vector3){ -1.0f, 0.0f, -1.0f },
+      (Vector3){  1.0f, 3.0f,  1.0f }
+  };
+  AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false);
+
+  // Lógica de Jogo (Vida e IA)
+  AddHealthComponent(&systems->entityManager, enemy, 100.0f);
+  
+  // SightRadius aumentado para 50.0f para garantir que ele te veja
+  AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
+
+  // Renderização (Use BRANCO para ver as texturas originais, ou RED para tintura de debug)
+  AddRenderComponent(&systems->entityManager, enemy, &data->enemyModel, WHITE);
 
   // Starts up Camera on the Mecha Position and Height 
   data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f }; 
@@ -36,6 +72,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   MovementSystem(systems);
 
+  AIControlSystem(systems);
 
   if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) // Exemplo: Tecla P ou ESC
   {
@@ -50,6 +87,8 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   BeginMode3D(data->camera);
   DrawLevel();
+  RenderSystem(systems);      
+
   EndMode3D();
 
   DrawFPS(10, 10);
@@ -57,6 +96,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
+  UnloadModel(data->enemyModel);
 
 }
 
