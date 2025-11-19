@@ -28,8 +28,10 @@ struct Systems{
     AudioManager audioManager;
     ConfigManager configManager;
     //TBD Below
-    //EventSystem eventSystem
+    //EventSystem eventSystem;
+    //LanguageSystem languageSystem;
     
+    float delta;
     bool shouldExit;
 };
 
