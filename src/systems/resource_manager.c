@@ -10,14 +10,14 @@ Don't forget to add the ID to the enum              *
 
 void InitResourceManager(ResourceManager* resourceManager) {
     //Models
-    resourceManager->models[MODEL_ID_MENU] = LoadModel("resources\\models\\player\\mechafullmenu.obj");
+    resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
     
     //Fonts
-    resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources\\fonts\\oxido_erode.ttf", 150, NULL, 0);
-    resourceManager->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources\\fonts\\code_predators.ttf", 150, NULL, 0);
-    resourceManager->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources\\fonts\\capture_it.ttf", 150, NULL, 0);
+    resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
+    resourceManager->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
+    resourceManager->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources/fonts/capture_it.ttf", 150, NULL, 0);
     //Musics
-    resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources\\musics\\menu_music.mp3");
+    resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
 
     //Render Textures
     resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
