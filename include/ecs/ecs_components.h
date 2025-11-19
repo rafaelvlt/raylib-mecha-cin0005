@@ -21,7 +21,14 @@ typedef struct  {
 typedef struct  {
     Vector3 velocity;
     Vector3 acceleration;
+    float drag;
 } PhysicsComponent;
+
+// For Collision system suport
+typedef struct {
+    BoundingBox bounds;
+    bool isStatic; 
+} CollisionComponent;
 
 // Used for model drawing in the world
 typedef struct  {
@@ -39,10 +46,23 @@ typedef struct {
 
 // Used in player control for camera movement
 typedef struct {
-    Camera *camera;         
-    float cameraYaw;        
-    float cameraPitch;      
-    float mouseSensitivity; 
+    Camera *camera;          
+
+    float mouseSensitivity;
+    float maxSpeed;
+    float turnSpeed;
+
+    float throttle;       
+    float turnState;      
+    
+    float torsoYaw;       
+    float torsoPitch;     
+
+    // Camera Animation 
+    float headTimer;
+    float walkLerp;
+    float headLerp;
+    Vector2 lean;
 } PlayerControlComponent;
 
 // Used in damage calculations and destroyed parts(maybe)
@@ -105,7 +125,8 @@ typedef enum {
   COMPONENT_PROJECTILE = 1 << 7,
   COMPONENT_WEAPON_CONTROL = 1 << 8,
   COMPONENT_AI_CONTROL = 1 << 9,
-  COMPONENT_COCKPIT_HUD = 1 << 10
+  COMPONENT_COCKPIT_HUD = 1 << 10,
+  COMPONENT_COLLISION = 1 << 11,
 } ComponentMask;
 
 #endif //ECS_COMPONENTS_H

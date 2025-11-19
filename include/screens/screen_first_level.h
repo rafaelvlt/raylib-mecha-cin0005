@@ -10,8 +10,6 @@ typedef struct{
 } playerInput;
 typedef struct {
   Camera3D camera;
-  Vector2 mouseDelta;
-  playerInput input;
 } FirstLevelData;
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
