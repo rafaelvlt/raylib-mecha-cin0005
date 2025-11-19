@@ -179,7 +179,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
             //Draw model wires to be a neon outline before drawing
             DrawModelWires(*(systems->entityManager.renderComponents->model), systems->entityManager.transformComponents->position, 1.0f, GREEN);
             //====================================================================
-            RenderSystem_Draw(&(systems->entityManager));
+            RenderSystem(systems);
             DrawGrid(15, 0.45f);
         EndMode3D();
     EndTextureMode();

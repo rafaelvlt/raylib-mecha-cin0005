@@ -6,30 +6,30 @@
 
 // Take the address of the entity manager and fill all of it with zero's to takeout junk out of the database
 void InitEntityManager(EntityManager* entityManager) {
-  memset(entityManager, 0, sizeof(EntityManager));
+    memset(entityManager, 0, sizeof(EntityManager));
 }
 
 // Gets a new Entity ID from the manager with blank components if there's room available. else gets a invalid ID
-Entity CreateEntity(EntityManager* entityManager)   {
-  if (entityManager->numEntities < MAX_ENTITIES)  {
-    Entity newEntity = entityManager->numEntities;
-    entityManager->componentMasks[newEntity] = COMPONENT_NONE;
-    entityManager->numEntities++;
-    return newEntity;
-  }
-  else return MAX_ENTITIES;
+Entity CreateEntity(EntityManager* entityManager) {
+    if (entityManager->numEntities < MAX_ENTITIES) {
+        Entity newEntity = entityManager->numEntities;
+        entityManager->componentMasks[newEntity] = COMPONENT_NONE;
+        entityManager->numEntities++;
+        return newEntity;
+    }
+    else return MAX_ENTITIES;
 }
 
 // Remove an Entity by zeroing out the bitmask to get removed
 void DestroyEntity(EntityManager* entityManager, Entity entity) {
-  if (entity < MAX_ENTITIES) {
-    entityManager->componentMasks[entity] = COMPONENT_NONE;
-  }
+    if (entity < MAX_ENTITIES) {
+        entityManager->componentMasks[entity] = COMPONENT_NONE;
+    }
 }
 
-// Same as init, just to Doccument Better
+// Same as init, just to Document Better
 void ClearEntityManager(EntityManager* entityManager) {
-  memset(entityManager, 0, sizeof(EntityManager));
+    memset(entityManager, 0, sizeof(EntityManager));
 }
 
 /* ===========================
@@ -38,74 +38,139 @@ void ClearEntityManager(EntityManager* entityManager) {
 ============================== */
 
 void AddTransformComponent(EntityManager* entityManager, Entity entity, Vector3 position) {
-    entityManager->transformComponents[entity].position = position;
-    entityManager->transformComponents[entity].orientation = QuaternionIdentity();
+    TransformComponent* transform = &entityManager->transformComponents[entity];
+    
+    transform->position = position;
+    transform->orientation = QuaternionIdentity();
+    
     entityManager->componentMasks[entity] |= COMPONENT_TRANSFORM;
 }
 
 void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity, float drag) {
-    entityManager->physicsComponents[entity].velocity = velocity;
-    entityManager->physicsComponents[entity].acceleration = (Vector3){0, 0, 0};
-    entityManager->physicsComponents[entity].drag = drag; // Novo campo
+    PhysicsComponent* physics = &entityManager->physicsComponents[entity];
+    
+    physics->velocity = velocity;
+    physics->acceleration = (Vector3){0, 0, 0};
+    physics->drag = drag; 
+    
     entityManager->componentMasks[entity] |= COMPONENT_PHYSICS;
 }
 
 void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* model, Color tint) {
-    entityManager->renderComponents[entity].model = model;
-    entityManager->renderComponents[entity].tint = tint;
-    entityManager->renderComponents[entity].isVisible = true;
+    RenderComponent* render = &entityManager->renderComponents[entity];
+    
+    render->model = model;
+    render->tint = tint;
+    render->isVisible = true;
+    
     entityManager->componentMasks[entity] |= COMPONENT_RENDER;
 }
 
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot) {
-    entityManager->attachmentComponents[entity].parent = parent;
-    entityManager->attachmentComponents[entity].offsetPosition = offsetPos;
-    entityManager->attachmentComponents[entity].offsetRotation = offsetRot;
+    AttachmentComponent* attachment = &entityManager->attachmentComponents[entity];
+    
+    attachment->parent = parent;
+    attachment->offsetPosition = offsetPos;
+    attachment->offsetRotation = offsetRot;
+    
     entityManager->componentMasks[entity] |= COMPONENT_ATTACHMENT;
 }
 
-void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity) {
-    entityManager->playerControlComponents[entity].camera = camera;
-    entityManager->playerControlComponents[entity].cameraYaw = 0.0f;
-    entityManager->playerControlComponents[entity].cameraPitch = 0.0f;
-    entityManager->playerControlComponents[entity].mouseSensitivity = sensitivity;
+void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity, float maxSpeed, float turnSpeed) {
+    PlayerControlComponent* player = &entityManager->playerControlComponents[entity];
+    
+    // Configurações
+    player->camera = camera;
+    player->mouseSensitivity = sensitivity;
+    player->maxSpeed = maxSpeed;
+    player->turnSpeed = turnSpeed;
+
+    // Zero-init the rest
+    player->throttle = 0.0f;
+    player->turnState = 0.0f;
+
+    player->torsoYaw = 0.0f;
+    player->torsoPitch = 0.0f;
+
+    player->headTimer = 0.0f;
+    player->walkLerp = 0.0f;
+    player->headLerp = 0.0f;
+    player->lean = (Vector2){0};
+
+    player->isShooting = false;
+    player->isZooming = false;
+    player->lockTargetRequested = false;
+
     entityManager->componentMasks[entity] |= COMPONENT_PLAYER_CONTROL;
 }
 
 void AddHealthComponent(EntityManager* entityManager, Entity entity, float health) {
-    entityManager->healthComponents[entity].currentHealth = health;
-    entityManager->healthComponents[entity].maxHealth = health;
+    HealthComponent* hp = &entityManager->healthComponents[entity];
+    
+    hp->currentHealth = health;
+    hp->maxHealth = health;
+    
     entityManager->componentMasks[entity] |= COMPONENT_HEALTH;
 }
 
 void AddWeaponComponent(EntityManager* entityManager, Entity entity, float fireRate, float projSpeed, float projDamage) {
-    entityManager->weaponComponents[entity].fireRate = fireRate;
-    entityManager->weaponComponents[entity].cooldownTimer = 0.0f;
-    entityManager->weaponComponents[entity].projectileSpeed = projSpeed;
-    entityManager->weaponComponents[entity].projectileDamage = projDamage;
-    entityManager->weaponComponents[entity].isFiring = false;
+    WeaponComponent* weapon = &entityManager->weaponComponents[entity];
+    
+    weapon->fireRate = fireRate;
+    weapon->cooldownTimer = 0.0f;
+    weapon->projectileSpeed = projSpeed;
+    weapon->projectileDamage = projDamage;
+    weapon->isFiring = false;
+    
     entityManager->componentMasks[entity] |= COMPONENT_WEAPON;
 }
 
+// Caso não tivesse a função Projectile implementada no seu código anterior:
+void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner) {
+    ProjectileComponent* projectile = &entityManager->projectileComponents[entity];
+    
+    projectile->owner = owner;
+    
+    entityManager->componentMasks[entity] |= COMPONENT_PROJECTILE;
+}
+
 void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, Entity primary, Entity secondary) {
-    entityManager->weaponControlComponents[entity].primaryWeapon = primary;
-    entityManager->weaponControlComponents[entity].secondaryWeapon = secondary;
+    WeaponControlComponent* wControl = &entityManager->weaponControlComponents[entity];
+    
+    wControl->primaryWeapon = primary;
+    wControl->secondaryWeapon = secondary;
+    
     entityManager->componentMasks[entity] |= COMPONENT_WEAPON_CONTROL;
 }
 
 void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range) {
-    entityManager->aiControlComponents[entity].target = MAX_ENTITIES;
-    entityManager->aiControlComponents[entity].sightRadius = sight;
-    entityManager->aiControlComponents[entity].attackRange = range;
-    entityManager->aiControlComponents[entity].timeSinceLastAction = 0.0f;
-    entityManager->aiControlComponents[entity].state = 0;
+    AIControlComponent* ai = &entityManager->aiControlComponents[entity];
+    
+    ai->target = MAX_ENTITIES;
+    ai->sightRadius = sight;
+    ai->attackRange = range;
+    ai->timeSinceLastAction = 0.0f;
+    ai->state = 0;
+    
     entityManager->componentMasks[entity] |= COMPONENT_AI_CONTROL;
 }
 
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown) {
-    entityManager->cockpitHUDComponents[entity].maxHeat = maxHeat;
-    entityManager->cockpitHUDComponents[entity].currentHeat = 0.0f;
-    entityManager->cockpitHUDComponents[entity].heatPerShot = heatPerShot;
-    entityManager->cockpitHUDComponents[entity].cooldownRate = cooldown;
+    CockpitHUDComponent* hud = &entityManager->cockpitHUDComponents[entity];
+    
+    hud->maxHeat = maxHeat;
+    hud->currentHeat = 0.0f;
+    hud->heatPerShot = heatPerShot;
+    hud->cooldownRate = cooldown;
+    
     entityManager->componentMasks[entity] |= COMPONENT_COCKPIT_HUD;
+}
+
+void AddCollisionComponent(EntityManager* entityManager, Entity entity, BoundingBox bounds, bool isStatic) {
+    CollisionComponent* collision = &entityManager->collisionComponents[entity];
+    
+    collision->bounds = bounds;
+    collision->isStatic = isStatic;
+    
+    entityManager->componentMasks[entity] |= COMPONENT_COLLISION;
 }
