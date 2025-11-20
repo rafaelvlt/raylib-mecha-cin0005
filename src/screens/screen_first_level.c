@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include "ecs/ecs_systems.h"
 #include "systems.h"
 
 static void DrawLevel();
@@ -33,6 +34,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   systems->delta_time = GetFrameTime(); 
 
   PlayerControlSystem(systems);
+  PlayerAudioSystem(systems);
 
   MovementSystem(systems);
 
