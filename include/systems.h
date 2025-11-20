@@ -1,8 +1,9 @@
 #ifndef SYSTEMS_H
 #define SYSTEMS_H
 
-#include <raylib.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <raylib.h>
 #include "resource_manager.h"
 #include "state_manager.h"
 #include "ecs/ecs_components.h"
