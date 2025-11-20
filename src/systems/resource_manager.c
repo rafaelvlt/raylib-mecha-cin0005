@@ -1,3 +1,4 @@
+#include "resource_manager.h"
 #include <raylib.h>
 #include <stdlib.h>
 #include "systems.h"
@@ -12,7 +13,7 @@ Don't forget to add the ID to the enum              *
 void InitResourceManager(ResourceManager* resourceManager) {
     //Models
     resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
-    
+    resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");    
     //Fonts
     resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
     resourceManager->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
