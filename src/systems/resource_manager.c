@@ -1,25 +1,27 @@
+#include "resource_manager.h"
 #include <raylib.h>
 #include <stdlib.h>
-#include "systems.h"
 #include "utility.h"
 
-/****************************************************
-See the resource_manager.h for how to use guideline *
-Only Change the init function to add more assets    *
-Don't forget to add the ID to the enum              *
-*****************************************************/
+  /****************************************************
+  See the resource_manager.h for how to use guideline *
+  Only Change the init function to add more assets    *
+  Don't forget to add the ID to the enum              *
+  *****************************************************/
 
-void InitResourceManager(ResourceManager* resourceManager) {
-    //Models
-    resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
-    
-    //Fonts
-    resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
-    resourceManager->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
-    resourceManager->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources/fonts/capture_it.ttf", 150, NULL, 0);
-    //Musics
-    resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
-
+  void InitResourceManager(ResourceManager* resourceManager) {
+      //Models
+      resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
+      
+      //Fonts
+      resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
+      resourceManager->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
+      resourceManager->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources/fonts/capture_it.ttf", 150, NULL, 0);
+      //Musics
+      resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
+      //Sounds
+      resourceManager->sounds[SOUND_ID_MECHA_FOOTSTEP] = LoadSound("resources/sounds/mecha_footstep.wav");
+    resourceManager->sounds[SOUND_ID_MECHA_ROTATING] = LoadSound("resources/sounds/mecha_rotation.wav"); 
     //Render Textures
     resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
     resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
@@ -60,6 +62,13 @@ Font* GetFont(ResourceManager* resourceManager, AssetFontID id) {
 Music* GetMusic(ResourceManager* resourceManager, AssetMusicID id) {
     if (id < MUSIC_ID_COUNT) {
         return &resourceManager->musics[id];
+    }
+    return NULL;
+}
+
+Sound* GetSound(ResourceManager* resourceManager, AssetSoundID id) {
+    if (id < SOUND_ID_COUNT) {
+        return &resourceManager->sounds[id];
     }
     return NULL;
 }

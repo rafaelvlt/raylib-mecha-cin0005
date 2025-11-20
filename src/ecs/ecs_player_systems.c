@@ -1,70 +1,74 @@
 #include <raylib.h>
 #include <raymath.h> 
+#include "resource_manager.h"
 #include "systems.h"
 #include "ecs/ecs_systems.h"
-
-#define MECH_HEIGHT     6.5f  // Camera Height
-// Bobbing frequency parameters
-#define BOB_FREQUENCY   2.0f  
-#define BOB_AMPLITUDE   0.2f  
-// Inclination parameters
-#define SWAY_SPEED      4.5f 
-#define MAX_PITCH_RAD   1.5f  // Anti neck-break (vertical 180*)
 
 void PlayerControlSystem(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   InputSystem* keys = &systems->configManager.KeyMap;
 
+  const float MECH_HEIGHT   = 6.5f;  
+  const float MAX_PITCH_RAD = 1.4f; 
+
+  const float BOB_FREQUENCY = 0.55f;
+  const float BOB_AMPLITUDE = 0.2f;
+
+  const float SWAY_SPEED        = 4.5f;
+  const float LEAN_TURN_FACTOR  = -0.06f;
+  const float LEAN_MOUSE_FACTOR = 0.005f;
+  const float LEAN_MOVE_FACTOR  = 0.02f;  
+
+  const float THROTTLE_LERP_SPEED = 2.5f; 
+  const float TURN_LERP_SPEED     = 1.0f; 
+  const float VELOCITY_LERP_SPEED = 1.0f;
+
+  float dt = systems->delta_time;
+
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) == 
       (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) {
 
-      // Shortcut 
       PlayerControlComponent* p = &em->playerControlComponents[i];
       PhysicsComponent* phys    = &em->physicsComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
-      float dt = systems->delta_time;
 
       // Mouse Input
       Vector2 mouseDelta = GetMouseDelta();
-      p->torsoYaw   -= mouseDelta.x * p->mouseSensitivity;
-      p->torsoPitch -= mouseDelta.y * p->mouseSensitivity;
+      p->torsoYaw   += mouseDelta.x * p->mouseSensitivity;
+      p->torsoPitch -= mouseDelta.y * p->mouseSensitivity; 
       p->torsoPitch = Clamp(p->torsoPitch, -MAX_PITCH_RAD, MAX_PITCH_RAD);
 
-      // Movement Input
+      // Keyboard Input
       float targetThrottle = 0.0f;
       float targetTurn = 0.0f;
+
       if (IsKeyDown(keys->KeyMoveForward))  targetThrottle = 1.0f;
       if (IsKeyDown(keys->KeyMoveBackward)) targetThrottle = -1.0f;
       if (IsKeyDown(keys->KeyTurnLeft))     targetTurn = 1.0f;
       if (IsKeyDown(keys->KeyTurnRight))    targetTurn = -1.0f;
 
-      p->throttle = Lerp(p->throttle, targetThrottle, 10.0f * dt);
-      p->turnState = Lerp(p->turnState, targetTurn, 10.0f * dt);
+      // Math for acceleration on forward movement(throttle) and rotation(turnstate) 
+      p->throttle  = Lerp(p->throttle, targetThrottle, THROTTLE_LERP_SPEED * dt);
+      p->turnState = Lerp(p->turnState, targetTurn, TURN_LERP_SPEED * dt);
 
+      // Input flags
+      p->isMoving = (fabs(p->throttle) > 0.01f);
+      p->isRotating = (fabs(mouseDelta.x) > 0.1f || fabs(mouseDelta.y) > 0.1f || fabs(p->turnState) > 0.01f);
 
-      // Physics
-      // Rotation (Yaw)
-      // Rotates on y axis of the world
-      if (fabs(p->turnState) > 0.01f) {
+      // Physics Logic
+      if (p->isMoving) {
         Quaternion rot = QuaternionFromAxisAngle((Vector3){0,1,0}, p->turnState * p->turnSpeed * dt);
         trans->orientation = QuaternionMultiply(trans->orientation, rot);
       }
-      
-      // Foward Movement based on legs orientation
-      Vector3 forward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
 
-      // Wanted velocity based on throttle
+      Vector3 forward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
       Vector3 desiredVelocity = Vector3Scale(forward, p->throttle * p->maxSpeed);
 
-      // Change physics component to be worked on by the Movement System later
-      phys->velocity = Vector3Lerp(phys->velocity, desiredVelocity, 2.0f * dt);
+      phys->velocity = Vector3Lerp(phys->velocity, desiredVelocity, VELOCITY_LERP_SPEED * dt);
 
-
-      // Cockpit Camera Animation
-
-      // Head Bobbing
-      // Only bobs if the mech is moving, increase frequency when moving alot, and stops it when the mech stop
+      // Cockpit Animation (Sway & Lean)
+      // Bobbing
       if (fabs(p->throttle) > 0.1f) {
         p->headTimer += dt * BOB_FREQUENCY;
         p->walkLerp = Lerp(p->walkLerp, 1.0f, 5.0f * dt);
@@ -73,36 +77,78 @@ void PlayerControlSystem(struct Systems* systems) {
         if (p->walkLerp < 0.01f) p->headTimer = 0.0f;
       }
 
-      // Swaying 
-      // Leans the cockpit based on acceleration and rotation
-      p->lean.x = Lerp(p->lean.x, p->turnState * -0.05f, SWAY_SPEED * dt); 
-      p->lean.y = Lerp(p->lean.y, p->throttle * 0.02f, SWAY_SPEED * dt);  
+      // Lean
+      float targetLeanX = (p->turnState * LEAN_TURN_FACTOR) + (mouseDelta.x * LEAN_MOUSE_FACTOR);
+      float targetLeanY = p->throttle * LEAN_MOVE_FACTOR;
 
-      
-      // Camera alteration
-      // Position + Mech Height + Bobbing + Lerp; 
+      p->lean.x = Lerp(p->lean.x, targetLeanX, SWAY_SPEED * dt);
+      p->lean.y = Lerp(p->lean.y, targetLeanY, SWAY_SPEED * dt);  
+
+
+      // Camera Calculation
+      // Position
       float bobY = sinf(p->headTimer * PI * 2.0f) * BOB_AMPLITUDE * p->walkLerp;
       p->camera->position = Vector3Add(trans->position, (Vector3){0, MECH_HEIGHT + bobY, 0});
 
-      // Camera Target
-      //Rotation Matrix based on Pitch, Yaw and Lean
+      // Target (Direction)
       float finalPitch = p->torsoPitch - p->lean.y;
-      float finalYaw   = p->torsoYaw; // Torso works solo, legs dont have influence on camera
+      float finalYaw   = p->torsoYaw;
 
-      Matrix rotMatrix = MatrixRotateXYZ((Vector3){ finalPitch, finalYaw, 0.0f });
+      Vector3 direction;
+      direction.x = cosf(finalPitch) * sinf(finalYaw); 
+      direction.y = sinf(finalPitch);
+      direction.z = cosf(finalPitch) * cosf(finalYaw);
 
-      // Raylib defaults forward to z = -1 
-      Vector3 camForward = Vector3Transform((Vector3){0, 0, -1}, rotMatrix);
+      direction = Vector3Normalize(direction);
+      direction.z *= -1.0f; // Raylib Forward é -Z
 
-      // Position + Target 
-      p->camera->target = Vector3Add(p->camera->position, camForward);
+      p->camera->target = Vector3Add(p->camera->position, direction);
 
-      // Bobbing + Lean
+      // Up Vector (Roll Effect)
       float bobRoll = cosf(p->headTimer * PI) * 0.02f * p->walkLerp;
       float finalRoll = p->lean.x + bobRoll;
 
-      // Rotates Default Up vector by rool
-      p->camera->up = Vector3Transform((Vector3){0, 1, 0}, MatrixRotateZ(finalRoll));
+      p->camera->up = Vector3RotateByAxisAngle((Vector3){0,1,0}, direction, finalRoll);
+    }
+  }
+}  
+
+
+void PlayerAudioSystem(struct Systems* systems) {
+  EntityManager* em = &systems->entityManager;
+
+  Sound sfxFootstep  = systems->resourceManager.sounds[SOUND_ID_MECHA_FOOTSTEP];
+
+   for (Entity i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
+
+      PlayerControlComponent* p = &em->playerControlComponents[i];
+      
+      // Maintaining a diff between currentstep and laststep helps select when to replay the sound
+      float currentStep = p->headTimer * 1.0f; 
+      float lastStep    = p->lastHeadTimer * 1.0f;
+
+      // If the current step goes into the ground, play the sound
+      if ((int)currentStep > (int)lastStep) {
+        
+        // Volume goes with the velocity
+        float intensity = fabs(p->throttle); 
+
+        if (p->isMoving) {
+          float stepVolume = 0.3f + (intensity * 0.7f); 
+          SetSoundVolume(sfxFootstep, stepVolume * systems->configManager.audioVolume);
+
+          // Randomized pitch for variance in sound
+          float pitchVar = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
+          SetSoundPitch(sfxFootstep, pitchVar);
+
+          PlaySound(sfxFootstep);
+        }
+      }
+
+      // Updates timer variables
+      if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer;
+      else p->lastHeadTimer = p->headTimer;
     }
   }
 }

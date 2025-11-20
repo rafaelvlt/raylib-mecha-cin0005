@@ -10,5 +10,5 @@ void RenderSystem(struct Systems* systems);
 
 //Player Systems
 void PlayerControlSystem(struct Systems* systems);
-
+void PlayerAudioSystem(struct Systems* systems);
 #endif // ECS_SYSTEMS_H
