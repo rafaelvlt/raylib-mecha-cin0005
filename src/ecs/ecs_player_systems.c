@@ -1,98 +1,74 @@
 #include <raylib.h>
 #include <raymath.h> 
+#include "resource_manager.h"
 #include "systems.h"
 #include "ecs/ecs_systems.h"
-
-// --- Configurações do Mecha ---
-#define MECH_HEIGHT     6.5f   // Altura da cabine
-#define BOB_FREQUENCY   2.0f   // Frequência do balanço
-#define BOB_AMPLITUDE   0.2f   // Amplitude do balanço
-#define SWAY_SPEED      4.0f   // Suavidade da inclinação
-#define MAX_PITCH_RAD   1.3f   // Limite vertical (olhar cima/baixo)
-#define MAX_YAW_RAD     1.8f   // Limite horizontal (pescoço)
 
 void PlayerControlSystem(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   InputSystem* keys = &systems->configManager.KeyMap;
 
+  const float MECH_HEIGHT   = 6.5f;  
+  const float MAX_PITCH_RAD = 1.4f; 
+
+  const float BOB_FREQUENCY = 0.55f;
+  const float BOB_AMPLITUDE = 0.2f;
+
+  const float SWAY_SPEED        = 4.5f;
+  const float LEAN_TURN_FACTOR  = -0.06f;
+  const float LEAN_MOUSE_FACTOR = 0.005f;
+  const float LEAN_MOVE_FACTOR  = 0.02f;  
+
+  const float THROTTLE_LERP_SPEED = 2.5f; 
+  const float TURN_LERP_SPEED     = 1.0f; 
+  const float VELOCITY_LERP_SPEED = 1.0f;
+
+  float dt = systems->delta_time;
+
   for (Entity i = 0; i < em->numEntities; i++) {
-    // Filtro de Componentes
     if ((em->componentMasks[i] & (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) == 
       (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) {
 
       PlayerControlComponent* p = &em->playerControlComponents[i];
       PhysicsComponent* phys    = &em->physicsComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
-      float dt = systems->delta_time;
 
-      // ==================================================================================
-      // 1. INPUT: CONTROLE DE MOUSE (CÂMERA/CABEÇA APENAS)
-      // ==================================================================================
-      
-      // Trava/Destrava o mouse com TAB
-      if (IsKeyPressed(KEY_TAB)) {
-          if (IsCursorHidden()) EnableCursor();
-          else DisableCursor();
-      }
-      if (!IsCursorHidden() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && IsWindowFocused()) {
-          DisableCursor();
-      }
+      // Mouse Input
+      Vector2 mouseDelta = GetMouseDelta();
+      p->torsoYaw   += mouseDelta.x * p->mouseSensitivity;
+      p->torsoPitch -= mouseDelta.y * p->mouseSensitivity; 
+      p->torsoPitch = Clamp(p->torsoPitch, -MAX_PITCH_RAD, MAX_PITCH_RAD);
 
-      if (IsCursorHidden()) {
-          Vector2 mouseDelta = GetMouseDelta();
-          // O Mouse afeta apenas as variáveis 'torso', não toca na física do corpo
-          p->torsoYaw   -= mouseDelta.x * p->mouseSensitivity;
-          p->torsoPitch -= mouseDelta.y * p->mouseSensitivity;
-
-          // Limites do pescoço (Clamp)
-          p->torsoPitch = Clamp(p->torsoPitch, -MAX_PITCH_RAD, MAX_PITCH_RAD);
-          p->torsoYaw   = Clamp(p->torsoYaw, -MAX_YAW_RAD, MAX_YAW_RAD);
-      }
-
-      // ==================================================================================
-      // 2. INPUT: CONTROLE DE TECLADO (CORPO APENAS)
-      // ==================================================================================
+      // Keyboard Input
       float targetThrottle = 0.0f;
       float targetTurn = 0.0f;
-      
-      // W/S movem o robô para onde as PERNAS estão apontando
+
       if (IsKeyDown(keys->KeyMoveForward))  targetThrottle = 1.0f;
       if (IsKeyDown(keys->KeyMoveBackward)) targetThrottle = -1.0f;
-      
-      // A/D giram o CHASSI do robô (não a câmera diretamente)
       if (IsKeyDown(keys->KeyTurnLeft))     targetTurn = 1.0f;
       if (IsKeyDown(keys->KeyTurnRight))    targetTurn = -1.0f;
 
-      // Interpolação (Simula peso/inércia do mecha)
-      p->throttle = Lerp(p->throttle, targetThrottle, 5.0f * dt);
-      p->turnState = Lerp(p->turnState, targetTurn, 5.0f * dt);
+      // Math for acceleration on forward movement(throttle) and rotation(turnstate) 
+      p->throttle  = Lerp(p->throttle, targetThrottle, THROTTLE_LERP_SPEED * dt);
+      p->turnState = Lerp(p->turnState, targetTurn, TURN_LERP_SPEED * dt);
 
-      // ==================================================================================
-      // 3. FÍSICA DE MOVIMENTO (Aplicada ao Transform Global)
-      // ==================================================================================
+      // Input flags
+      p->isMoving = (fabs(p->throttle) > 0.01f);
+      p->isRotating = (fabs(mouseDelta.x) > 0.1f || fabs(mouseDelta.y) > 0.1f || fabs(p->turnState) > 0.01f);
 
-      // A. Rotação do Corpo (Giro do Chassis)
-      if (fabs(p->turnState) > 0.01f) {
-        // Rotaciona o transform global no eixo Y (Up)
-        Quaternion deltaRot = QuaternionFromAxisAngle((Vector3){0,1,0}, p->turnState * p->turnSpeed * dt);
-        trans->orientation = QuaternionMultiply(trans->orientation, deltaRot);
-        trans->orientation = QuaternionNormalize(trans->orientation);
+      // Physics Logic
+      if (p->isMoving) {
+        Quaternion rot = QuaternionFromAxisAngle((Vector3){0,1,0}, p->turnState * p->turnSpeed * dt);
+        trans->orientation = QuaternionMultiply(trans->orientation, rot);
       }
-      
-      // B. Movimento (Velocity)
-      // Calcula "Frente" baseada na orientação das PERNAS (trans->orientation)
-      // Raylib usa (0,0,-1) como frente padrão
-      Vector3 legsForward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
 
-      // Aplica velocidade na direção das pernas
-      Vector3 desiredVelocity = Vector3Scale(legsForward, p->throttle * p->maxSpeed);
-      phys->velocity = Vector3Lerp(phys->velocity, desiredVelocity, 4.0f * dt); 
+      Vector3 forward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
+      Vector3 desiredVelocity = Vector3Scale(forward, p->throttle * p->maxSpeed);
 
-      // ==================================================================================
-      // 4. CÂMERA (Hierarquia: Posição do Corpo -> Rotação Corpo -> Rotação Cabeça)
-      // ==================================================================================
+      phys->velocity = Vector3Lerp(phys->velocity, desiredVelocity, VELOCITY_LERP_SPEED * dt);
 
-      // -- Head Bobbing e Sway (Efeitos de Imersão) --
+      // Cockpit Animation (Sway & Lean)
+      // Bobbing
       if (fabs(p->throttle) > 0.1f) {
         p->headTimer += dt * BOB_FREQUENCY;
         p->walkLerp = Lerp(p->walkLerp, 1.0f, 5.0f * dt);
@@ -101,54 +77,78 @@ void PlayerControlSystem(struct Systems* systems) {
         if (p->walkLerp < 0.01f) p->headTimer = 0.0f;
       }
 
-      // Sway: Inclina a câmera levemente baseada na inércia do movimento
-      p->lean.x = Lerp(p->lean.x, p->turnState * -0.15f, SWAY_SPEED * dt); 
-      p->lean.y = Lerp(p->lean.y, p->throttle * 0.05f, SWAY_SPEED * dt);   
+      // Lean
+      float targetLeanX = (p->turnState * LEAN_TURN_FACTOR) + (mouseDelta.x * LEAN_MOUSE_FACTOR);
+      float targetLeanY = p->throttle * LEAN_MOVE_FACTOR;
 
-      // -- Cálculo Final da Câmera --
-      
-      // 1. Posição: Centro do Robô + Altura Fixa + Balanço Vertical
+      p->lean.x = Lerp(p->lean.x, targetLeanX, SWAY_SPEED * dt);
+      p->lean.y = Lerp(p->lean.y, targetLeanY, SWAY_SPEED * dt);  
+
+
+      // Camera Calculation
+      // Position
       float bobY = sinf(p->headTimer * PI * 2.0f) * BOB_AMPLITUDE * p->walkLerp;
       p->camera->position = Vector3Add(trans->position, (Vector3){0, MECH_HEIGHT + bobY, 0});
 
-      // 2. Orientação (Matrizes)
-      // A ordem de multiplicação é crucial aqui para separar Cabeça de Corpo.
-      
-      // Matriz do Corpo (Global - Controlada por WASD)
-      Matrix matBody = QuaternionToMatrix(trans->orientation);
-      
-      // Matriz da Cabeça (Local - Controlada por Mouse)
-      // Pitch (X) e Yaw (Y) combinados com o Sway (Lean)
-      // Criamos duas matrizes separadas para evitar problemas de rotação (Gimbal Lock)
-      Matrix matPitch = MatrixRotateX(p->torsoPitch - p->lean.y);
-      Matrix matYaw   = MatrixRotateY(p->torsoYaw);
-      
-      // Cabeça = Yaw * Pitch (Ordem: Gira pescoço, depois inclina cabeça)
-      Matrix matHead = MatrixMultiply(matPitch, matYaw);
-      
-      // Matriz Final = Cabeça * Corpo
-      // Significado: A cabeça é "filha" do corpo. Se o corpo gira, a cabeça vai junto.
-      Matrix matFinal = MatrixMultiply(matHead, matBody);
+      // Target (Direction)
+      float finalPitch = p->torsoPitch - p->lean.y;
+      float finalYaw   = p->torsoYaw;
 
-      // 3. Alvo (Target)
-      // Transforma o vetor "frente" local pela matriz final combinada
-      Vector3 viewForward = Vector3Transform((Vector3){0, 0, -1}, matFinal);
-      p->camera->target = Vector3Add(p->camera->position, viewForward);
+      Vector3 direction;
+      direction.x = cosf(finalPitch) * sinf(finalYaw); 
+      direction.y = sinf(finalPitch);
+      direction.z = cosf(finalPitch) * cosf(finalYaw);
 
-      // 4. Vetor UP (Roll)
-      // Adiciona inclinação lateral (Roll) causada pelo balanço
+      direction = Vector3Normalize(direction);
+      direction.z *= -1.0f; // Raylib Forward é -Z
+
+      p->camera->target = Vector3Add(p->camera->position, direction);
+
+      // Up Vector (Roll Effect)
       float bobRoll = cosf(p->headTimer * PI) * 0.02f * p->walkLerp;
       float finalRoll = p->lean.x + bobRoll;
-      
-      // Usa a matriz do corpo para garantir que o UP da câmera respeite a inclinação do robô
-      // Mas adiciona o Roll localmente
-      Vector3 upLocal = (Vector3){0, 1, 0};
-      upLocal = Vector3Transform(upLocal, MatrixRotateZ(finalRoll)); // Aplica Roll
-      
-      // Se quiser que a câmera incline se o robô subir rampa, descomente a linha abaixo:
-      // upLocal = Vector3Transform(upLocal, matBody); 
-      
-      p->camera->up = upLocal;
+
+      p->camera->up = Vector3RotateByAxisAngle((Vector3){0,1,0}, direction, finalRoll);
     }
   }
-}
+}  
+
+
+void PlayerAudioSystem(struct Systems* systems) {
+  EntityManager* em = &systems->entityManager;
+
+  Sound sfxFootstep  = systems->resourceManager.sounds[SOUND_ID_MECHA_FOOTSTEP];
+
+  for (Entity i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
+
+      PlayerControlComponent* p = &em->playerControlComponents[i];
+
+      // Maintaining a diff between currentstep and laststep helps select when to replay the sound
+      float currentStep = p->headTimer * 1.0f; 
+      float lastStep    = p->lastHeadTimer * 1.0f;
+
+      // If the current step goes into the ground, play the sound
+      if ((int)currentStep > (int)lastStep) {
+
+        // Volume goes with the velocity
+        float intensity = fabs(p->throttle); 
+
+        if (p->isMoving) {
+          float stepVolume = 0.3f + (intensity * 0.7f); 
+          SetSoundVolume(sfxFootstep, stepVolume * systems->configManager.audioVolume);
+
+          // Randomized pitch for variance in sound
+          float pitchVar = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
+          SetSoundPitch(sfxFootstep, pitchVar);
+
+          PlaySound(sfxFootstep);
+        }
+      }
+
+      // Updates timer variables
+      if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer;
+      else p->lastHeadTimer = p->headTimer;
+    }
+    }
+  }

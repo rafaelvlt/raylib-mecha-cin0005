@@ -1,93 +1,94 @@
 #include <raylib.h>
 #include <raymath.h>
+#include "ecs/ecs_systems.h"
 #include "systems.h"
 
 static void DrawLevel(void);
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-    // Reset ECS state
-    InitEntityManager(&systems->entityManager);
+  // Reset ECS state
+  InitEntityManager(&systems->entityManager);
 
-    // ---------------------------------------------------------
-    // Player Entity Setup
-    // ---------------------------------------------------------
-    Entity player = CreateEntity(&systems->entityManager);
-    
-    AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
-    AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
-    
-    // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
-    AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
-    
-    BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
-    AddCollisionComponent(&systems->entityManager, player, playerBounds, false);
+  // ---------------------------------------------------------
+  // Player Entity Setup
+  // ---------------------------------------------------------
+  Entity player = CreateEntity(&systems->entityManager);
+
+  AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
+  AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
+
+  // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
+  AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
+
+  BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
+  AddCollisionComponent(&systems->entityManager, player, playerBounds, false);
 
 
-    // ---------------------------------------------------------
-    // Enemy Entity Setup
-    // ---------------------------------------------------------
-    // Retrieve model from Resource Manager instead of loading it locally
-    Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
+  // ---------------------------------------------------------
+  // Enemy Entity Setup
+  // ---------------------------------------------------------
+  Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
 
-    if (enemyModel != NULL) {
-        // Apply scale fix to the shared model
-        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
+  if (enemyModel != NULL) {
+    // Apply scale fix to the shared model
+    enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
 
-        Entity enemy = CreateEntity(&systems->entityManager);
+    Entity enemy = CreateEntity(&systems->entityManager);
 
-        AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
-        AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
-        
-        BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
-        AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false);
+    AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+    AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
 
-        // AI and Stats
-        AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-        AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
+    BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+    AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false);
 
-        AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
-    }
+    // AI and Stats
+    AddHealthComponent(&systems->entityManager, enemy, 100.0f);
+    AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
 
-    // ---------------------------------------------------------
-    // Camera & Input Setup
-    // ---------------------------------------------------------
-    data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
-    data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
-    data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    data->camera.fovy = 60.0f;
-    data->camera.projection = CAMERA_PERSPECTIVE;
+    AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
+  }
 
-    DisableCursor(); 
+  // ---------------------------------------------------------
+  // Camera & Input Setup
+  // ---------------------------------------------------------
+  data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
+  data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
+  data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+  data->camera.fovy = 60.0f;
+  data->camera.projection = CAMERA_PERSPECTIVE;
+
+  DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-    systems->delta_time = GetFrameTime(); 
+  systems->delta_time = GetFrameTime(); 
 
-    // Run Gameplay Systems
-    PlayerControlSystem(systems);
-    AIControlSystem(systems);
-    MovementSystem(systems);
+  // Run Gameplay Systems
+  PlayerControlSystem(systems);
+  PlayerAudioSystem(systems);
+  AIControlSystem(systems);
+  MovementSystem(systems);
 
-    
-    if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
-    {
-        EnableCursor();
-        RequestScreenChange(systems, SCREEN_MAIN_MENU);
-    }
+
+  if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
+  {
+    EnableCursor();
+    RequestScreenChange(systems, SCREEN_MAIN_MENU);
+  }
 }
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-    ClearBackground(RAYWHITE);
+  ClearBackground(RAYWHITE);
 
-    BeginMode3D(data->camera);
-        DrawLevel();            
-        RenderSystem(systems);  
-    EndMode3D();
+  BeginMode3D(data->camera);
+  DrawLevel();            
+  RenderSystem(systems);  
+  EndMode3D();
 
-    DrawFPS(10, 10);
+  DrawFPS(10, 10);
 }
 
 void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)

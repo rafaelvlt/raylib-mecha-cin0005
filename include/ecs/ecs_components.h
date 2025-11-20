@@ -47,24 +47,28 @@ typedef struct {
 // Used in player control for camera movement
 typedef struct {
   Camera *camera;          
-
   float mouseSensitivity;
+  // Movement
   float maxSpeed;
   float turnSpeed;
-
   float throttle;       
   float turnState;      
-
   float torsoYaw;       
   float torsoPitch;     
 
+  //Audio
+  float hydraulicVolume;
+
   //flags
+  bool isMoving;
+  bool isRotating;
   bool isShooting;
   bool isZooming;
   bool lockTargetRequested;
 
   // Camera Animation 
   float headTimer;
+  float lastHeadTimer;
   float walkLerp;
   float headLerp;
   Vector2 lean;

@@ -200,7 +200,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     DrawRectangleRec(menuPanel, Fade(BLACK, 0.75f));
     DrawRectangleLinesEx(menuPanel, 4, GREEN);
 
-    //------- Buttons Specs (to scale with Resolution) ----------
+    //------ Buttons Specs (to scale with Resolution) ----------
     const float contentPaddingX = panelWidth * 0.1f;  
     const float contentPaddingY = panelHeight * 0.05f; 
     const float contentAreaX = panelX + contentPaddingX;

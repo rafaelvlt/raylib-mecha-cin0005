@@ -10,7 +10,6 @@ typedef struct{
 } playerInput;
 typedef struct {
   Camera3D camera;
-  Model enemyModel;
 } FirstLevelData;
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
