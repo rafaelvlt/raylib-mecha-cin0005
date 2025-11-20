@@ -23,21 +23,42 @@ void PlayerControlSystem(struct Systems* systems) {
   const float TURN_LERP_SPEED     = 1.0f; 
   const float VELOCITY_LERP_SPEED = 1.0f;
 
+  const float DEFAULT_FOV = 60.0f;
+  const float ZOOM_FOV = 20.0f;
+  const float ZOOM_SPEED = 10.0f;
+
   float dt = systems->delta_time;
 
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) == 
       (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) {
-
+      
       PlayerControlComponent* p = &em->playerControlComponents[i];
       PhysicsComponent* phys    = &em->physicsComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
+      
 
       // Mouse Input
       Vector2 mouseDelta = GetMouseDelta();
       p->torsoYaw   += mouseDelta.x * p->mouseSensitivity;
       p->torsoPitch -= mouseDelta.y * p->mouseSensitivity; 
       p->torsoPitch = Clamp(p->torsoPitch, -MAX_PITCH_RAD, MAX_PITCH_RAD);
+
+      float targetFOV = DEFAULT_FOV; 
+      if (IsMouseButtonDown(keys->KeyZoom)){
+        targetFOV = ZOOM_FOV;
+        p->isZooming = true;
+      }
+      else{
+        p->isZooming = false;
+      }
+
+      if (IsMouseButtonDown(keys->KeyShoot)){
+        p->isShooting = true;
+      }
+      else{
+        p->isShooting = false;
+      }
 
       // Keyboard Input
       float targetThrottle = 0.0f;
@@ -47,7 +68,6 @@ void PlayerControlSystem(struct Systems* systems) {
       if (IsKeyDown(keys->KeyMoveBackward)) targetThrottle = -1.0f;
       if (IsKeyDown(keys->KeyTurnLeft))     targetTurn = 1.0f;
       if (IsKeyDown(keys->KeyTurnRight))    targetTurn = -1.0f;
-
       // Math for acceleration on forward movement(throttle) and rotation(turnstate) 
       p->throttle  = Lerp(p->throttle, targetThrottle, THROTTLE_LERP_SPEED * dt);
       p->turnState = Lerp(p->turnState, targetTurn, TURN_LERP_SPEED * dt);
@@ -93,7 +113,7 @@ void PlayerControlSystem(struct Systems* systems) {
       // Target (Direction)
       float finalPitch = p->torsoPitch - p->lean.y;
       float finalYaw   = p->torsoYaw;
-
+      
       Vector3 direction;
       direction.x = cosf(finalPitch) * sinf(finalYaw); 
       direction.y = sinf(finalPitch);
@@ -103,6 +123,7 @@ void PlayerControlSystem(struct Systems* systems) {
       direction.z *= -1.0f; // Raylib Forward é -Z
 
       p->camera->target = Vector3Add(p->camera->position, direction);
+      p->camera->fovy = Lerp(p->camera->fovy, targetFOV, ZOOM_SPEED * dt);
 
       // Up Vector (Roll Effect)
       float bobRoll = cosf(p->headTimer * PI) * 0.02f * p->walkLerp;
