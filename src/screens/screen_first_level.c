@@ -2,101 +2,96 @@
 #include <raymath.h>
 #include "systems.h"
 
-static void DrawLevel();
+static void DrawLevel(void);
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  // Clears EM
-  InitEntityManager(&systems->entityManager);
+    // Reset ECS state
+    InitEntityManager(&systems->entityManager);
 
-  // Creates Player and add all components to him
-  Entity player = CreateEntity(&systems->entityManager);
-  AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
-  AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
-  AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
-  BoundingBox bounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
-  AddCollisionComponent(&systems->entityManager, player, bounds, false);
+    // ---------------------------------------------------------
+    // Player Entity Setup
+    // ---------------------------------------------------------
+    Entity player = CreateEntity(&systems->entityManager);
+    
+    AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
+    AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
+    
+    // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
+    AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
+    
+    BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
+    AddCollisionComponent(&systems->entityManager, player, playerBounds, false);
 
-  // =====================
-  // Create Enemy
-  // =====================
 
-  // Carrega o modelo
-  data->enemyModel = LoadModel("assets/models/sentinel.glb");
+    // ---------------------------------------------------------
+    // Enemy Entity Setup
+    // ---------------------------------------------------------
+    // Retrieve model from Resource Manager instead of loading it locally
+    Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
 
-  // --- AJUSTE CRÍTICO DE ESCALA ---
-  // Aumenta o modelo 2x caso ele seja muito pequeno.
-  // Se ficar gigante, mude para 0.5f ou 0.1f
-  data->enemyModel.transform = MatrixScale(0.5f, 0.5f, 0.5f);
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
 
-  Entity enemy = CreateEntity(&systems->entityManager);
+        Entity enemy = CreateEntity(&systems->entityManager);
 
-  // --- AJUSTE CRÍTICO DE POSIÇÃO ---
-  // Coloca o inimigo em Z=15 (Na frente do Player que olha para Z+)
-  // Y=0 (No chão)
-  AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+        AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+        AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
+        
+        BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+        AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false);
 
-  // Física e Colisão
-  AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
-  
-  BoundingBox enemyBox = {
-      (Vector3){ -1.0f, 0.0f, -1.0f },
-      (Vector3){  1.0f, 3.0f,  1.0f }
-  };
-  AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false);
+        // AI and Stats
+        AddHealthComponent(&systems->entityManager, enemy, 100.0f);
+        AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
 
-  // Lógica de Jogo (Vida e IA)
-  AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-  
-  // SightRadius aumentado para 50.0f para garantir que ele te veja
-  AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
+        AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
+    }
 
-  // Renderização (Use BRANCO para ver as texturas originais, ou RED para tintura de debug)
-  AddRenderComponent(&systems->entityManager, enemy, &data->enemyModel, WHITE);
+    // ---------------------------------------------------------
+    // Camera & Input Setup
+    // ---------------------------------------------------------
+    data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
+    data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
+    data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    data->camera.fovy = 60.0f;
+    data->camera.projection = CAMERA_PERSPECTIVE;
 
-  // Starts up Camera on the Mecha Position and Height 
-  data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f }; 
-  data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };  
-  data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-  data->camera.fovy = 60.0f;
-  data->camera.projection = CAMERA_PERSPECTIVE;
-
-  DisableCursor(); // Trava o mouse para FPS}
+    DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  systems->delta_time = GetFrameTime(); 
+    systems->delta_time = GetFrameTime(); 
 
-  PlayerControlSystem(systems);
+    // Run Gameplay Systems
+    PlayerControlSystem(systems);
+    AIControlSystem(systems);
+    MovementSystem(systems);
 
-  MovementSystem(systems);
-
-  AIControlSystem(systems);
-
-  if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) // Exemplo: Tecla P ou ESC
-  {
-    EnableCursor(); // Libera o mouse
-    RequestScreenChange(systems, SCREEN_MAIN_MENU);
-  }
+    
+    if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
+    {
+        EnableCursor();
+        RequestScreenChange(systems, SCREEN_MAIN_MENU);
+    }
 }
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  ClearBackground(RAYWHITE);
+    ClearBackground(RAYWHITE);
 
-  BeginMode3D(data->camera);
-  DrawLevel();
-  RenderSystem(systems);      
+    BeginMode3D(data->camera);
+        DrawLevel();            
+        RenderSystem(systems);  
+    EndMode3D();
 
-  EndMode3D();
-
-  DrawFPS(10, 10);
+    DrawFPS(10, 10);
 }
 
 void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  UnloadModel(data->enemyModel);
 
 }
 
@@ -143,9 +138,4 @@ static void DrawLevel(void)
 
   // Red sun
   DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 0, 0, 255 });
-}
-
-
-
-
-
+} 

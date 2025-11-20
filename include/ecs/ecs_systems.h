@@ -12,7 +12,7 @@ void RenderSystem(struct Systems* systems);
 void PlayerControlSystem(struct Systems* systems);
 
 //Enemy AI Systems
-void AIControlSystem(struct Systems*);
+void AIControlSystem(struct Systems* systems);
 
 
 #endif // ECS_SYSTEMS_H
