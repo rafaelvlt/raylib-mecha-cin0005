@@ -1,10 +1,13 @@
 #include <raylib.h>
 #include <raymath.h> 
+#include "ecs/ecs_components.h"
 #include "resource_manager.h"
 #include "systems.h"
 #include "ecs/ecs_systems.h"
 
 void PlayerControlSystem(struct Systems* systems) {
+  uint32_t mask = COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM | COMPONENT_WEAPON_CONTROL; 
+
   EntityManager* em = &systems->entityManager;
   InputSystem* keys = &systems->configManager.KeyMap;
 
@@ -30,12 +33,12 @@ void PlayerControlSystem(struct Systems* systems) {
   float dt = systems->delta_time;
 
   for (Entity i = 0; i < em->numEntities; i++) {
-    if ((em->componentMasks[i] & (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) == 
-      (COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM)) {
+    if ((em->componentMasks[i] & mask) == mask) {
       
       PlayerControlComponent* p = &em->playerControlComponents[i];
       PhysicsComponent* phys    = &em->physicsComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
+      WeaponControlComponent* wc = &em->weaponControlComponents[i];
       
 
       // Mouse Input
@@ -52,13 +55,21 @@ void PlayerControlSystem(struct Systems* systems) {
       else{
         p->isZooming = false;
       }
+      
+      // Weapons Input
 
-      if (IsMouseButtonDown(keys->KeyShoot)){
-        p->isShooting = true;
+      // Aims always on the center of the screen
+      Vector3 aimVector = Vector3Subtract(p->camera->target, p->camera->position); 
+      wc->aimDirection = Vector3Normalize(aimVector);
+
+      for (int group = 0; group < MAX_WEAPONS_GROUPS; group++){
+        if(IsKeyPressed(keys->KeyWeaponGroups[group])) wc->activeGroup[group] = !wc->activeGroup[group];
       }
-      else{
-        p->isShooting = false;
+
+      if(IsMouseButtonDown(keys->KeyShoot)) {
+        wc->triggerPulled = true;
       }
+      else wc->triggerPulled = false;
 
       // Keyboard Input
       float targetThrottle = 0.0f;
@@ -136,12 +147,14 @@ void PlayerControlSystem(struct Systems* systems) {
 
 
 void PlayerAudioSystem(struct Systems* systems) {
+  uint32_t mask = COMPONENT_PLAYER_CONTROL;
+
   EntityManager* em = &systems->entityManager;
 
   Sound sfxFootstep  = systems->resourceManager.sounds[SOUND_ID_MECHA_FOOTSTEP];
 
   for (Entity i = 0; i < em->numEntities; i++) {
-    if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
+    if ((em->componentMasks[i] & mask) == mask) {
 
       PlayerControlComponent* p = &em->playerControlComponents[i];
 

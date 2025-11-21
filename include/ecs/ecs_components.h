@@ -2,10 +2,16 @@
 #define ECS_COMPONENTS_H
 #include <raylib.h>
 #include <stdint.h>
+#include "resource_manager.h"
+#include "ecs_types.h"
 
-// Definition for maximum arary size, and typedef for UID
+// Definition for maximum array size, and typedef for UID
 #define MAX_ENTITIES 1024
+#define MAX_WEAPONS_EQUIP 8
+#define MAX_WEAPONS_GROUPS 5
+
 typedef uint32_t Entity;
+
 
 /* ===========================
   Components definitions
@@ -26,8 +32,9 @@ typedef struct  {
 
 // For Collision system suport
 typedef struct {
-  BoundingBox bounds;
-  bool isStatic; 
+  BoundingBox hitbox;
+  bool isStatic;
+  bool isTrigger;
 } CollisionComponent;
 
 // Used for model drawing in the world
@@ -61,8 +68,7 @@ typedef struct {
 
   //flags
   bool isMoving;
-  bool isRotating;
-  bool isShooting;
+  bool isRotating; 
   bool isZooming;
   bool lockTargetRequested;
 
@@ -82,22 +88,46 @@ typedef struct  {
 
 // Used for stats about a weapon
 typedef struct  {
-  float fireRate;
+  WeaponType type;
+
+  // State
   float cooldownTimer;
+  
+  // Attributes
+  float firingRate;
   float projectileSpeed;
   float projectileDamage;
-  bool isFiring;
+  float range;
+
+  // TBD HEAT
+  float heatGenerated;
+  
+  // Animation
+  AssetSoundID launchSoundID;
+  AssetModelID projectileModelID;
 }  WeaponComponent;
 
 // Used to prevent own death
 typedef struct  {
   Entity owner;
-}  ProjectileComponent;
+  float damage; // copied from weaponComponent
+  bool destroyOnHit;
+
+  //Animation
+  float blastRadius;
+  Effect hitEffectID;
+} ProjectileComponent;
 
 // Detect which weapon to use and fire with for both player and A.I
 typedef struct {
-  Entity primaryWeapon;
-  Entity secondaryWeapon;
+  // Control Proprieties 
+  bool triggerPulled;
+  Vector3 aimDirection;
+  
+  //Weapon Group
+  Entity weaponsSlots[MAX_WEAPONS_EQUIP];
+  int weaponsGroupMap[MAX_WEAPONS_EQUIP];
+  int activeGroup[MAX_WEAPONS_GROUPS];
 } WeaponControlComponent;
 
 

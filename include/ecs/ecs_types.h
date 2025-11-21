@@ -1,0 +1,25 @@
+#ifndef ECS_TYPES_H
+#define ECS_TYPES_H
+
+typedef enum{
+  ENTITY_PLAYER = 0,
+  ENTITY_ENEMY_SCOUT,
+  ENTITY_ENEMY_FIGHTER,
+  ENTITY_COUNT
+} EntityType;
+
+typedef enum{
+  WEAPON_LASER_BEAM = 0,
+  WEAPON_MINIGUN,
+  WEAPON_COUNTER
+} WeaponType;
+
+typedef enum{
+  EFFECT_NONE = 0,
+  EFFECT_SMALL_SPARK,
+  EFFECT_MEDIUM_EXPLOSION,
+  EFFECT_BIG_BOOM,
+  EFFECT_COUNTER
+} Effect;
+
+#endif

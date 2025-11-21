@@ -24,6 +24,7 @@ typedef struct{
   Entity owner;
   WeaponType weapon;
   Vector3 direction;
+  Vector3 position;
 } WeaponFiredData;
 
 typedef struct {

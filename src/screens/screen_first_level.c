@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include "ecs/ecs_entitymanager.h"
 #include "ecs/ecs_systems.h"
 #include "systems.h"
 
@@ -20,9 +21,70 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
   AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
+  AddWeaponControlComponent(&systems->entityManager, player);
 
   BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
-  AddCollisionComponent(&systems->entityManager, player, playerBounds, false);
+  AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
+  // ---------------------------------------------------------
+  // Weapon Entity Setup
+  // ---------------------------------------------------------
+  Entity weaponLeft = CreateEntity(&systems->entityManager);
+
+  Vector3 offsetL = { -1.70f, 5.50f, -1.50f };
+  AddTransformComponent(&systems->entityManager, weaponLeft, Vector3Zero());
+  AddAttachmentComponent(&systems->entityManager, weaponLeft, player, offsetL, QuaternionIdentity());
+
+  AddWeaponComponent(
+    &systems->entityManager, 
+    weaponLeft, 
+    WEAPON_MINIGUN, 
+    0.1f,    
+    100.0f, 
+    5.0f,  
+    500.0f, 
+    0.0f,   
+    SOUND_ID_COUNT, 
+    MODEL_ID_PROJECTILE 
+  );
+
+
+  // --- ARMA DIREITA (Braço/Canto Inferior Direito) ---
+  Entity weaponRight = CreateEntity(&systems->entityManager);
+
+  // Apenas invertemos o X para 1.70
+  Vector3 offsetR = { 1.70f, 5.50f, -1.50f };
+
+  AddTransformComponent(&systems->entityManager, weaponRight, Vector3Zero());
+  AddAttachmentComponent(&systems->entityManager, weaponRight, player, offsetR, QuaternionIdentity());
+  AddWeaponComponent(
+    &systems->entityManager, 
+    weaponRight, 
+    WEAPON_MINIGUN, 
+    0.1f,    
+    100.0f, 
+    5.0f,  
+    500.0f, 
+    0.0f,   
+    SOUND_ID_COUNT, 
+    MODEL_ID_PROJECTILE 
+  );
+
+  // 1. Adiciona o componente ao Jogador
+  AddWeaponControlComponent(&systems->entityManager, player);
+
+  // 2. Conecta as armas aos slots
+  WeaponControlComponent* ctrl = &systems->entityManager.weaponControlComponents[player];
+
+  // Arma Esquerda -> Grupo 1
+  ctrl->weaponsSlots[0] = weaponLeft;
+  ctrl->weaponsGroupMap[0] = 0; // Grupo 0 (Tecla 1)
+
+  // Arma Direita -> Grupo 1 (Atiram juntas)
+  ctrl->weaponsSlots[1] = weaponRight;
+  ctrl->weaponsGroupMap[1] = 0; // Grupo 0 (Tecla 1)
+
+  // Ativa o Grupo 1 por padrão
+  ctrl->activeGroup[0] = true;
 
 
   // ---------------------------------------------------------
@@ -40,7 +102,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
 
     BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
-    AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false);
+    AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
 
     // AI and Stats
     AddHealthComponent(&systems->entityManager, enemy, 100.0f);
@@ -70,6 +132,10 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   PlayerAudioSystem(systems);
   AIControlSystem(systems);
   MovementSystem(systems);
+  AttachmentSystem(systems); // <--- ADICIONE ISSO (se tiver implementado)
+
+  // 4. Combate (Cria projéteis nas posições atualizadas)
+  WeaponSystem(systems);     // <--- ADICIONE ISSO
 
 
   if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
@@ -87,6 +153,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawLevel();            
   RenderSystem(systems);  
   EndMode3D();
+
 
   DrawFPS(10, 10);
 }
