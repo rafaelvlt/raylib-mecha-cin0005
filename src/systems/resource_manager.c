@@ -14,6 +14,9 @@ void InitResourceManager(ResourceManager* resourceManager) {
     //Models
     resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
     resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
+    // Temporary for bullets
+    Mesh sphereMesh = GenMeshSphere(0.2f, 8, 8);
+    resourceManager->models[MODEL_ID_PROJECTILE] = LoadModelFromMesh(sphereMesh);
     
     //Fonts
     resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);

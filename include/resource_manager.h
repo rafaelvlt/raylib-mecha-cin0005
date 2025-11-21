@@ -23,6 +23,7 @@ and add a array to the resourceManager Struct + Make a Get function for it      
 typedef enum {
     MODEL_ID_MENU = 0,
     MODEL_ID_ENEMY_SCOUT,
+    MODEL_ID_PROJECTILE,
     MODEL_ID_COUNT
 } AssetModelID;
 
