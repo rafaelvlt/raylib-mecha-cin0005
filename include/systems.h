@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <raylib.h>
 #include "resource_manager.h"
+#include "event_manager.h"
 #include "state_manager.h"
+#include "audio_manager.h"
+#include "config_manager.h"
 #include "ecs/ecs_components.h"
 #include "ecs/ecs_entitymanager.h"
 #include "ecs/ecs_systems.h"
-#include "audio_manager.h"
-#include "config_manager.h"
 
 // Holds all managers and global systems, is passed around alot as a pointer to have a "global" system that any function can acess
 struct Systems{
@@ -20,8 +21,8 @@ struct Systems{
     ResourceManager resourceManager;
     AudioManager audioManager;
     ConfigManager configManager;
+    EventManager eventManager;
     //TBD Below
-    //EventSystem eventSystem;
     //LanguageSystem languageSystem;
 
     float delta_time;
