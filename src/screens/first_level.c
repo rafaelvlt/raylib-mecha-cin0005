@@ -66,26 +66,32 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     // Enemy Entity Setup
     // ---------------------------------------------------------
     
-    Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
+    //Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
 
-    if (enemyModel != NULL) {
+    //if (enemyModel != NULL) {
         // Apply scale fix to the shared model
-        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
+        //enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
 
-        Entity enemy = CreateEntity(&systems->entityManager);
+        //Entity enemy = CreateEntity(&systems->entityManager);
 
-        AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
-        AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
+        //AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+        //AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
 
-        BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
-        AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
+        //BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+        //AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
 
-        AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-        AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
+        //AddHealthComponent(&systems->entityManager, enemy, 100.0f);
+        //AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
 
-        AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
-    }
+        //AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
+    //}
 
+    //ajustei a função para criar vários inimigos de forma mais simples
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){10.0f,0.0f,20.0f});
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){-15.0f,0.0f,25.0f});
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){5.0f,0.0f,30.0f});
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){-20.0f,0.0f,15.0f});
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){0.0f,0.0f,40.0f});
     // ---------------------------------------------------------
     // Camera & Input Setup
     // ---------------------------------------------------------

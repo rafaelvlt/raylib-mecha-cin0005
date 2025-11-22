@@ -73,5 +73,8 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
 
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown);
 
+void createEnemyScout(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position);
+
+void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position);
 
 #endif // ECS_ENTITYMANAGER_H
