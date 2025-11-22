@@ -9,9 +9,9 @@
 #include "state_manager.h"
 #include "audio_manager.h"
 #include "config_manager.h"
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
+#include "ecs/components.h"
+#include "ecs/entitymanager.h"
+#include "ecs/systems.h"
 
 // Holds all managers and global systems, is passed around alot as a pointer to have a "global" system that any function can acess
 struct Systems{

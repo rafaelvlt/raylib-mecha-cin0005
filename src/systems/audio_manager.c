@@ -1,6 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
-#include "ecs/ecs_types.h"
+#include "ecs/types.h"
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "state_manager.h"

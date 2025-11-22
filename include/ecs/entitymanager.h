@@ -1,6 +1,6 @@
 #ifndef ECS_ENTITYMANAGER_H
 #define ECS_ENTITYMANAGER_H
-#include "ecs/ecs_components.h"
+#include "components.h"
 #include "raylib.h"
 
 typedef struct  {

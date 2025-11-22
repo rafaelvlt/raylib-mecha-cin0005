@@ -5,9 +5,9 @@
 #include "utility.h"
 #include "state_manager.h"
 #include "resource_manager.h"
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
+#include "ecs/components.h"
+#include "ecs/entitymanager.h"
+#include "ecs/systems.h"
 
 int main(void) {
     // --- Window Initialization ---
