@@ -2,125 +2,100 @@
 #include <raymath.h>
 #include "ecs/ecs_entitymanager.h"
 #include "ecs/ecs_systems.h"
+#include "ecs/ecs_types.h"
 #include "systems.h"
 
 static void DrawLevel(void);
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  // Reset ECS state
-  InitEntityManager(&systems->entityManager);
+    // 1. Reset ECS state
+    InitEntityManager(&systems->entityManager);
 
-  // ---------------------------------------------------------
-  // Player Entity Setup
-  // ---------------------------------------------------------
-  Entity player = CreateEntity(&systems->entityManager);
+    // ---------------------------------------------------------
+    // Player Entity Setup
+    // ---------------------------------------------------------
+    Entity player = CreateEntity(&systems->entityManager);
 
-  AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
-  AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
+    AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
+    AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
 
-  // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
-  AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
-  AddWeaponControlComponent(&systems->entityManager, player);
+    // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
+    AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
+    
+    BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
+    AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
 
-  BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
-  AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
-  // ---------------------------------------------------------
-  // Weapon Entity Setup
-  // ---------------------------------------------------------
-  Entity weaponLeft = CreateEntity(&systems->entityManager);
+    // ---------------------------------------------------------
+    // Weapon Setup 
+    // ---------------------------------------------------------
+    
+    // --- Left Weapon ---
+    Entity weaponLeft = CreateEntity(&systems->entityManager);
+    Vector3 offsetL = { -1.70f, 5.50f, -1.50f };
+    
+    AddTransformComponent(&systems->entityManager, weaponLeft, Vector3Zero());
+    AddAttachmentComponent(&systems->entityManager, weaponLeft, player, offsetL, QuaternionIdentity());
+    AddWeaponComponent(&systems->entityManager, weaponLeft, WEAPON_PULSE_LASER, 0.1f, 100.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
-  Vector3 offsetL = { -1.70f, 5.50f, -1.50f };
-  AddTransformComponent(&systems->entityManager, weaponLeft, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, weaponLeft, player, offsetL, QuaternionIdentity());
+    // --- Right Weapon ---
+    Entity weaponRight = CreateEntity(&systems->entityManager);
+    Vector3 offsetR = { 1.70f, 5.50f, -1.50f }; // Inverted X
 
-  AddWeaponComponent(
-    &systems->entityManager, 
-    weaponLeft, 
-    WEAPON_MINIGUN, 
-    0.1f,    
-    100.0f, 
-    5.0f,  
-    500.0f, 
-    0.0f,   
-    SOUND_ID_COUNT, 
-    MODEL_ID_PROJECTILE 
-  );
+    AddTransformComponent(&systems->entityManager, weaponRight, Vector3Zero());
+    AddAttachmentComponent(&systems->entityManager, weaponRight, player, offsetR, QuaternionIdentity());
+    AddWeaponComponent(&systems->entityManager, weaponRight, WEAPON_PULSE_LASER, 0.1f, 100.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
+    // ---------------------------------------------------------
+    // Weapon Control System (Loadout)
+    // ---------------------------------------------------------
+    AddWeaponControlComponent(&systems->entityManager, player, AIM_MODE_CAMERA);
+    
+    WeaponControlComponent* ctrl = &systems->entityManager.weaponControlComponents[player];
 
-  // --- ARMA DIREITA (Braço/Canto Inferior Direito) ---
-  Entity weaponRight = CreateEntity(&systems->entityManager);
+    // Link entities to slots and groups
+    ctrl->weaponsSlots[0] = weaponLeft;
+    ctrl->weaponsGroupMap[0] = 0; // Group 1
+    
+    ctrl->weaponsSlots[1] = weaponRight;
+    ctrl->weaponsGroupMap[1] = 0; // Group 1
 
-  // Apenas invertemos o X para 1.70
-  Vector3 offsetR = { 1.70f, 5.50f, -1.50f };
+    ctrl->activeGroup[0] = true;
 
-  AddTransformComponent(&systems->entityManager, weaponRight, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, weaponRight, player, offsetR, QuaternionIdentity());
-  AddWeaponComponent(
-    &systems->entityManager, 
-    weaponRight, 
-    WEAPON_MINIGUN, 
-    0.1f,    
-    100.0f, 
-    5.0f,  
-    500.0f, 
-    0.0f,   
-    SOUND_ID_COUNT, 
-    MODEL_ID_PROJECTILE 
-  );
+    // ---------------------------------------------------------
+    // Enemy Entity Setup
+    // ---------------------------------------------------------
+    
+    Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
 
-  // 1. Adiciona o componente ao Jogador
-  AddWeaponControlComponent(&systems->entityManager, player);
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
 
-  // 2. Conecta as armas aos slots
-  WeaponControlComponent* ctrl = &systems->entityManager.weaponControlComponents[player];
+        Entity enemy = CreateEntity(&systems->entityManager);
 
-  // Arma Esquerda -> Grupo 1
-  ctrl->weaponsSlots[0] = weaponLeft;
-  ctrl->weaponsGroupMap[0] = 0; // Grupo 0 (Tecla 1)
+        AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+        AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
 
-  // Arma Direita -> Grupo 1 (Atiram juntas)
-  ctrl->weaponsSlots[1] = weaponRight;
-  ctrl->weaponsGroupMap[1] = 0; // Grupo 0 (Tecla 1)
+        BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+        AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
 
-  // Ativa o Grupo 1 por padrão
-  ctrl->activeGroup[0] = true;
+        AddHealthComponent(&systems->entityManager, enemy, 100.0f);
+        AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
 
+        AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
+    }
 
-  // ---------------------------------------------------------
-  // Enemy Entity Setup
-  // ---------------------------------------------------------
-  Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
+    // ---------------------------------------------------------
+    // Camera & Input Setup
+    // ---------------------------------------------------------
+    data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
+    data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
+    data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    data->camera.fovy = 60.0f;
+    data->camera.projection = CAMERA_PERSPECTIVE;
 
-  if (enemyModel != NULL) {
-    // Apply scale fix to the shared model
-    enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
-
-    Entity enemy = CreateEntity(&systems->entityManager);
-
-    AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
-    AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
-
-    BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
-    AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
-
-    // AI and Stats
-    AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-    AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
-
-    AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
-  }
-
-  // ---------------------------------------------------------
-  // Camera & Input Setup
-  // ---------------------------------------------------------
-  data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
-  data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
-  data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-  data->camera.fovy = 60.0f;
-  data->camera.projection = CAMERA_PERSPECTIVE;
-
-  DisableCursor(); 
+    DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -132,11 +107,9 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   PlayerAudioSystem(systems);
   AIControlSystem(systems);
   MovementSystem(systems);
-  AttachmentSystem(systems); // <--- ADICIONE ISSO (se tiver implementado)
-
-  // 4. Combate (Cria projéteis nas posições atualizadas)
-  WeaponSystem(systems);     // <--- ADICIONE ISSO
-
+  AttachmentSystem(systems);
+  WeaponSystem(systems);   
+  LifetimeSystem(systems);
 
   if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
   {

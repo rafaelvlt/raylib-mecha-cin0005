@@ -157,6 +157,15 @@ void AddWeaponComponent
   entityManager->componentMasks[entity] |= COMPONENT_WEAPON;
 }
 
+void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float lifetime){
+  LifetimeComponent* lt = &entityManager->lifetimeComponents[entity];
+  
+  lt->lifetime = lifetime;
+  lt->currentTime = 0.00f;
+
+  entityManager->componentMasks[entity] |= COMPONENT_LIFETIME;
+}
+
 void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID) {
   ProjectileComponent* projectile = &entityManager->projectileComponents[entity];
 
@@ -169,11 +178,12 @@ void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity 
   entityManager->componentMasks[entity] |= COMPONENT_PROJECTILE;
 }
 
-void AddWeaponControlComponent(EntityManager* entityManager, Entity entity) {
+void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimMode aimMode) {
   WeaponControlComponent* wControl = &entityManager->weaponControlComponents[entity];
 
   wControl->triggerPulled = false;
   wControl->aimDirection = Vector3Zero();
+  wControl->aimMode = aimMode;
 
   for (int i = 0; i < MAX_WEAPONS_EQUIP; i++){
     wControl->weaponsSlots[i] = MAX_ENTITIES;

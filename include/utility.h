@@ -7,6 +7,9 @@
 #define SCREEN_HEIGHT 720
 #define GAME_TITLE "MECHA GAME"
 
+// Camera Height
+#define MECH_HEIGHT 6.5f  
+
 // Colors
 #define GREENISH_BLACK  CLITERAL(Color){ 0, 25, 0, 255 }
 

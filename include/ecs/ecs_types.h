@@ -9,10 +9,16 @@ typedef enum{
 } EntityType;
 
 typedef enum{
-  WEAPON_LASER_BEAM = 0,
-  WEAPON_MINIGUN,
+  WEAPON_PULSE_LASER = 0,
+  WEAPON_LASER_BEAM,
+  WEAPON_MACHINE_GUN,
   WEAPON_COUNTER
 } WeaponType;
+
+typedef enum{
+  AIM_MODE_PHYSICAL = 0,
+  AIM_MODE_CAMERA,
+} AimMode;
 
 typedef enum{
   EFFECT_NONE = 0,

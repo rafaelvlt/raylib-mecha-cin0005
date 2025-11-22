@@ -5,15 +5,17 @@ struct Systems;
 
 
 
-// Movement System: Update every position applying physics
+// Updates every position applying physics
 void MovementSystem(struct Systems* systems);
 
-// Drawing System: Draw every visible Entity
+// Draw every visible Entity
 void RenderSystem(struct Systems* systems);
 
 // For Mecha parts other than torso
 void AttachmentSystem(struct Systems* systems);
 
+// For deleting temporary entities, like bullets or other things
+void LifetimeSystem(struct Systems* systems);
 
 // Generalist Shooting Systems: Works both for the player and for the AI
 void WeaponSystem(struct Systems* systems);

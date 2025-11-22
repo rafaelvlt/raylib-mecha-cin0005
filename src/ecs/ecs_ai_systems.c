@@ -9,7 +9,7 @@ void AIControlSystem(struct Systems* systems) {
   Vector3 targetPos = {0};
   bool playerFound = false;
 
-  const float AI_MOVE_SPEED = 5.0f;
+  const float AI_MOVE_SPEED = 2.5f;
 
   // Finds Player if they have the Player Control Component
   for (int i = 0; i < em->numEntities; i++) {
