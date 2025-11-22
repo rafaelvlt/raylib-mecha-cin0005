@@ -12,6 +12,7 @@ typedef struct  {
   PlayerControlComponent  playerControlComponents[MAX_ENTITIES];
   HealthComponent         healthComponents[MAX_ENTITIES];
   WeaponComponent         weaponComponents[MAX_ENTITIES];
+  LifetimeComponent       lifetimeComponents[MAX_ENTITIES];
   ProjectileComponent     projectileComponents[MAX_ENTITIES];
   WeaponControlComponent  weaponControlComponents[MAX_ENTITIES];
   AIControlComponent      aiControlComponents[MAX_ENTITIES];
@@ -62,9 +63,11 @@ void AddWeaponComponent
   AssetSoundID launchSoundID,  AssetModelID projectileModelID
 );
 
+void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float lifetime);
+
 void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID);
 
-void AddWeaponControlComponent(EntityManager* entityManager, Entity entity);
+void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimMode aimMode);
 
 void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range);
 

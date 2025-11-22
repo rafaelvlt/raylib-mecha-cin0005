@@ -3,6 +3,7 @@
 #include "ecs/ecs_components.h"
 #include "resource_manager.h"
 #include "systems.h"
+#include "utility.h"
 #include "ecs/ecs_systems.h"
 
 void PlayerControlSystem(struct Systems* systems) {
@@ -11,7 +12,6 @@ void PlayerControlSystem(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   InputSystem* keys = &systems->configManager.KeyMap;
 
-  const float MECH_HEIGHT   = 6.5f;  
   const float MAX_PITCH_RAD = 1.4f; 
 
   const float BOB_FREQUENCY = 0.55f;

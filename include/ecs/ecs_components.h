@@ -13,9 +13,7 @@
 typedef uint32_t Entity;
 
 
-/* ===========================
-  Components definitions
-=============================*/
+/* =========================== Components definitions =============================*/
 
 // Used for position drawn in the world
 typedef struct  {
@@ -110,7 +108,7 @@ typedef struct  {
 // Used to prevent own death
 typedef struct  {
   Entity owner;
-  float damage; // copied from weaponComponent
+  float damage; // copied from WeaponComponent
   bool destroyOnHit;
 
   //Animation
@@ -118,11 +116,17 @@ typedef struct  {
   Effect hitEffectID;
 } ProjectileComponent;
 
+typedef struct{
+  float lifetime;
+  float currentTime;
+} LifetimeComponent;
+
 // Detect which weapon to use and fire with for both player and A.I
 typedef struct {
   // Control Proprieties 
   bool triggerPulled;
   Vector3 aimDirection;
+  AimMode aimMode;
   
   //Weapon Group
   Entity weaponsSlots[MAX_WEAPONS_EQUIP];
@@ -161,11 +165,12 @@ typedef enum {
   COMPONENT_PLAYER_CONTROL = 1 << 4,
   COMPONENT_HEALTH = 1 << 5,
   COMPONENT_WEAPON = 1 << 6,
-  COMPONENT_PROJECTILE = 1 << 7,
-  COMPONENT_WEAPON_CONTROL = 1 << 8,
-  COMPONENT_AI_CONTROL = 1 << 9,
-  COMPONENT_COCKPIT_HUD = 1 << 10,
-  COMPONENT_COLLISION = 1 << 11,
+  COMPONENT_LIFETIME = 1 << 7,
+  COMPONENT_PROJECTILE = 1 << 8,
+  COMPONENT_WEAPON_CONTROL = 1 << 9,
+  COMPONENT_AI_CONTROL = 1 << 10,
+  COMPONENT_COCKPIT_HUD = 1 << 11,
+  COMPONENT_COLLISION = 1 << 12,
 } ComponentMask;
 
 #endif //ECS_COMPONENTS_H
