@@ -1,10 +1,10 @@
 #include <raylib.h>
 #include <raymath.h> 
-#include "ecs/ecs_components.h"
+#include "ecs/components.h"
 #include "resource_manager.h"
 #include "systems.h"
 #include "utility.h"
-#include "ecs/ecs_systems.h"
+#include "ecs/systems.h"
 
 void PlayerControlSystem(struct Systems* systems) {
   uint32_t mask = COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM | COMPONENT_WEAPON_CONTROL; 
@@ -34,12 +34,12 @@ void PlayerControlSystem(struct Systems* systems) {
 
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & mask) == mask) {
-      
+
       PlayerControlComponent* p = &em->playerControlComponents[i];
       PhysicsComponent* phys    = &em->physicsComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
       WeaponControlComponent* wc = &em->weaponControlComponents[i];
-      
+
 
       // Mouse Input
       Vector2 mouseDelta = GetMouseDelta();
@@ -55,7 +55,7 @@ void PlayerControlSystem(struct Systems* systems) {
       else{
         p->isZooming = false;
       }
-      
+
       // Weapons Input
 
       // Aims always on the center of the screen
@@ -124,7 +124,7 @@ void PlayerControlSystem(struct Systems* systems) {
       // Target (Direction)
       float finalPitch = p->torsoPitch - p->lean.y;
       float finalYaw   = p->torsoYaw;
-      
+
       Vector3 direction;
       direction.x = cosf(finalPitch) * sinf(finalYaw); 
       direction.y = sinf(finalPitch);
@@ -184,5 +184,5 @@ void PlayerAudioSystem(struct Systems* systems) {
       if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer;
       else p->lastHeadTimer = p->headTimer;
     }
-    }
   }
+}

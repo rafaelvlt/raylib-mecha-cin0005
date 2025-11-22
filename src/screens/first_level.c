@@ -1,8 +1,8 @@
 #include <raylib.h>
 #include <raymath.h>
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
-#include "ecs/ecs_types.h"
+#include "ecs/entitymanager.h"
+#include "ecs/systems.h"
+#include "ecs/types.h"
 #include "systems.h"
 
 static void DrawLevel(void);

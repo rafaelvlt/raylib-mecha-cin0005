@@ -3,7 +3,7 @@
 #include <raylib.h>
 #include <stdint.h>
 #include "resource_manager.h"
-#include "ecs_types.h"
+#include "types.h"
 
 // Definition for maximum array size, and typedef for UID
 #define MAX_ENTITIES 1024
@@ -173,4 +173,4 @@ typedef enum {
   COMPONENT_COLLISION = 1 << 12,
 } ComponentMask;
 
-#endif //ECS_COMPONENTS_H
+#endif //components.h

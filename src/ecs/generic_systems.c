@@ -1,11 +1,11 @@
 #include <raylib.h>
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_types.h"
+#include "ecs/components.h"
+#include "ecs/entitymanager.h"
+#include "ecs/types.h"
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "systems.h"
-#include "ecs/ecs_systems.h"
+#include "ecs/systems.h"
 #include "raymath.h" 
 #include "utility.h"
 

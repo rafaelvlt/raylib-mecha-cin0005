@@ -2,10 +2,10 @@
 #define EVENT_MANAGER_H
 
 #include <raylib.h>
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
-#include "ecs/ecs_types.h"
+#include "ecs/components.h"
+#include "ecs/entitymanager.h"
+#include "ecs/systems.h"
+#include "ecs/types.h"
 #include "state_manager.h"
 
 #define MAX_EVENTS_QUANTITY 256

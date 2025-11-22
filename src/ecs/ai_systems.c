@@ -1,5 +1,5 @@
 #include "systems.h"
-#include "ecs/ecs_entitymanager.h"
+#include "ecs/entitymanager.h"
 #include <raymath.h>
 
 
@@ -48,7 +48,7 @@ void AIControlSystem(struct Systems* systems) {
         Vector3 dir = Vector3Normalize(Vector3Subtract(targetPos, transform->position));
 
         phys->velocity = Vector3Scale(dir, AI_MOVE_SPEED);
-        
+
         // Rotates the object to look at the player
         Matrix lookAt = MatrixLookAt(Vector3Zero(), dir, (Vector3){0,1,0});
         transform->orientation = QuaternionFromMatrix(lookAt);

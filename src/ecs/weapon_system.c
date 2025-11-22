@@ -2,10 +2,10 @@
 #include <raymath.h>
 #include "utility.h"
 #include "systems.h"
-#include "ecs/ecs_types.h"
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
+#include "ecs/types.h"
+#include "ecs/components.h"
+#include "ecs/entitymanager.h"
+#include "ecs/systems.h"
 
 // Helper functions
 static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats);
@@ -15,7 +15,7 @@ static Vector3 GetCameraMuzzlePosition(Camera* camera, Vector3 localOffset);
 void WeaponSystem(struct Systems* systems){
   const uint32_t mask = COMPONENT_WEAPON_CONTROL;
   EntityManager* em = &systems->entityManager;
-  
+
   const float convergencePoint = 75.0f;
   float dt = systems->delta_time;
   for (Entity mecha = 0; mecha < em->numEntities; mecha++){
@@ -51,7 +51,7 @@ void WeaponSystem(struct Systems* systems){
             else{
               spawnPos = em->transformComponents[WeaponID].position;
             }
-            
+
 
             weapon->cooldownTimer = weapon->firingRate;
             SpawnProjectile(systems, spawnPos, shootDir, mecha, weapon);
@@ -75,26 +75,26 @@ void WeaponSystem(struct Systems* systems){
  * Calculate where the gunshot shoud leave based on camera
  * --------------------------------------- */
 static Vector3 GetCameraMuzzlePosition(Camera* camera, Vector3 localOffset) {
-    // Fixes offset to camera height
-    localOffset.y -= MECH_HEIGHT; 
-    // Get Forward facing vector(G.A B - A = line from point B to A)
-    Vector3 forward = Vector3Subtract(camera->target, camera->position);
-    forward = Vector3Normalize(forward);
-    
-    // Get right vector doing a Cross product between the up vector and forward vector
-    Vector3 right = Vector3CrossProduct(forward, (Vector3){0.0f, 1.0f, 0.0f});
-    right = Vector3Normalize(right);
-    
-    // Garantee that the up vector is really pointing up to the camera(in case the camera is leaning)
-    Vector3 up = Vector3CrossProduct(right, forward);
-    
-    // Position = Camera + (right * offX) + (up * OffY) + (forward * OffZ)
-    Vector3 spawnPos = camera->position;
-    spawnPos = Vector3Add(spawnPos, Vector3Scale(right, localOffset.x));
-    spawnPos = Vector3Add(spawnPos, Vector3Scale(up, localOffset.y));
-    spawnPos = Vector3Add(spawnPos, Vector3Scale(forward, localOffset.z));
+  // Fixes offset to camera height
+  localOffset.y -= MECH_HEIGHT; 
+  // Get Forward facing vector(G.A B - A = line from point B to A)
+  Vector3 forward = Vector3Subtract(camera->target, camera->position);
+  forward = Vector3Normalize(forward);
 
-    return spawnPos;
+  // Get right vector doing a Cross product between the up vector and forward vector
+  Vector3 right = Vector3CrossProduct(forward, (Vector3){0.0f, 1.0f, 0.0f});
+  right = Vector3Normalize(right);
+
+  // Garantee that the up vector is really pointing up to the camera(in case the camera is leaning)
+  Vector3 up = Vector3CrossProduct(right, forward);
+
+  // Position = Camera + (right * offX) + (up * OffY) + (forward * OffZ)
+  Vector3 spawnPos = camera->position;
+  spawnPos = Vector3Add(spawnPos, Vector3Scale(right, localOffset.x));
+  spawnPos = Vector3Add(spawnPos, Vector3Scale(up, localOffset.y));
+  spawnPos = Vector3Add(spawnPos, Vector3Scale(forward, localOffset.z));
+
+  return spawnPos;
 }
 
 /* -------------------------------------
@@ -104,7 +104,7 @@ static Vector3 GetCameraMuzzlePosition(Camera* camera, Vector3 localOffset) {
 static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats) {
   EntityManager* em = &systems->entityManager;
   ResourceManager* rm = &systems->resourceManager;
-  
+
   Entity bullet = CreateEntity(em);
   if (bullet >= MAX_ENTITIES) return;
 
@@ -124,14 +124,14 @@ static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 d
   }
   // No air drag for the bullets
   AddPhysicsComponent(em, bullet, velocity, 0.0f);
-  
+
   // Hitbox
   BoundingBox box = (BoundingBox){(Vector3){-0.2f, -0.2f, -0.2f}, (Vector3){0.2f, 0.2f, 0.2f}};
   AddCollisionComponent(em, bullet, box, false, true);
 
   //Projectile behaviour
   AddProjectileComponent(em, bullet, owner, stats->projectileDamage, true, 0.0f, (Effect)0);
-  
+
   // Gets model for visuals
   Model* bulletModel = GetModel(rm, stats->projectileModelID);
   AddRenderComponent(em, bullet, bulletModel, RED);

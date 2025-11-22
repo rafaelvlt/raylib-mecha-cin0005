@@ -1,8 +1,8 @@
 #include <raylib.h>
 #include <raymath.h>
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_types.h"
+#include "ecs/entitymanager.h"
+#include "ecs/components.h"
+#include "ecs/types.h"
 #include <string.h>
 
 
@@ -18,7 +18,7 @@ Entity CreateEntity(EntityManager* em) {
 
     if (em->componentMasks[i] == COMPONENT_NONE) {
       // increases numEntities if the new ID is higher than the largest being used
-     if (i >= em->numEntities) {
+      if (i >= em->numEntities) {
         em->numEntities = i + 1;
       }
 
@@ -141,7 +141,7 @@ void AddWeaponComponent
  AssetSoundID launchSoundID,  AssetModelID projectileModelID
  ) {
   WeaponComponent* weapon = &entityManager->weaponComponents[entity];
-  
+
   weapon->type = type;
   weapon->firingRate = firingRate;
   weapon->projectileSpeed = projectileSpeed;
@@ -159,7 +159,7 @@ void AddWeaponComponent
 
 void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float lifetime){
   LifetimeComponent* lt = &entityManager->lifetimeComponents[entity];
-  
+
   lt->lifetime = lifetime;
   lt->currentTime = 0.00f;
 
