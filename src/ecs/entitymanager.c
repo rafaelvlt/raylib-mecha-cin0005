@@ -16,6 +16,7 @@ Entity CreateEntity(EntityManager* em) {
 
   for (int i = 0; i < MAX_ENTITIES; i++) {
 
+    // Find the first available spot by checking for a none bitmask
     if (em->componentMasks[i] == COMPONENT_NONE) {
       // increases numEntities if the new ID is higher than the largest being used
       if (i >= em->numEntities) {
@@ -223,3 +224,30 @@ void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float m
   entityManager->componentMasks[entity] |= COMPONENT_COCKPIT_HUD;
 }
 
+
+void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityManager, Vector3 position){
+
+  Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT);
+
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
+
+        Entity scout = CreateEntity(entityManager);
+
+        AddTransformComponent(entityManager, scout, position);
+        AddPhysicsComponent(entityManager, scout, (Vector3){0,0,0}, 0.90f);
+
+        BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+        AddCollisionComponent(entityManager, scout, enemyBox, false, false);
+
+        AddHealthComponent(entityManager, scout, 100.0f);
+        AddAIControlComponent(entityManager, scout, 50.0f, 10.0f);
+
+        AddRenderComponent(entityManager, scout, enemyModel, WHITE);
+    }
+}
+
+void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position){
+
+}
