@@ -30,6 +30,7 @@ void AIControlSystem(struct Systems* systems) {
       AIControlComponent* ai = &em->aiControlComponents[e];
       TransformComponent* transform = &em->transformComponents[e];
       PhysicsComponent* phys = &em->physicsComponents[e];
+      WeaponControlComponent* wc = &em->weaponControlComponents[e];
 
 
       float dist = Vector3Distance(transform->position, targetPos);
@@ -83,6 +84,9 @@ void AIControlSystem(struct Systems* systems) {
       case 2: // Attack
         // Lógica de ataque já implementada abaixo
         phys->velocity = Vector3Zero();
+        // Aqui você pode adicionar lógica de ataque, como disparar armas, etc.
+        wc->triggerPulled = true;
+        wc->aimDirection = Vector3Normalize(Vector3Subtract(targetPos, transform->position));
         break;
       default:
         // Idle - Garante que ele pare se o player fugir

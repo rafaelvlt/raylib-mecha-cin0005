@@ -275,6 +275,9 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
         AddAIControlComponent(entityManager, scout, 50.0f, 10.0f, scoutPoints, numPoints);
 
         AddRenderComponent(entityManager, scout, enemyModel, WHITE);
+
+        AddWeaponComponent(entityManager, scout, WEAPON_PULSE_LASER, 0.5f, 150.0f, 10.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+        AddWeaponControlComponent(entityManager, scout, AIM_MODE_PHYSICAL);
     }
 }
 
@@ -298,5 +301,8 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
         AddAIControlComponent(entityManager, combatent, 60.0f, 15.0f, NULL, 0); // No patrol points for combatent
 
         AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
+
+        AddWeaponComponent(entityManager, combatent, WEAPON_LASER_BEAM, 0.3f, 200.0f, 15.0f, 600.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+        AddWeaponControlComponent(entityManager, combatent, AIM_MODE_PHYSICAL);
     }
 }
