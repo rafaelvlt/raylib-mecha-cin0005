@@ -38,7 +38,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     
     AddTransformComponent(&systems->entityManager, weaponLeft, Vector3Zero());
     AddAttachmentComponent(&systems->entityManager, weaponLeft, player, offsetL, QuaternionIdentity());
-    AddWeaponComponent(&systems->entityManager, weaponLeft, WEAPON_PULSE_LASER, 0.5f, 100.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+    AddWeaponComponent(&systems->entityManager, weaponLeft, WEAPON_PULSE_LASER, 0.5f, 150.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
     // --- Right Weapon ---
     Entity weaponRight = CreateEntity(&systems->entityManager);
@@ -46,7 +46,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
     AddTransformComponent(&systems->entityManager, weaponRight, Vector3Zero());
     AddAttachmentComponent(&systems->entityManager, weaponRight, player, offsetR, QuaternionIdentity());
-    AddWeaponComponent(&systems->entityManager, weaponRight, WEAPON_PULSE_LASER, 0.5f, 100.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+    AddWeaponComponent(&systems->entityManager, weaponRight, WEAPON_PULSE_LASER, 0.5f, 150.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
     // ---------------------------------------------------------
     // Weapon Control System (Loadout)
