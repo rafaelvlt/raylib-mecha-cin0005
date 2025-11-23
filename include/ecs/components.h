@@ -55,6 +55,7 @@ typedef struct {
   float mouseSensitivity;
   // Movement
   float maxSpeed;
+  float legAngle;
   float turnSpeed;
   float throttle;       
   float turnState;      
@@ -113,6 +114,7 @@ typedef struct  {
 
   //Animation
   float blastRadius;
+  WeaponType type;
   Effect hitEffectID;
 } ProjectileComponent;
 
@@ -152,6 +154,16 @@ typedef struct  {
   float cooldownRate;
 } CockpitHUDComponent;
 
+typedef struct {
+  float startSize; 
+  float endSize;   
+  Color color;
+  AssetTextureID textureID; // If textureID = 0, procedural 
+  int columns;
+  int rows;
+  int totalFrames;
+} EffectComponent;
+
 /* =======================================
   Bitmask for querying by the systems
 ==========================================*/ 
@@ -171,6 +183,7 @@ typedef enum {
   COMPONENT_AI_CONTROL = 1 << 10,
   COMPONENT_COCKPIT_HUD = 1 << 11,
   COMPONENT_COLLISION = 1 << 12,
+  COMPONENT_EFFECT = 1 << 13,
 } ComponentMask;
 
 #endif //components.h

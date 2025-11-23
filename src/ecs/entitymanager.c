@@ -3,6 +3,7 @@
 #include "ecs/entitymanager.h"
 #include "ecs/components.h"
 #include "ecs/types.h"
+#include "resource_manager.h"
 #include <string.h>
 
 
@@ -98,16 +99,18 @@ void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity 
   entityManager->componentMasks[entity] |= COMPONENT_ATTACHMENT;
 }
 
-void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity, float maxSpeed, float turnSpeed) {
+void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera) {
   PlayerControlComponent* player = &entityManager->playerControlComponents[entity];
-
   // Camera configuration 
   player->camera = camera;
-  player->mouseSensitivity = sensitivity;
-  player->maxSpeed = maxSpeed;
-  player->turnSpeed = turnSpeed;
+
+
+  player->mouseSensitivity = 0.001f;
+  player->maxSpeed = 15.0f;
+  player->turnSpeed = 1.5f;
 
   // Zero-init the rest
+  player->legAngle = 0.0f;
   player->throttle = 0.0f;
   player->turnState = 0.0f;
 
@@ -161,12 +164,12 @@ void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float li
   LifetimeComponent* lt = &entityManager->lifetimeComponents[entity];
 
   lt->lifetime = lifetime;
-  lt->currentTime = 0.00f;
+  lt->currentTime = lifetime;
 
   entityManager->componentMasks[entity] |= COMPONENT_LIFETIME;
 }
 
-void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID) {
+void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID, WeaponType type){
   ProjectileComponent* projectile = &entityManager->projectileComponents[entity];
 
   projectile->owner = owner;
@@ -223,3 +226,22 @@ void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float m
   entityManager->componentMasks[entity] |= COMPONENT_COCKPIT_HUD;
 }
 
+void AddEffectComponent(EntityManager* em, Entity entity, float startSize, float endSize, Color color, AssetTextureID texID, int cols, int rows) {
+  EffectComponent* fx = &em->effectComponents[entity];
+
+  fx->startSize = startSize;
+  fx->endSize = endSize;
+  fx->color = color;
+
+  fx->textureID = texID;
+  fx->columns = cols;
+  fx->rows = rows;
+
+  if (texID != TEXTURE_ID_COUNT && cols > 0 && rows > 0) {
+    fx->totalFrames = cols * rows;
+  } else {
+    fx->totalFrames = 0;
+  }
+
+  em->componentMasks[entity] |= COMPONENT_EFFECT;
+}
