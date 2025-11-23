@@ -69,6 +69,8 @@ typedef struct {
   bool isMoving;
   bool isRotating; 
   bool isZooming;
+  bool centeringTorsotoLegs;
+  bool centeringLegstoTorso;
   bool lockTargetRequested;
 
   // Camera Animation 

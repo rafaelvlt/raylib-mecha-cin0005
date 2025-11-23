@@ -121,7 +121,11 @@ void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Came
   player->walkLerp = 0.0f;
   player->headLerp = 0.0f;
   player->lean = (Vector2){0};
-
+  
+  player->centeringLegstoTorso = false;
+  player->centeringTorsotoLegs = false;
+  player->isMoving = false;
+  player->isRotating = false;
   player->isZooming = false;
   player->lockTargetRequested = false;
 
