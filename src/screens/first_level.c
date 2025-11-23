@@ -93,8 +93,8 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     Vector3 scoutPoints2[2] = { {15.0f,0.0f,80.0f}, {-15.0f,0.0f,80.0f} }; //line patrol
 
     // Creating multiple scouts with patrol points
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints1[0], &scoutPoints1, 4);
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints2[0], &scoutPoints2, 2);
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints1[0], scoutPoints1, 4);
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints2[0], scoutPoints2, 2);
     
     createEnemyCombatent(&systems->resourceManager,&systems->entityManager, (Vector3){ 0.0f, 0.0f, 50.0f });
 
