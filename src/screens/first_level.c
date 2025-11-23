@@ -7,7 +7,41 @@
 #include "resource_manager.h"
 #include "systems.h"
 
+// -------------------------------------------
+// TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
+// -------------------------------------------
 static void DrawLevel(void);
+
+// -------------------------------------------
+// TEMPORARY FUNCTION ONLY FOR DEBUGGING 
+// -------------------------------------------
+static void DrawTargetDebug(struct Systems* systems) {
+  EntityManager* em = &systems->entityManager;
+
+  for (int i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & (COMPONENT_PLAYER_CONTROL | COMPONENT_WEAPON_CONTROL)) == 
+      (COMPONENT_PLAYER_CONTROL | COMPONENT_WEAPON_CONTROL)) {
+
+      WeaponControlComponent* wc = &em->weaponControlComponents[i];
+      Entity target = wc->lockedTarget;
+      if (target < MAX_ENTITIES && (em->componentMasks[target] & (COMPONENT_TRANSFORM | COMPONENT_COLLISION))) {
+
+        TransformComponent* tTarget = &em->transformComponents[target];
+        CollisionComponent* cTarget = &em->collisionComponents[target];
+
+        BoundingBox worldBox;
+        worldBox.min = Vector3Add(cTarget->hitbox.min, tTarget->position);
+        worldBox.max = Vector3Add(cTarget->hitbox.max, tTarget->position);
+
+        DrawBoundingBox(worldBox, GREEN);
+
+        Vector3 center = Vector3Scale(Vector3Add(worldBox.min, worldBox.max), 0.5f);
+        DrawLine3D(center, Vector3Add(center, (Vector3){0, 20, 0}), GREEN);
+
+      }
+    }
+  }
+}
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
@@ -107,7 +141,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     data->camera.fovy = 60.0f;
     data->camera.projection = CAMERA_PERSPECTIVE;
 
-    DisableCursor(); 
+  DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -139,8 +173,9 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   BeginMode3D(data->camera);
   DrawLevel();         
-  EffectSystem(systems, &data->camera);
   RenderSystem(systems);  
+  DrawTargetDebug(systems);
+  EffectSystem(systems, &data->camera);
   EndMode3D();
 
 

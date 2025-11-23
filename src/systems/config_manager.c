@@ -59,7 +59,7 @@ static void SetDefaultConfig(struct Systems* systems){
   systems->configManager.KeyMap.KeyCenterLegsToTorso = KEY_F; // 70
   systems->configManager.KeyMap.KeyShoot = MOUSE_BUTTON_LEFT;  // 0
   systems->configManager.KeyMap.KeyZoom  = MOUSE_BUTTON_RIGHT; // 1
-  systems->configManager.KeyMap.KeyLockTarget = KEY_R;         // 82
+  systems->configManager.KeyMap.KeyLockTarget = KEY_TAB;         // 82
   systems->configManager.KeyMap.KeyWeaponGroups[0] = KEY_ONE;   // 49
   systems->configManager.KeyMap.KeyWeaponGroups[1] = KEY_TWO;   // 50
   systems->configManager.KeyMap.KeyWeaponGroups[2] = KEY_THREE; // 51

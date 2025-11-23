@@ -192,6 +192,7 @@ void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimM
   wControl->triggerPulled = false;
   wControl->aimDirection = Vector3Zero();
   wControl->aimMode = aimMode;
+  wControl->lockedTarget = MAX_ENTITIES;
 
   for (int i = 0; i < MAX_WEAPONS_EQUIP; i++){
     wControl->weaponsSlots[i] = MAX_ENTITIES;

@@ -14,11 +14,13 @@
 #define VELOCITY_LERP_SPEED  2.0f
 // Centering
 #define CENTERING_TORSO_LEGS_SPEED 5.0f
-#define CENTERING_LEGS_TORSO_SPEED 5.0f
+#define CENTERING_LEGS_TORSO_SPEED 4.0f
 // Zoom
 #define ZOOM_FOV              20.0f
 #define DEFAULT_FOV           60.0f
 #define ZOOM_SPEED            10.0f
+// Lock
+#define MAX_LOCK_DISTANCE     1000.0f * 1000.0f
 // Animation
 #define MECH_HEIGHT     6.5f  
 #define BOB_FREQUENCY   1.10f
@@ -27,6 +29,82 @@
 #define LEAN_TURN       -0.06f
 #define LEAN_MOUSE      0.005f
 #define LEAN_MOVE       0.02f  
+
+// Input function
+static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* p, WeaponControlComponent* wc, float dt);
+
+static void UpdatePlayerPhysics(PlayerControlComponent* p, TransformComponent* trans, PhysicsComponent* phys, float dt);
+
+static void UpdateCockpitCamera(PlayerControlComponent* p, TransformComponent* trans, WeaponControlComponent* wc, float dt);
+
+// Target Lock functions
+static void UpdateTargetLock(struct Systems* systems, PlayerControlComponent* p, WeaponControlComponent* wc);
+static bool GetTargetInfo(EntityManager* em, Entity target, Vector3 myPos, Vector3 myAim, float* outDistSq, float* outDot);
+
+void PlayerControlSystem(struct Systems* systems) {
+  uint32_t mask = COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM | COMPONENT_WEAPON_CONTROL; 
+
+  EntityManager* em = &systems->entityManager;
+
+  float dt = systems->delta_time;
+
+  for (Entity i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & mask) == mask) {
+
+      PlayerControlComponent* p = &em->playerControlComponents[i];
+      PhysicsComponent* phys    = &em->physicsComponents[i];
+      TransformComponent* trans = &em->transformComponents[i];
+      WeaponControlComponent* wc = &em->weaponControlComponents[i];
+
+      ProcessPlayerInput(systems, p, wc, dt);
+
+      UpdatePlayerPhysics(p, trans, phys, dt);
+
+      UpdateCockpitCamera(p, trans, wc, dt);
+    }
+  }
+}  
+
+
+void PlayerAudioSystem(struct Systems* systems) {
+  uint32_t mask = COMPONENT_PLAYER_CONTROL;
+
+  EntityManager* em = &systems->entityManager;
+
+  Sound sfxFootstep  = systems->resourceManager.sounds[SOUND_ID_MECHA_FOOTSTEP];
+
+  for (Entity i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & mask) == mask) {
+
+      PlayerControlComponent* p = &em->playerControlComponents[i];
+
+      // Maintaining a diff between currentstep and laststep helps select when to replay the sound
+      float currentStep = p->headTimer * 1.0f; 
+      float lastStep    = p->lastHeadTimer * 1.0f;
+
+      // If the current step goes into the ground, play the sound
+      if ((int)currentStep > (int)lastStep) {
+
+        // Volume goes with the velocity
+        float intensity = fabs(p->throttle); 
+
+        if (p->isMoving) {
+          float stepVolume = 0.3f + (intensity * 0.7f); 
+          SetSoundVolume(sfxFootstep, stepVolume * systems->configManager.audioVolume);
+
+          // Randomized pitch for variance in sound
+          float pitchVar = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
+          SetSoundPitch(sfxFootstep, pitchVar);
+
+          PlaySound(sfxFootstep);
+        }
+      }
+
+      // Updates timer variables
+      if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer; else p->lastHeadTimer = p->headTimer;
+    }
+  }
+}
 
 static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* p, WeaponControlComponent* wc, float dt) {
   InputSystem* keys = &systems->configManager.KeyMap;
@@ -60,9 +138,9 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
 
     // If close enough, makes it zero and turns off flag  
     if (fabs(p->torsoYaw) < 0.01f && fabs(p->torsoPitch) < 0.01f) {
-        p->torsoYaw = 0.0f;
-        p->torsoPitch = 0.0f;
-        p->centeringTorsotoLegs = false;
+      p->torsoYaw = 0.0f;
+      p->torsoPitch = 0.0f;
+      p->centeringTorsotoLegs = false;
     }
 
     // QOL: If the player tries to move alot during the centering, cancels it
@@ -81,11 +159,15 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
   p->camera->fovy = Lerp(p->camera->fovy, targetFOV, ZOOM_SPEED * dt);
 
   // Weapons input
-  wc->triggerPulled = IsMouseButtonDown(keys->KeyShoot);
 
+  wc->triggerPulled = IsMouseButtonDown(keys->KeyShoot);
+  // Weapon Groups
   for (int group = 0; group < MAX_WEAPONS_GROUPS; group++){
     if(IsKeyPressed(keys->KeyWeaponGroups[group])) wc->activeGroup[group] = !wc->activeGroup[group];
   }
+
+  // Target Lock
+  UpdateTargetLock(systems, p, wc);
 
   // Flags
   p->isMoving = (fabs(p->throttle) > 0.01f);
@@ -168,69 +250,76 @@ static void UpdateCockpitCamera(PlayerControlComponent* p, TransformComponent* t
   wc->aimDirection = direction;
 }
 
-
-void PlayerControlSystem(struct Systems* systems) {
-  uint32_t mask = COMPONENT_PLAYER_CONTROL | COMPONENT_PHYSICS | COMPONENT_TRANSFORM | COMPONENT_WEAPON_CONTROL; 
-
+static void UpdateTargetLock(struct Systems* systems, PlayerControlComponent* p, WeaponControlComponent* wc) {
   EntityManager* em = &systems->entityManager;
+  InputSystem* keys = &systems->configManager.KeyMap;
 
-  float dt = systems->delta_time;
+  Vector3 myPos = p->camera->position;
+  Vector3 aimDir = wc->aimDirection;
+  float distSq, dot;
 
-  for (Entity i = 0; i < em->numEntities; i++) {
-    if ((em->componentMasks[i] & mask) == mask) {
-
-      PlayerControlComponent* p = &em->playerControlComponents[i];
-      PhysicsComponent* phys    = &em->physicsComponents[i];
-      TransformComponent* trans = &em->transformComponents[i];
-      WeaponControlComponent* wc = &em->weaponControlComponents[i];
-
-      ProcessPlayerInput(systems, p, wc, dt);
-
-      UpdatePlayerPhysics(p, trans, phys, dt);
-
-      UpdateCockpitCamera(p, trans, wc, dt);
+  // Unlock logic, checks every frame
+  if (wc->lockedTarget != MAX_ENTITIES) {
+    bool keepLock = false;
+    // Checks if the target is valid
+    if (em->componentMasks[wc->lockedTarget] != COMPONENT_NONE && GetTargetInfo(em, wc->lockedTarget, myPos, aimDir, &distSq, &dot)) {
+      // Checks if it's in the lock range, and if it's in 180 degree forward cone
+      if (distSq <= MAX_LOCK_DISTANCE && dot >= 0.0f) {
+        keepLock = true;
+      }
+    }
+    if (!keepLock) {
+      wc->lockedTarget = MAX_ENTITIES; // Destrava
     }
   }
-}  
 
+  // Lock target logic, checks only on key pressed
+  if (IsKeyPressed(keys->KeyLockTarget)) {
+    float bestDot = -1.0f;
+    Entity bestTarget = MAX_ENTITIES;
+    Entity currentTarget = wc->lockedTarget;
 
-void PlayerAudioSystem(struct Systems* systems) {
-  uint32_t mask = COMPONENT_PLAYER_CONTROL;
+    for (Entity i = 0; i < em->numEntities; i++) {
+      if (!(em->componentMasks[i] & COMPONENT_AI_CONTROL)) ;
+      else {
+        GetTargetInfo(em, i, myPos, aimDir, &distSq, &dot);
+        if (distSq <= MAX_LOCK_DISTANCE && dot > 0.5f) {
+          // Cycle logic, penalizes the dot of the current target to cycle to the next
+          if (i == currentTarget) dot -= 2.0f;
 
-  EntityManager* em = &systems->entityManager;
-
-  Sound sfxFootstep  = systems->resourceManager.sounds[SOUND_ID_MECHA_FOOTSTEP];
-
-  for (Entity i = 0; i < em->numEntities; i++) {
-    if ((em->componentMasks[i] & mask) == mask) {
-
-      PlayerControlComponent* p = &em->playerControlComponents[i];
-
-      // Maintaining a diff between currentstep and laststep helps select when to replay the sound
-      float currentStep = p->headTimer * 1.0f; 
-      float lastStep    = p->lastHeadTimer * 1.0f;
-
-      // If the current step goes into the ground, play the sound
-      if ((int)currentStep > (int)lastStep) {
-
-        // Volume goes with the velocity
-        float intensity = fabs(p->throttle); 
-
-        if (p->isMoving) {
-          float stepVolume = 0.3f + (intensity * 0.7f); 
-          SetSoundVolume(sfxFootstep, stepVolume * systems->configManager.audioVolume);
-
-          // Randomized pitch for variance in sound
-          float pitchVar = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
-          SetSoundPitch(sfxFootstep, pitchVar);
-
-          PlaySound(sfxFootstep);
+          if (dot > bestDot) {
+            bestDot = dot;
+            bestTarget = i;
+          }
         }
       }
-
-      // Updates timer variables
-      if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer;
-      else p->lastHeadTimer = p->headTimer;
+    }
+    // Locks into new target if he's found
+    if (bestTarget != MAX_ENTITIES) {
+      wc->lockedTarget = bestTarget;
+    } else {
+      wc->lockedTarget = MAX_ENTITIES;
     }
   }
+}
+
+// Only returns true if he's valid
+static bool GetTargetInfo(EntityManager* em, Entity target, Vector3 myPos, Vector3 myAim, float* outDistSq, float* outDot) {
+
+  // Mask Validation
+  uint32_t reqMask = COMPONENT_TRANSFORM | COMPONENT_COLLISION;
+  if ((em->componentMasks[target] & reqMask) != reqMask) return false;
+
+  // Position
+  Vector3 targetPos = em->transformComponents[target].position;
+
+  // Distance
+  Vector3 toTarget = Vector3Subtract(targetPos, myPos);
+  *outDistSq = Vector3LengthSqr(toTarget);
+
+  // Dot Product (Angle)
+  Vector3 dirToTarget = Vector3Normalize(toTarget);
+  *outDot = Vector3DotProduct(myAim, dirToTarget); 
+
+  return true;
 }
