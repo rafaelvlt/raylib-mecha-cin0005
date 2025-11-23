@@ -3,13 +3,17 @@
 
 struct Systems;
 
-
+#include <raylib.h>
 
 // Updates every position applying physics
 void MovementSystem(struct Systems* systems);
 
 // Draw every visible Entity
 void RenderSystem(struct Systems* systems);
+void EffectSystem(struct Systems* systems, Camera* camera);
+
+// Deals with all types of collisions
+void CollisionSystem(struct Systems* systems);
 
 // For Mecha parts other than torso
 void AttachmentSystem(struct Systems* systems);

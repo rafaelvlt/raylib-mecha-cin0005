@@ -24,6 +24,7 @@ typedef enum {
     MODEL_ID_MENU = 0,
     MODEL_ID_ENEMY_SCOUT,
     MODEL_ID_PROJECTILE_PULSE_LASER,
+    MODEL_ID_DUMMY,
     MODEL_ID_COUNT
 } AssetModelID;
 
@@ -44,8 +45,19 @@ typedef enum {
   SOUND_ID_MECHA_FOOTSTEP = 0,
   SOUND_ID_MECHA_ROTATING,
   SOUND_ID_PULSE_LASER_FIRING,
+  SOUND_ID_PULSE_LASER_IMPACT,
   SOUND_ID_COUNT
 } AssetSoundID;
+
+typedef enum{
+  EFFECT_ID_EXPLOSION,
+  EFFECT_ID_COUNT
+} AssetEffectID;
+
+typedef enum{
+  TEXTURE_ID_EXPLOSION_SPRITESHEET = 0,
+  TEXTURE_ID_COUNT 
+} AssetTextureID;
 
 typedef enum {
     RENDERTEXTURE_ID_SPLITSCREEN_MENU = 0,
@@ -60,6 +72,7 @@ typedef struct ResourceManager {
     Font  fonts[FONT_ID_COUNT];
     Music musics[MUSIC_ID_COUNT];
     Sound sounds[SOUND_ID_COUNT];
+    Texture textures[TEXTURE_ID_COUNT];
     RenderTexture renderTextures[RENDERTEXTURE_ID_COUNT];
 } ResourceManager;
 
@@ -70,6 +83,7 @@ Model* GetModel(ResourceManager* resourceManager, AssetModelID id);
 Font* GetFont(ResourceManager* resourceManager, AssetFontID id);
 Music* GetMusic(ResourceManager* resourceManager, AssetMusicID id);
 Sound* GetSound(ResourceManager* resourceManager, AssetSoundID id);
+Texture* GetTexture(ResourceManager* resourceManager, AssetTextureID id);
 RenderTexture* GetRenderTexture(ResourceManager* resourceManager, AssetRenderTextureID id);
 
 #endif

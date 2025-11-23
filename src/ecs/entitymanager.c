@@ -3,6 +3,7 @@
 #include "ecs/entitymanager.h"
 #include "ecs/components.h"
 #include "ecs/types.h"
+#include "resource_manager.h"
 #include <string.h>
 
 
@@ -99,16 +100,18 @@ void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity 
   entityManager->componentMasks[entity] |= COMPONENT_ATTACHMENT;
 }
 
-void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity, float maxSpeed, float turnSpeed) {
+void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera) {
   PlayerControlComponent* player = &entityManager->playerControlComponents[entity];
-
   // Camera configuration 
   player->camera = camera;
-  player->mouseSensitivity = sensitivity;
-  player->maxSpeed = maxSpeed;
-  player->turnSpeed = turnSpeed;
+
+
+  player->mouseSensitivity = 0.001f;
+  player->maxSpeed = 15.0f;
+  player->turnSpeed = 1.5f;
 
   // Zero-init the rest
+  player->legAngle = 0.0f;
   player->throttle = 0.0f;
   player->turnState = 0.0f;
 
@@ -119,7 +122,11 @@ void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Came
   player->walkLerp = 0.0f;
   player->headLerp = 0.0f;
   player->lean = (Vector2){0};
-
+  
+  player->centeringLegstoTorso = false;
+  player->centeringTorsotoLegs = false;
+  player->isMoving = false;
+  player->isRotating = false;
   player->isZooming = false;
   player->lockTargetRequested = false;
 
@@ -162,12 +169,12 @@ void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float li
   LifetimeComponent* lt = &entityManager->lifetimeComponents[entity];
 
   lt->lifetime = lifetime;
-  lt->currentTime = 0.00f;
+  lt->currentTime = lifetime;
 
   entityManager->componentMasks[entity] |= COMPONENT_LIFETIME;
 }
 
-void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID) {
+void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID, WeaponType type){
   ProjectileComponent* projectile = &entityManager->projectileComponents[entity];
 
   projectile->owner = owner;
@@ -226,6 +233,25 @@ void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float m
   entityManager->componentMasks[entity] |= COMPONENT_COCKPIT_HUD;
 }
 
+void AddEffectComponent(EntityManager* em, Entity entity, float startSize, float endSize, Color color, AssetTextureID texID, int cols, int rows) {
+  EffectComponent* fx = &em->effectComponents[entity];
+
+  fx->startSize = startSize;
+  fx->endSize = endSize;
+  fx->color = color;
+
+  fx->textureID = texID;
+  fx->columns = cols;
+  fx->rows = rows;
+
+  if (texID != TEXTURE_ID_COUNT && cols > 0 && rows > 0) {
+    fx->totalFrames = cols * rows;
+  } else {
+    fx->totalFrames = 0;
+  }
+
+  em->componentMasks[entity] |= COMPONENT_EFFECT;
+}
 
 void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints){
 
@@ -240,7 +266,7 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
         AddTransformComponent(entityManager, scout, position);
         AddPhysicsComponent(entityManager, scout, (Vector3){0,0,0}, 0.90f);
 
-        BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+        BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
         AddCollisionComponent(entityManager, scout, enemyBox, false, false);
 
         AddHealthComponent(entityManager, scout, 100.0f);
@@ -263,7 +289,7 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
         AddTransformComponent(entityManager, combatent, position);
         AddPhysicsComponent(entityManager, combatent, (Vector3){0,0,0}, 0.90f);
 
-        BoundingBox enemyBox = { (Vector3){ -2.0f, 0.0f, -2.0f }, (Vector3){ 2.0f, 6.0f, 2.0f } };
+        BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
         AddCollisionComponent(entityManager, combatent, enemyBox, false, false);
 
         AddHealthComponent(entityManager, combatent, 150.0f);

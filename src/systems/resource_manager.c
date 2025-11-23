@@ -1,6 +1,5 @@
 #include "resource_manager.h"
 #include <raylib.h>
-#include <stdlib.h>
 #include "systems.h"
 #include "utility.h"
 
@@ -23,12 +22,14 @@ void InitResourceManager(ResourceManager* resourceManager) {
 
   //Projectiles
   //Pulse Laser 
-  Mesh pulseLaserGunProjectileMesh = GenMeshCube(0.01f, 0.01f, 2.0f);
+  Mesh pulseLaserGunProjectileMesh = GenMeshCube(0.025f, 0.025f, 3.0f);
   resourceManager->models[MODEL_ID_PROJECTILE_PULSE_LASER] = LoadModelFromMesh(pulseLaserGunProjectileMesh);
   // Lighting up
   resourceManager->models[MODEL_ID_PROJECTILE_PULSE_LASER].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
-
+  // Dummy
+  Mesh cubmesh = GenMeshCube(3.0f, 3.0f, 3.0f);
+  resourceManager->models[MODEL_ID_DUMMY] =  LoadModelFromMesh(cubmesh); 
   // ---------------------------------------------------------
   // FONTS 
   // ---------------------------------------------------------
@@ -42,11 +43,17 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->sounds[SOUND_ID_MECHA_FOOTSTEP] = LoadSound("resources/sounds/mecha_footstep.wav");
 
   resourceManager->sounds[SOUND_ID_PULSE_LASER_FIRING] = LoadSound("resources/sounds/pulse_laser_firing.wav");
+  resourceManager->sounds[SOUND_ID_PULSE_LASER_IMPACT] = LoadSound("resources/sounds/pulse_laser_impact.wav");
   // ---------------------------------------------------------
   // MUSIC 
   // ---------------------------------------------------------
   resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
 
+  // ---------------------------------------------------------
+  // TEXTURES 
+  // ---------------------------------------------------------
+  resourceManager->textures[TEXTURE_ID_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/explosion.png");
+  
   // ---------------------------------------------------------
   // RENDER TEXTURES 
   // ---------------------------------------------------------
@@ -64,6 +71,12 @@ void ShutdownResourceManager(ResourceManager* resourceManager) {
   }
   for(int i = 0; i < MUSIC_ID_COUNT; i++){
     UnloadMusicStream(resourceManager->musics[i]);
+  }
+  for (int i = 0; i < SOUND_ID_COUNT; i++){
+    UnloadSound(resourceManager->sounds[i]);
+  }
+  for (int i = 0; i < TEXTURE_ID_COUNT; i++){
+    UnloadTexture(resourceManager->textures[i]);
   }
   for(int i = 0; i < RENDERTEXTURE_ID_COUNT; i++){
     UnloadRenderTexture(resourceManager->renderTextures[i]);
@@ -101,6 +114,14 @@ Music* GetMusic(ResourceManager* resourceManager, AssetMusicID id) {
     return &resourceManager->musics[id];
   }
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Music access");
+  return NULL;
+}
+
+Texture* GetTexture(ResourceManager* resourceManager, AssetTextureID id){
+  if (id < TEXTURE_ID_COUNT) {
+    return &resourceManager->textures[id];
+  }
+  TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Texture access");
   return NULL;
 }
 
