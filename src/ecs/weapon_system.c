@@ -7,6 +7,8 @@
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 
+#define CONVERGENCE_POINT 75.0f
+
 // Helper functions
 static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats);
 static Vector3 GetCameraMuzzlePosition(Camera* camera, Vector3 localOffset);
@@ -16,7 +18,6 @@ void WeaponSystem(struct Systems* systems){
   const uint32_t mask = COMPONENT_WEAPON_CONTROL;
   EntityManager* em = &systems->entityManager;
 
-  const float convergencePoint = 75.0f;
   float dt = systems->delta_time;
   for (Entity mecha = 0; mecha < em->numEntities; mecha++){
     if((em->componentMasks[mecha] & mask) == mask){
@@ -45,7 +46,7 @@ void WeaponSystem(struct Systems* systems){
               Vector3 offset = em->attachmentComponents[WeaponID].offsetPosition;
 
               spawnPos = GetCameraMuzzlePosition(pc->camera, offset);
-              Vector3 aimPoint = Vector3Add(pc->camera->position, Vector3Scale(wc->aimDirection, convergencePoint));
+              Vector3 aimPoint = Vector3Add(pc->camera->position, Vector3Scale(wc->aimDirection, CONVERGENCE_POINT));
               shootDir = Vector3Normalize(Vector3Subtract(aimPoint, spawnPos));
             }
             else{

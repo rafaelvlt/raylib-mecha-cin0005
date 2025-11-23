@@ -131,6 +131,7 @@ typedef struct {
   bool triggerPulled;
   Vector3 aimDirection;
   AimMode aimMode;
+  Entity lockedTarget;
   
   //Weapon Group
   Entity weaponsSlots[MAX_WEAPONS_EQUIP];
