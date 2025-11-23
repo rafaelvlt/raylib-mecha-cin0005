@@ -218,6 +218,7 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
   ai->state = 0;
   ai->patrolPoints = patrolPoints;
   ai->numPatrolPoints = numPatrolPoints;
+  ai->currentPatrolIndex = 0;
 
   entityManager->componentMasks[entity] |= COMPONENT_AI_CONTROL;
 }
