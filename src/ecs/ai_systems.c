@@ -35,7 +35,10 @@ void AIControlSystem(struct Systems* systems) {
 
       float dist = Vector3Distance(transform->position, targetPos);
 
-      // Estado 0 = idle, 1 = perseguindo, 2 = atacando
+      // Estado 0 = patrol, 1 = perseguindo, 2 = atacando
+      if (dist >= ai->sightRadius) {
+        ai->state = 0; // patrol
+      }
       if (dist < ai->sightRadius) {
         ai->state = 1;  // perseguir
       }
@@ -70,6 +73,7 @@ void AIControlSystem(struct Systems* systems) {
           // Sem pontos de patrulha, permanece parado
           phys->velocity = Vector3Zero();
         }
+        wc->triggerPulled = false; // Não atira enquanto patrulha
         break;
       case 1: // Chase
         // Lógica de perseguição já implementada abaixo
@@ -80,6 +84,7 @@ void AIControlSystem(struct Systems* systems) {
         // Rotates the object to look at the player
         Matrix lookAt = MatrixLookAt(Vector3Zero(), dir, (Vector3){0,1,0});
         transform->orientation = QuaternionFromMatrix(lookAt);
+        wc->triggerPulled = false; // Não atira enquanto persegue
         break;
       case 2: // Attack
         // Lógica de ataque já implementada abaixo
