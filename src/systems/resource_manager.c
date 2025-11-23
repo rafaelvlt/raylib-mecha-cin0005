@@ -9,6 +9,7 @@ Only Change the init function to add more assets    *
 Don't forget to add the ID to the enum              *
 *****************************************************/
 
+
 void InitResourceManager(ResourceManager* resourceManager) {
   
 
@@ -59,6 +60,46 @@ void InitResourceManager(ResourceManager* resourceManager) {
   // ---------------------------------------------------------
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
+
+  // 1. Carregar Textura de Grama
+  resourceManager->textures[TEXTURE_ID_GRASS] = LoadTexture("resources/textures/grass.png");
+    // Isso é CRUCIAL: Faz a textura repetir em vez de esticar
+  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_GRASS]);
+
+    // Passo B: Configurar Filtro Anisotrópico
+    // Faz a textura ficar nítida mesmo quando vista de ângulo raso (chão indo pro horizonte)
+    // Se o PC não aguentar 16X, a Raylib reduz automaticamente.
+  SetTextureFilter(resourceManager->textures[TEXTURE_ID_GRASS], TEXTURE_FILTER_ANISOTROPIC_16X);
+    
+    // Passo C: Repetição (Wrap)
+  SetTextureWrap(resourceManager->textures[TEXTURE_ID_GRASS], TEXTURE_WRAP_REPEAT);
+  SetTextureWrap(resourceManager->textures[TEXTURE_ID_GRASS], TEXTURE_WRAP_REPEAT); 
+
+    // 2. Gerar a Malha do Terreno
+    // Tamanho: 200x200 unidades, Resolução: 10x10 polígonos
+  Mesh floorMesh = GenMeshPlane(2000.0f, 2000.0f, 20, 20);
+
+    // 3. Corrigir o "Tiling" (Repetição) da Textura
+    // Multiplicamos as coordenadas UV para que a grama se repita 40 vezes
+  if (floorMesh.texcoords) {
+      for (int i = 0; i < floorMesh.vertexCount * 2; i++) {
+            floorMesh.texcoords[i] *= 400.0f;
+        }
+    }
+
+// ... (Geração da Mesh acima) ...
+
+    // 4. Criar o Modelo
+  resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
+    
+    // Aplicar a textura
+  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_GRASS];
+
+    // =======================================================
+    // CORREÇÃO CRÍTICA AQUI
+    // =======================================================
+    // Define a cor base como BRANCO. Sem isso, a textura fica multiplicada por 0 (preto).
+  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 }
 
 void ShutdownResourceManager(ResourceManager* resourceManager) {
