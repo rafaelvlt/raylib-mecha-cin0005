@@ -141,7 +141,9 @@ typedef struct  {
   float sightRadius;
   float attackRange;
   float timeSinceLastAction;
-  int state; // probably change to a enum later, 0 = patrol 1 = attack;
+  int state; // probably change to a enum later, 0 = patrol 1 = chase 2 = attack;
+  Vector3* patrolPoints; // null for fighters
+  int numPatrolPoints; // 0 for fighters
 } AIControlComponent;
 
 // Dumb container for HUD numbers

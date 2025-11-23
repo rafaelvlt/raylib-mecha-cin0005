@@ -87,11 +87,15 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     //}
 
     //ajustei a função para criar vários inimigos de forma mais simples
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){10.0f,0.0f,20.0f});
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){-15.0f,0.0f,25.0f});
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){5.0f,0.0f,30.0f});
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){-20.0f,0.0f,15.0f});
-    createEnemyScout(&systems->resourceManager,&systems->entityManager, (Vector3){0.0f,0.0f,40.0f});
+    Vector3 scoutPoints1[4] = { {20.0f,0.0f,20.0f}, {-20.0f,0.0f,20.0f},{-20.0f,0.0f,-20.0f}, {20.0f,0.0f,-20.0f} }; //square patrol
+    Vector3 scoutPoints2[2] = { {15.0f,0.0f,25.0f}, {-15.0f,0.0f,25.0f} }; //line patrol
+
+    // Creating multiple scouts with patrol points
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints1[0], &scoutPoints1, 4);
+    createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints2[0], &scoutPoints2, 2);
+    
+    createEnemyCombatent(&systems->resourceManager,&systems->entityManager, (Vector3){ -25.0f, 0.0f, -25.0f });
+
     // ---------------------------------------------------------
     // Camera & Input Setup
     // ---------------------------------------------------------

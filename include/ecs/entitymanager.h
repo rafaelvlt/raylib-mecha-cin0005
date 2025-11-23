@@ -69,11 +69,11 @@ void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity 
 
 void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimMode aimMode);
 
-void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range);
+void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range, Vector3* patrolPoints, int numPatrolPoints);
 
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown);
 
-void createEnemyScout(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position);
+void createEnemyScout(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints);
 
 void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position);
 

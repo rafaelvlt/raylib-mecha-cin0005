@@ -201,7 +201,7 @@ void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimM
   entityManager->componentMasks[entity] |= COMPONENT_WEAPON_CONTROL;
 }
 
-void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range) {
+void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range, Vector3* patrolPoints, int numPatrolPoints) {
   AIControlComponent* ai = &entityManager->aiControlComponents[entity];
 
   ai->target = MAX_ENTITIES;
@@ -209,6 +209,8 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
   ai->attackRange = range;
   ai->timeSinceLastAction = 0.0f;
   ai->state = 0;
+  ai->patrolPoints = patrolPoints;
+  ai->numPatrolPoints = numPatrolPoints;
 
   entityManager->componentMasks[entity] |= COMPONENT_AI_CONTROL;
 }
@@ -225,7 +227,7 @@ void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float m
 }
 
 
-void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityManager, Vector3 position){
+void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints){
 
   Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT);
 
@@ -242,7 +244,7 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
         AddCollisionComponent(entityManager, scout, enemyBox, false, false);
 
         AddHealthComponent(entityManager, scout, 100.0f);
-        AddAIControlComponent(entityManager, scout, 50.0f, 10.0f);
+        AddAIControlComponent(entityManager, scout, 50.0f, 10.0f, scoutPoints, numPoints);
 
         AddRenderComponent(entityManager, scout, enemyModel, WHITE);
     }
@@ -250,4 +252,23 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
 
 void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position){
 
+  Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT); // Using same model for placeholder
+
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(1.0f, 1.0f, 1.0f);
+
+        Entity combatent = CreateEntity(entityManager);
+
+        AddTransformComponent(entityManager, combatent, position);
+        AddPhysicsComponent(entityManager, combatent, (Vector3){0,0,0}, 0.90f);
+
+        BoundingBox enemyBox = { (Vector3){ -2.0f, 0.0f, -2.0f }, (Vector3){ 2.0f, 6.0f, 2.0f } };
+        AddCollisionComponent(entityManager, combatent, enemyBox, false, false);
+
+        AddHealthComponent(entityManager, combatent, 150.0f);
+        AddAIControlComponent(entityManager, combatent, 60.0f, 15.0f, NULL, 0); // No patrol points for combatent
+
+        AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
+    }
 }
