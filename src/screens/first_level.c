@@ -7,11 +7,16 @@
 #include "resource_manager.h"
 #include "systems.h"
 #include "map_loader.h"
+#include <rlgl.h> // <--- IMPORTANTE: Necessário para rlDisableDepthMask
+
+#define MAX_CLOUDS 100        
+#define CLOUD_AREA 1000.0f    
+#define CLOUD_HEIGHT 120.0f
 
 // -------------------------------------------
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
-static void DrawLevel(struct Systems* systems);
+static void DrawLevel(struct Systems* systems, const Camera* camera);
 
 // -------------------------------------------
 // TEMPORARY FUNCTION ONLY FOR DEBUGGING 
@@ -43,7 +48,12 @@ static void DrawTargetDebug(struct Systems* systems) {
     }
   }
 }
+typedef struct {
+    Vector3 position;
+    float size;
+} CloudData;
 
+static CloudData clouds[MAX_CLOUDS];
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
     // 1. Reset ECS
@@ -94,7 +104,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
   ClearBackground(SKYBLUE);
   BeginMode3D(data->camera);
-  DrawLevel(systems);           
+  DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
   DrawTargetDebug(systems);
   EffectSystem(systems, &data->camera);
@@ -109,15 +119,30 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 }
 
-static void DrawLevel(struct Systems* systems) // <--- Recebendo systems
-{
-    // 1. Desenha o Terreno Infinito (Visual)
+// A função agora recebe a Câmera
+static void DrawLevel(struct Systems* systems, const Camera* camera) {
+    // 1. Terreno
     Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
+    if (terrain) DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
     
-    if (terrain) {
-        DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
-    }
-    
-    // 2. Ambiente (Sol)
+    // 2. Sol
     DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
+
+    // 3. NUVENS
+    Texture* cloudTex = GetTexture(&systems->resourceManager, TEXTURE_ID_CLOUD_BILLBOARD);
+    if (cloudTex) {
+        rlDisableDepthMask(); 
+        
+        for (int i = 0; i < MAX_CLOUDS; i++) {
+            // Animação (Vento)
+            // Usa GetFrameTime() para movimento suave baseado em tempo
+            clouds[i].position.x += 2.0f * GetFrameTime();
+            // Wrap Around: Quando sai da área de desenho, volta para o outro lado
+            if (clouds[i].position.x > CLOUD_AREA) clouds[i].position.x = -CLOUD_AREA;
+
+            // Desenha a nuvem olhando para a câmera
+            DrawBillboard(*camera, *cloudTex, clouds[i].position, clouds[i].size, WHITE);
+        }
+        rlEnableDepthMask(); 
+    }
 }

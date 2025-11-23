@@ -100,6 +100,9 @@ void InitResourceManager(ResourceManager* resourceManager) {
     // =======================================================
     // Define a cor base como BRANCO. Sem isso, a textura fica multiplicada por 0 (preto).
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+  Image cloudImg = GenImageGradientRadial(256, 256, 0.0f, (Color){255, 255, 255, 200}, (Color){255, 255, 255, 0});
+  resourceManager->textures[TEXTURE_ID_CLOUD_BILLBOARD] = LoadTextureFromImage(cloudImg);
+  UnloadImage(cloudImg); 
 }
 
 void ShutdownResourceManager(ResourceManager* resourceManager) {
