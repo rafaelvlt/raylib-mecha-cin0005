@@ -13,8 +13,8 @@ void PlayerControlSystem(struct Systems* systems) {
   InputSystem* keys = &systems->configManager.KeyMap;
 
   const float MAX_PITCH_RAD = 1.4f; 
-
-  const float BOB_FREQUENCY = 0.55f;
+  const float MAX_YAW_RAD = 1.4f;
+  const float BOB_FREQUENCY = 1.10f;
   const float BOB_AMPLITUDE = 0.2f;
 
   const float SWAY_SPEED        = 4.5f;
@@ -22,9 +22,9 @@ void PlayerControlSystem(struct Systems* systems) {
   const float LEAN_MOUSE_FACTOR = 0.005f;
   const float LEAN_MOVE_FACTOR  = 0.02f;  
 
-  const float THROTTLE_LERP_SPEED = 2.5f; 
+  const float THROTTLE_LERP_SPEED = 4.5f; 
   const float TURN_LERP_SPEED     = 1.0f; 
-  const float VELOCITY_LERP_SPEED = 1.0f;
+  const float VELOCITY_LERP_SPEED = 2.0f;
 
   const float DEFAULT_FOV = 60.0f;
   const float ZOOM_FOV = 20.0f;
@@ -39,14 +39,30 @@ void PlayerControlSystem(struct Systems* systems) {
       PhysicsComponent* phys    = &em->physicsComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
       WeaponControlComponent* wc = &em->weaponControlComponents[i];
+ 
+      // Keyboard Input
+      float targetThrottle = 0.0f;
+      float targetTurn = 0.0f;
 
+      if (IsKeyDown(keys->KeyMoveForward))  targetThrottle = 1.0f;
+      if (IsKeyDown(keys->KeyMoveBackward)) targetThrottle = -1.0f;
+      if (IsKeyDown(keys->KeyTurnLeft))     targetTurn = 1.0f;
+      if (IsKeyDown(keys->KeyTurnRight))    targetTurn = -1.0f;
+      // Math for acceleration on forward movement(throttle) and rotation(turnstate) 
+      p->throttle  = Lerp(p->throttle, targetThrottle, THROTTLE_LERP_SPEED * dt);
+      p->turnState = Lerp(p->turnState, targetTurn, TURN_LERP_SPEED * dt);
 
-      // Mouse Input
+      // Torso movement input and treatement
+      // Torso x axis movement and clamp in relation to the legs
       Vector2 mouseDelta = GetMouseDelta();
-      p->torsoYaw   += mouseDelta.x * p->mouseSensitivity;
+      p->torsoYaw += mouseDelta.x * p->mouseSensitivity;     
+      p->torsoYaw = Clamp(p->torsoYaw, -MAX_YAW_RAD, MAX_YAW_RAD);
+
+      //Torso y axis input and clamp 
       p->torsoPitch -= mouseDelta.y * p->mouseSensitivity; 
       p->torsoPitch = Clamp(p->torsoPitch, -MAX_PITCH_RAD, MAX_PITCH_RAD);
 
+      // Zoom input
       float targetFOV = DEFAULT_FOV; 
       if (IsMouseButtonDown(keys->KeyZoom)){
         targetFOV = ZOOM_FOV;
@@ -71,31 +87,22 @@ void PlayerControlSystem(struct Systems* systems) {
       }
       else wc->triggerPulled = false;
 
-      // Keyboard Input
-      float targetThrottle = 0.0f;
-      float targetTurn = 0.0f;
-
-      if (IsKeyDown(keys->KeyMoveForward))  targetThrottle = 1.0f;
-      if (IsKeyDown(keys->KeyMoveBackward)) targetThrottle = -1.0f;
-      if (IsKeyDown(keys->KeyTurnLeft))     targetTurn = 1.0f;
-      if (IsKeyDown(keys->KeyTurnRight))    targetTurn = -1.0f;
-      // Math for acceleration on forward movement(throttle) and rotation(turnstate) 
-      p->throttle  = Lerp(p->throttle, targetThrottle, THROTTLE_LERP_SPEED * dt);
-      p->turnState = Lerp(p->turnState, targetTurn, TURN_LERP_SPEED * dt);
-
       // Input flags
       p->isMoving = (fabs(p->throttle) > 0.01f);
-      p->isRotating = (fabs(mouseDelta.x) > 0.1f || fabs(mouseDelta.y) > 0.1f || fabs(p->turnState) > 0.01f);
+      p->isRotating = fabs(p->turnState) > 0.01f;
 
       // Physics Logic
-      if (p->isMoving) {
-        Quaternion rot = QuaternionFromAxisAngle((Vector3){0,1,0}, p->turnState * p->turnSpeed * dt);
-        trans->orientation = QuaternionMultiply(trans->orientation, rot);
+      // Leg rotation also counts for camera rotation
+      if (p->isRotating) {
+          p->legAngle += p->turnState * p->turnSpeed * dt;
+          if (p->legAngle > PI * 2) p->legAngle -= PI * 2;
+          if (p->legAngle < 0) p->legAngle += PI * 2;
       }
+      trans->orientation = QuaternionFromAxisAngle((Vector3){0, 1, 0}, p->legAngle);
 
+      // Velocity (Raylib forward is z = -1);
       Vector3 forward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
       Vector3 desiredVelocity = Vector3Scale(forward, p->throttle * p->maxSpeed);
-
       phys->velocity = Vector3Lerp(phys->velocity, desiredVelocity, VELOCITY_LERP_SPEED * dt);
 
       // Cockpit Animation (Sway & Lean)
@@ -122,18 +129,18 @@ void PlayerControlSystem(struct Systems* systems) {
       p->camera->position = Vector3Add(trans->position, (Vector3){0, MECH_HEIGHT + bobY, 0});
 
       // Target (Direction)
-      float finalPitch = p->torsoPitch - p->lean.y;
-      float finalYaw   = p->torsoYaw;
+      float finalCameraYaw = p->torsoYaw - p->legAngle; 
+      float finalCameraPitch = p->torsoPitch - p->lean.y;
 
       Vector3 direction;
-      direction.x = cosf(finalPitch) * sinf(finalYaw); 
-      direction.y = sinf(finalPitch);
-      direction.z = cosf(finalPitch) * cosf(finalYaw);
+      direction.x = cosf(finalCameraPitch) * sinf(finalCameraYaw); 
+      direction.y = sinf(finalCameraPitch);
+      direction.z = cosf(finalCameraPitch) * cosf(finalCameraYaw);
 
       direction = Vector3Normalize(direction);
-      direction.z *= -1.0f; // Raylib Forward é -Z
+      direction.z *= -1.0f; // Raylib Forward -Z
 
-      p->camera->target = Vector3Add(p->camera->position, direction);
+      p->camera->target = Vector3Add(p->camera->position, direction);      p->camera->target = Vector3Add(p->camera->position, direction);
       p->camera->fovy = Lerp(p->camera->fovy, targetFOV, ZOOM_SPEED * dt);
 
       // Up Vector (Roll Effect)
