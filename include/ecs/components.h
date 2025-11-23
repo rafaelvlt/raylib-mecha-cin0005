@@ -148,6 +148,7 @@ typedef struct  {
   int state; // probably change to a enum later, 0 = patrol 1 = chase 2 = attack;
   Vector3* patrolPoints; // null for fighters
   int numPatrolPoints; // 0 for fighters
+  int currentPatrolIndex;
 } AIControlComponent;
 
 // Dumb container for HUD numbers

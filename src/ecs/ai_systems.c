@@ -43,8 +43,35 @@ void AIControlSystem(struct Systems* systems) {
         ai->state = 2; // atacar
       }
 
+      switch (ai->state)
+      {
+      case 0: // Patrol
+        // Implementar patrulha se houver pontos de patrulha
+        if (ai->numPatrolPoints > 0) {
+          Vector3 patrolTarget = ai->patrolPoints[ai->currentPatrolIndex];
+          Vector3 dir = Vector3Normalize(Vector3Subtract(patrolTarget, transform->position));
 
-      if (ai->state == 1) { // Perseguindo
+          phys->velocity = Vector3Scale(dir, AI_MOVE_SPEED);
+
+          // Rotates the object to look at the patrol point
+          Matrix lookAt = MatrixLookAt(Vector3Zero(), dir, (Vector3){0,1,0});
+          transform->orientation = QuaternionFromMatrix(lookAt);
+
+          // Verifica se chegou perto o suficiente do ponto de patrulha
+          if (Vector3Distance(transform->position, patrolTarget) < 1.0f) {
+            // Move para o próximo ponto de patrulha
+            ai->currentPatrolIndex++;
+            if (ai->currentPatrolIndex >= ai->numPatrolPoints) {
+              ai->currentPatrolIndex = 0; // Loop back to the first patrol point
+            }
+          }
+        } else {
+          // Sem pontos de patrulha, permanece parado
+          phys->velocity = Vector3Zero();
+        }
+        break;
+      case 1: // Chase
+        // Lógica de perseguição já implementada abaixo
         Vector3 dir = Vector3Normalize(Vector3Subtract(targetPos, transform->position));
 
         phys->velocity = Vector3Scale(dir, AI_MOVE_SPEED);
@@ -52,15 +79,15 @@ void AIControlSystem(struct Systems* systems) {
         // Rotates the object to look at the player
         Matrix lookAt = MatrixLookAt(Vector3Zero(), dir, (Vector3){0,1,0});
         transform->orientation = QuaternionFromMatrix(lookAt);
-      }
-      else if (ai->state == 2) { // Atacando
+        break;
+      case 2: // Attack
+        // Lógica de ataque já implementada abaixo
         phys->velocity = Vector3Zero();
-
-        // FireWeapon(s) viria aqui
-      }
-      else {
+        break;
+      default:
         // Idle - Garante que ele pare se o player fugir
         phys->velocity = Vector3Zero();
+        break;
       }
     }
   }
