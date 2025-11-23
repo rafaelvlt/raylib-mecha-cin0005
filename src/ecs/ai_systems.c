@@ -36,6 +36,7 @@ void AIControlSystem(struct Systems* systems) {
       float dist = Vector3Distance(transform->position, targetPos);
 
       // Estado 0 = patrol, 1 = perseguindo, 2 = atacando
+      /*
       if (dist >= ai->sightRadius) {
         ai->state = 0; // patrol
       }
@@ -45,7 +46,11 @@ void AIControlSystem(struct Systems* systems) {
 
       if (dist < ai->attackRange) {
         ai->state = 2; // atacar
-      }
+      }*/
+      
+
+      //optional: simplificação da lógica acima
+      ai->state = (dist<ai->attackRange)+(dist<ai->sightRadius);
 
       switch (ai->state)
       {
@@ -69,9 +74,11 @@ void AIControlSystem(struct Systems* systems) {
               ai->currentPatrolIndex = 0; // Loop back to the first patrol point
             }
           }
+          printf("Patrolling to point %d\n", ai->currentPatrolIndex);
         } else {
           // Sem pontos de patrulha, permanece parado
           phys->velocity = Vector3Zero();
+          printf("No patrol points, idling\n");
         }
         wc->triggerPulled = false; // Não atira enquanto patrulha
         break;
@@ -84,6 +91,7 @@ void AIControlSystem(struct Systems* systems) {
         // Rotates the object to look at the player
         Matrix lookAt = MatrixLookAt(Vector3Zero(), dir, (Vector3){0,1,0});
         transform->orientation = QuaternionFromMatrix(lookAt);
+        printf("Chasing player\n");
         wc->triggerPulled = false; // Não atira enquanto persegue
         break;
       case 2: // Attack
@@ -92,6 +100,7 @@ void AIControlSystem(struct Systems* systems) {
         // Aqui você pode adicionar lógica de ataque, como disparar armas, etc.
         wc->triggerPulled = true;
         wc->aimDirection = Vector3Normalize(Vector3Subtract(targetPos, transform->position));
+        printf("Attacking player\n");
         break;
       default:
         // Idle - Garante que ele pare se o player fugir

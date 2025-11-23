@@ -284,6 +284,10 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
         AddWeaponComponent(entityManager, weaponLeft, WEAPON_LASER_BEAM, 1.0f, 100.0f, 2.0f, 300.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
         AddWeaponControlComponent(entityManager, scout, AIM_MODE_PHYSICAL);
+        WeaponControlComponent *wc = &entityManager->weaponControlComponents[scout];
+        wc->weaponsSlots[0] = weaponLeft;
+        wc->weaponsGroupMap[0] = 0; // Group 1  
+        wc->activeGroup[0] = true;
     }
 }
 
@@ -304,7 +308,7 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
         AddCollisionComponent(entityManager, combatent, enemyBox, false, false);
 
         AddHealthComponent(entityManager, combatent, 150.0f);
-        AddAIControlComponent(entityManager, combatent, 60.0f, 15.0f, NULL, 0); // No patrol points for combatent
+        AddAIControlComponent(entityManager, combatent, 150.0f, 100.0f, NULL, 0); // No patrol points for combatent
 
         AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
 
@@ -314,8 +318,12 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
 
         AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
         AddAttachmentComponent(entityManager, weaponLeft, combatent, offsetS, QuaternionIdentity());
-        AddWeaponComponent(entityManager, weaponLeft, WEAPON_MACHINE_GUN, 0.2f, 120.0f, 3.0f, 400.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_DUMMY);
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_MACHINE_GUN, 0.2f, 120.0f, 3.0f, 100.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_DUMMY);
 
         AddWeaponControlComponent(entityManager, combatent, AIM_MODE_PHYSICAL);
+        WeaponControlComponent *wc = &entityManager->weaponControlComponents[combatent];
+        wc->weaponsSlots[0] = weaponLeft;
+        wc->weaponsGroupMap[0] = 0; // Group 1  
+        wc->activeGroup[0] = true;
     }
 }
