@@ -3,7 +3,6 @@
 
 #include <raylib.h>
 #include "ecs/components.h"
-#include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
 #include "state_manager.h"
@@ -15,7 +14,7 @@ struct Systems;
 typedef enum {
   EVENT_NONE = 0,
   EVENT_WEAPON_FIRED,
-  EVENT_COLISSION,
+  EVENT_PROJECTILE_COLLISION,
   EVENT_ENTITY_DEATH,
   EVENT_SCREEN_CHANGE,
 } EventType;
@@ -32,7 +31,8 @@ typedef struct {
     Entity victim;    
     float damageAmount;
     Vector3 impactPoint;
-} ColissionData;
+    WeaponType type;
+} ProjectileCollisionData;
 
 typedef struct{
   EntityType type;
@@ -45,7 +45,7 @@ typedef struct {
 
 typedef union {
   WeaponFiredData weaponFired;
-  ColissionData colissionDetected;
+  ProjectileCollisionData projectileCollisionDetected;
   EntityDeathData deathEvent;
   ScreenChangeData screenChange;
 } EventData;
@@ -62,6 +62,9 @@ typedef struct{
 
 void InitEventManager(struct Systems* systems);
 void PushEvent(struct Systems* systems, EventType type, EventData data);
+void ProcessGameEvents(struct Systems* systems);
 void ClearEventManager(EventManager* em);
 
+// Integration with other systems
+void EffectSystemOnEvent(struct Systems* systems, Event event);
 #endif

@@ -26,6 +26,23 @@ void PushEvent(struct Systems* systems, EventType type, EventData data) {
   }
 }
 
+void ProcessGameEvents(struct Systems* systems) {
+  EventManager* ev = &systems->eventManager;
+
+  for (int i = 0; i < ev->eventCounter; i++) {
+    Event event = ev->eventQueue[i];
+
+    AudioManagerOnEvent(systems, event); 
+    EffectSystemOnEvent(systems, event);
+  }
+
+  ClearEventManager(ev);
+}
+
 void ClearEventManager(EventManager* em) {
   em->eventCounter = 0;
 }
+
+
+
+
