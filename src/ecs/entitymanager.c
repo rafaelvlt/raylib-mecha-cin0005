@@ -276,7 +276,13 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
 
         AddRenderComponent(entityManager, scout, enemyModel, WHITE);
 
-        AddWeaponComponent(entityManager, scout, WEAPON_PULSE_LASER, 0.5f, 150.0f, 10.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+        Entity weaponLeft = CreateEntity(entityManager); // Scout weapon
+        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+
+        AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
+        AddAttachmentComponent(entityManager, weaponLeft, scout, offsetS, QuaternionIdentity());
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_LASER_BEAM, 1.0f, 100.0f, 2.0f, 300.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+
         AddWeaponControlComponent(entityManager, scout, AIM_MODE_PHYSICAL);
     }
 }
@@ -302,7 +308,14 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
 
         AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
 
-        AddWeaponComponent(entityManager, combatent, WEAPON_LASER_BEAM, 0.3f, 200.0f, 15.0f, 600.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+        
+        Entity weaponLeft = CreateEntity(entityManager); // combatent weapon
+        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+
+        AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
+        AddAttachmentComponent(entityManager, weaponLeft, combatent, offsetS, QuaternionIdentity());
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_MACHINE_GUN, 0.2f, 120.0f, 3.0f, 400.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_DUMMY);
+
         AddWeaponControlComponent(entityManager, combatent, AIM_MODE_PHYSICAL);
     }
 }
