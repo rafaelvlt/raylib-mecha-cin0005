@@ -144,6 +144,7 @@ typedef struct {
 typedef struct  {
   Entity target;
   float sightRadius;
+  float sightAngle;
   float attackRange;
   float timeSinceLastAction;
   int state; // probably change to a enum later, 0 = patrol 1 = chase 2 = attack;
