@@ -12,6 +12,9 @@
 #define THROTTLE_LERP_SPEED   4.5f 
 #define TURN_LERP_SPEED       1.0f
 #define VELOCITY_LERP_SPEED  2.0f
+// Centering
+#define CENTERING_TORSO_LEGS_SPEED 5.0f
+#define CENTERING_LEGS_TORSO_SPEED 5.0f
 // Zoom
 #define ZOOM_FOV              20.0f
 #define DEFAULT_FOV           60.0f
@@ -48,6 +51,30 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
   p->throttle  = Lerp(p->throttle, targetThrottle, THROTTLE_LERP_SPEED * dt);
   p->turnState = Lerp(p->turnState, targetTurn, TURN_LERP_SPEED * dt);
 
+
+  // Center Torso to Legs
+  if (!p->centeringTorsotoLegs) p->centeringTorsotoLegs = IsKeyPressed(keys->KeyCenterTorsoToLegs);
+  if (p->centeringTorsotoLegs){
+    p->torsoYaw = Lerp(p->torsoYaw, 0.0f, dt * 5.0f);
+    p->torsoPitch = Lerp(p->torsoPitch, 0.0f, dt * 5.0f);
+
+    // If close enough, makes it zero and turns off flag  
+    if (fabs(p->torsoYaw) < 0.01f && fabs(p->torsoPitch) < 0.01f) {
+        p->torsoYaw = 0.0f;
+        p->torsoPitch = 0.0f;
+        p->centeringTorsotoLegs = false;
+    }
+
+    // QOL: If the player tries to move alot during the centering, cancels it
+    if (fabs(mouseDelta.x) > 1.0f || fabs(mouseDelta.y) > 1.0f) {
+      p->centeringTorsotoLegs = false;
+    }
+  }
+
+  // Center Legs to Torso
+  if (!p->centeringLegstoTorso) p->centeringLegstoTorso = IsKeyPressed(keys->KeyCenterLegsToTorso);
+  // The logic is dealt by the physics function
+
   // Zoom
   float targetFOV = IsMouseButtonDown(keys->KeyZoom) ? ZOOM_FOV : DEFAULT_FOV;
   p->isZooming = IsMouseButtonDown(keys->KeyZoom);
@@ -66,13 +93,26 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
 }
 
 static void UpdatePlayerPhysics(PlayerControlComponent* p, TransformComponent* trans, PhysicsComponent* phys, float dt) {
+  // Centering Legs to Torso
+  if (p->centeringLegstoTorso) {
+    float oldTorsoYaw = p->torsoYaw;
+    p->torsoYaw = Lerp(p->torsoYaw, 0.0f, CENTERING_LEGS_TORSO_SPEED * dt);
+    float deltaAngle = p->torsoYaw - oldTorsoYaw;
+    p->legAngle += deltaAngle;
 
-  // Leg rotation also counts for camera rotation
-  if (p->isRotating) {
-    p->legAngle += p->turnState * p->turnSpeed * dt;
-    if (p->legAngle > PI * 2) p->legAngle -= PI * 2;
-    if (p->legAngle < 0) p->legAngle += PI * 2;
+    if (fabs(p->torsoYaw) < 0.01f) {
+      p->torsoYaw = 0.0f;
+      p->centeringLegstoTorso = false;
+    }
   }
+  // Leg rotation also counts for camera rotation
+  else if (p->isRotating) {
+    p->legAngle += p->turnState * p->turnSpeed * dt;
+  }
+
+  if (p->legAngle > PI * 2) p->legAngle -= PI * 2;
+  if (p->legAngle < 0) p->legAngle += PI * 2;
+
   trans->orientation = QuaternionFromAxisAngle((Vector3){0, 1, 0}, p->legAngle);
 
   // Velocity (Raylib forward is z = -1);
