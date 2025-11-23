@@ -5,7 +5,6 @@
 #include "utility.h"
 #include "state_manager.h"
 #include "resource_manager.h"
-#include "ecs/components.h"
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 

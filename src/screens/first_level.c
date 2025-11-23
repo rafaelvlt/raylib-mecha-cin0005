@@ -3,6 +3,8 @@
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
+#include "event_manager.h"
+#include "resource_manager.h"
 #include "systems.h"
 
 static void DrawLevel(void);
@@ -21,7 +23,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
 
     // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
-    AddPlayerControlComponent(&systems->entityManager, player, &data->camera, 0.003f, 15.0f, 2.0f);
+    AddPlayerControlComponent(&systems->entityManager, player, &data->camera);
     
     BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
     AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
@@ -36,7 +38,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     
     AddTransformComponent(&systems->entityManager, weaponLeft, Vector3Zero());
     AddAttachmentComponent(&systems->entityManager, weaponLeft, player, offsetL, QuaternionIdentity());
-    AddWeaponComponent(&systems->entityManager, weaponLeft, WEAPON_PULSE_LASER, 0.1f, 100.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+    AddWeaponComponent(&systems->entityManager, weaponLeft, WEAPON_PULSE_LASER, 0.5f, 150.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
     // --- Right Weapon ---
     Entity weaponRight = CreateEntity(&systems->entityManager);
@@ -44,7 +46,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
     AddTransformComponent(&systems->entityManager, weaponRight, Vector3Zero());
     AddAttachmentComponent(&systems->entityManager, weaponRight, player, offsetR, QuaternionIdentity());
-    AddWeaponComponent(&systems->entityManager, weaponRight, WEAPON_PULSE_LASER, 0.1f, 100.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+    AddWeaponComponent(&systems->entityManager, weaponRight, WEAPON_PULSE_LASER, 0.5f, 150.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
 
     // ---------------------------------------------------------
     // Weapon Control System (Loadout)
@@ -74,10 +76,10 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
         //Entity enemy = CreateEntity(&systems->entityManager);
 
-        //AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 0.0f, 15.0f });
+        //AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 3.0f, -50.0f });
         //AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
 
-        //BoundingBox enemyBox = { (Vector3){ -1.0f, 0.0f, -1.0f }, (Vector3){ 1.0f, 3.0f, 1.0f } };
+        //BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
         //AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
 
         //AddHealthComponent(&systems->entityManager, enemy, 100.0f);
@@ -87,14 +89,14 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     //}
 
     //ajustei a função para criar vários inimigos de forma mais simples
-    Vector3 scoutPoints1[4] = { {20.0f,0.0f,20.0f}, {-20.0f,0.0f,20.0f},{-20.0f,0.0f,-20.0f}, {20.0f,0.0f,-20.0f} }; //square patrol
-    Vector3 scoutPoints2[2] = { {15.0f,0.0f,25.0f}, {-15.0f,0.0f,25.0f} }; //line patrol
+    Vector3 scoutPoints1[4] = { {20.0f,0.0f,70.0f}, {-20.0f,0.0f,70.0f},{-20.0f,0.0f,30.0f}, {20.0f,0.0f,30.0f} }; //square patrol
+    Vector3 scoutPoints2[2] = { {15.0f,0.0f,80.0f}, {-15.0f,0.0f,80.0f} }; //line patrol
 
     // Creating multiple scouts with patrol points
     createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints1[0], &scoutPoints1, 4);
     createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints2[0], &scoutPoints2, 2);
     
-    createEnemyCombatent(&systems->resourceManager,&systems->entityManager, (Vector3){ -25.0f, 0.0f, -25.0f });
+    createEnemyCombatent(&systems->resourceManager,&systems->entityManager, (Vector3){ 0.0f, 0.0f, 50.0f });
 
     // ---------------------------------------------------------
     // Camera & Input Setup
@@ -114,18 +116,21 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   // Run Gameplay Systems
   PlayerControlSystem(systems);
-  PlayerAudioSystem(systems);
   AIControlSystem(systems);
-  MovementSystem(systems);
+  LifetimeSystem(systems); 
+  MovementSystem(systems);  
   AttachmentSystem(systems);
-  WeaponSystem(systems);   
-  LifetimeSystem(systems);
+  WeaponSystem(systems); 
+  CollisionSystem(systems);
+  PlayerAudioSystem(systems);
 
   if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
   {
     EnableCursor();
     RequestScreenChange(systems, SCREEN_MAIN_MENU);
   }
+
+  ProcessGameEvents(systems);
 }
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -133,7 +138,8 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   ClearBackground(RAYWHITE);
 
   BeginMode3D(data->camera);
-  DrawLevel();            
+  DrawLevel();         
+  EffectSystem(systems, &data->camera);
   RenderSystem(systems);  
   EndMode3D();
 

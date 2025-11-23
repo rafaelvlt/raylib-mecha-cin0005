@@ -18,6 +18,7 @@ typedef struct  {
   AIControlComponent      aiControlComponents[MAX_ENTITIES];
   CockpitHUDComponent     cockpitHUDComponents[MAX_ENTITIES];
   CollisionComponent      collisionComponents[MAX_ENTITIES];
+  EffectComponent         effectComponents[MAX_ENTITIES];
   
   // Bitmask for every Entity
   uint32_t                componentMasks[MAX_ENTITIES];
@@ -52,7 +53,7 @@ void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* mode
 
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot);
 
-void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity, float maxSpeed, float turnSpeed);
+void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera);
 
 void AddHealthComponent(EntityManager* entityManager, Entity entity, float health);
 
@@ -65,13 +66,15 @@ void AddWeaponComponent
 
 void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float lifetime);
 
-void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID);
+void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID, WeaponType type);
 
 void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimMode aimMode);
 
 void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range, Vector3* patrolPoints, int numPatrolPoints);
 
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown);
+
+void AddEffectComponent(EntityManager* em, Entity entity, float sSize, float endSize, Color color, AssetTextureID texID, int cols, int rows);
 
 void createEnemyScout(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints);
 
