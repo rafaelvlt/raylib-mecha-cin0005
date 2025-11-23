@@ -102,26 +102,6 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     // Enemy Entity Setup
     // ---------------------------------------------------------
     
-    //Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
-
-    //if (enemyModel != NULL) {
-        // Apply scale fix to the shared model
-        //enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
-
-        //Entity enemy = CreateEntity(&systems->entityManager);
-
-        //AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 3.0f, -50.0f });
-        //AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
-
-        //BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
-        //AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
-
-        //AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-        //AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
-
-        //AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
-    //}
-
     //ajustei a função para criar vários inimigos de forma mais simples
     Vector3 scoutPoints1[4] = { {20.0f,0.0f,70.0f}, {-20.0f,0.0f,70.0f},{-20.0f,0.0f,30.0f}, {20.0f,0.0f,30.0f} }; //square patrol
     Vector3 scoutPoints2[2] = { {15.0f,0.0f,80.0f}, {-15.0f,0.0f,80.0f} }; //line patrol
