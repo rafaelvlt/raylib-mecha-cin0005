@@ -25,6 +25,7 @@ typedef enum {
     MODEL_ID_ENEMY_SCOUT,
     MODEL_ID_PROJECTILE_PULSE_LASER,
     MODEL_ID_DUMMY,
+    MODEL_ID_TERRAIN,
     MODEL_ID_COUNT
 } AssetModelID;
 
@@ -56,6 +57,7 @@ typedef enum{
 
 typedef enum{
   TEXTURE_ID_EXPLOSION_SPRITESHEET = 0,
+  TEXTURE_ID_GRASS,
   TEXTURE_ID_COUNT 
 } AssetTextureID;
 
