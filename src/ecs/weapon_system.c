@@ -130,11 +130,11 @@ static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 d
   AddCollisionComponent(em, bullet, box, false, true);
 
   //Projectile behaviour
-  AddProjectileComponent(em, bullet, owner, stats->projectileDamage, true, 0.0f, (Effect)0);
+  AddProjectileComponent(em, bullet, owner, stats->projectileDamage, true, 0.0f, (Effect)0, stats->type);
 
   // Gets model for visuals
   Model* bulletModel = GetModel(rm, stats->projectileModelID);
-  AddRenderComponent(em, bullet, bulletModel, RED);
+  AddRenderComponent(em, bullet, bulletModel, LASER_BLUE);
   //Temporary component
   AddLifetimeComponent(em, bullet, 1.5f); 
 }

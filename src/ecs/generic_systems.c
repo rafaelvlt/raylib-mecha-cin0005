@@ -9,7 +9,6 @@
 #include "raymath.h" 
 #include "utility.h"
 
-
 // Query all components with Transform and Physics Components, make them move based on their data
 void MovementSystem(struct Systems* systems) {
   const uint32_t mask = COMPONENT_TRANSFORM | COMPONENT_PHYSICS;
@@ -102,13 +101,11 @@ void LifetimeSystem(struct Systems* systems){
     if ((em->componentMasks[entity] & mask) == mask){
       LifetimeComponent* lt = &em->lifetimeComponents[entity];
 
-      lt->currentTime += dt;
+      lt->currentTime -= dt;
 
-      if (lt->currentTime >= lt->lifetime){
+      if (lt->currentTime <= 0){
         DestroyEntity(em, entity);
       }
     }
   }
 }
-
-

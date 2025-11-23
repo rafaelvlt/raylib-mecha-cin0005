@@ -12,7 +12,7 @@
 
 // Colors
 #define GREENISH_BLACK  CLITERAL(Color){ 0, 25, 0, 255 }
-
+#define LASER_BLUE      (Color){ 50, 180, 255, 255 }
 
 
 #endif
