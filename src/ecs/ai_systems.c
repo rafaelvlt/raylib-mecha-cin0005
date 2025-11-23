@@ -48,9 +48,22 @@ void AIControlSystem(struct Systems* systems) {
         ai->state = 2; // atacar
       }*/
       
+    
+      Vector3 dirToTarget = Vector3Subtract(targetPos, transform->position);
+      Vector3 foward = {
+        2.0f * (transform->orientation.x * transform->orientation.z + transform->orientation.w * transform->orientation.y),
+        2.0f * (transform->orientation.y * transform->orientation.z - transform->orientation.w * transform->orientation.x),
+        1.0f - 2.0f * (transform->orientation.x * transform->orientation.x + transform->orientation.y * transform->orientation.y)
+      }; 
+      float angleToTarget = Vector3Angle(foward, Vector3Normalize(dirToTarget)) * (180.0f / PI); // Convert to degrees
 
       //optional: simplificação da lógica acima
-      ai->state = (dist<ai->attackRange)+(dist<ai->sightRadius);
+      ai->state = ((dist<ai->attackRange)+(dist<ai->sightRadius));
+
+      if (angleToTarget > 90.0f && angleToTarget < 270.0f){ {
+        ai->state = 0; // Volta para patrulha se o player sair do campo de visão
+      }
+    
 
       switch (ai->state)
       {
