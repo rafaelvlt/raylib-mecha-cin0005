@@ -58,6 +58,7 @@ typedef enum{
 typedef enum{
   TEXTURE_ID_EXPLOSION_SPRITESHEET = 0,
   TEXTURE_ID_GRASS,
+  TEXTURE_ID_CLOUD_BILLBOARD,
   TEXTURE_ID_COUNT 
 } AssetTextureID;
 
