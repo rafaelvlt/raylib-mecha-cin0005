@@ -38,6 +38,8 @@ typedef struct {
 typedef struct{
   EntityType type;
   Entity owner;
+  Entity killer;
+  Vector3 pos;
 } EntityDeathData;
 
 typedef struct {

@@ -109,5 +109,5 @@ LINK_WEAPON player 0 p_laser_L 0 1
 LINK_WEAPON player 1 p_laser_R 0 1
 
 # Mísseis no Grupo 1 (Tecla 2), Slot 2 e 3. Inativos (0) ou Ativos (1).
-LINK_WEAPON player 2 p_missile_L 1 1
-LINK_WEAPON player 3 p_missile_R 1 1
+LINK_WEAPON player 2 p_missile_L 1 0
+LINK_WEAPON player 3 p_missile_R 1 0

@@ -49,11 +49,6 @@ static void DrawTargetDebug(struct Systems* systems) {
     }
   }
 }
-typedef struct {
-    Vector3 position;
-    float size;
-    float speedMultiplier;
-} CloudData;
 
 static CloudData clouds[MAX_CLOUDS];
 static void InitClouds() {
@@ -107,6 +102,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   AttachmentSystem(systems);
   WeaponSystem(systems); 
   CollisionSystem(systems);
+  HealthSystem(systems);
   PlayerAudioSystem(systems);
 
   if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
@@ -132,10 +128,6 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawHUDSystem(systems);
   DrawMinimapSystem(systems, data);
 
-
-
-
-  Hudsystem(systems);
   DrawFPS(10, 10);
 }
 
