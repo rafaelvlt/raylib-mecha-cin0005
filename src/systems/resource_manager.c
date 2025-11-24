@@ -53,6 +53,7 @@ void InitResourceManager(ResourceManager* resourceManager) {
   // TEXTURES 
   // ---------------------------------------------------------
   resourceManager->textures[TEXTURE_ID_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/explosion.png");
+  resourceManager->textures[TEXTURE_ID_CROSSHAIR_SPRITE] = LoadTexture("resources/textures/crosshair.png");
   
   // ---------------------------------------------------------
   // RENDER TEXTURES 

@@ -56,6 +56,7 @@ typedef enum{
 
 typedef enum{
   TEXTURE_ID_EXPLOSION_SPRITESHEET = 0,
+  TEXTURE_ID_CROSSHAIR_SPRITE,
   TEXTURE_ID_COUNT 
 } AssetTextureID;
 
