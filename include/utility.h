@@ -11,8 +11,8 @@
 #define MECH_HEIGHT 6.5f  
 
 // Colors
-#define GREENISH_BLACK  CLITERAL(Color){ 0, 25, 0, 255 }
+#define GREENISH_BLACK  (Color){ 0, 25, 0, 255 }
 #define LASER_BLUE      (Color){ 50, 180, 255, 255 }
-
+#define ENGINE_COLOR    (Color){ 255, 100, 10, 255 }
 
 #endif
