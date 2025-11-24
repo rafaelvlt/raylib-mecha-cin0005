@@ -1,17 +1,25 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "systems.h"
+#include "map_loader.h"
+
+
+#define MAX_CLOUDS 100        
+#define CLOUD_AREA 1000.0f    
+#define CLOUD_HEIGHT 120.0f
 
 
 // -------------------------------------------
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
-static void DrawLevel(void);
+static void DrawLevel(struct Systems* systems, const Camera* camera);
+
 // -------------------------------------------
 // TEMPORARY FUNCTION ONLY FOR DEBUGGING 
 // -------------------------------------------
@@ -41,6 +49,27 @@ static void DrawTargetDebug(struct Systems* systems) {
       }
     }
   }
+}
+typedef struct {
+    Vector3 position;
+    float size;
+    float speedMultiplier;
+} CloudData;
+
+static CloudData clouds[MAX_CLOUDS];
+static void InitClouds() {
+    for (int i = 0; i < MAX_CLOUDS; i++) {
+        // ... (posição X/Z) ...
+        clouds[i].position = (Vector3){
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA),
+            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), 
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA)
+        };
+        clouds[i].size = (float)GetRandomValue(40, 80); 
+        
+        // NOVO: Velocidade aleatória (ex: 0.5x até 1.5x a velocidade base)
+        clouds[i].speedMultiplier = (float)GetRandomValue(5, 15) / 10.0f;
+    }
 }
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -296,10 +325,9 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  ClearBackground(RAYWHITE);
-
+  ClearBackground(SKYBLUE);
   BeginMode3D(data->camera);
-  DrawLevel();         
+  DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
   DrawTargetDebug(systems);
   EffectSystem(systems, &data->camera);
