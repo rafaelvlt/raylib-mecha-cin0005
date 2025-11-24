@@ -17,6 +17,7 @@ Entity CreateEntity(EntityManager* em) {
 
   for (int i = 0; i < MAX_ENTITIES; i++) {
 
+    // Find the first available spot by checking for a none bitmask
     if (em->componentMasks[i] == COMPONENT_NONE) {
       // increases numEntities if the new ID is higher than the largest being used
       if (i >= em->numEntities) {
@@ -214,7 +215,7 @@ void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimM
   entityManager->componentMasks[entity] |= COMPONENT_WEAPON_CONTROL;
 }
 
-void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range) {
+void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range, Vector3* patrolPoints, int numPatrolPoints) {
   AIControlComponent* ai = &entityManager->aiControlComponents[entity];
 
   ai->target = MAX_ENTITIES;
@@ -222,6 +223,9 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
   ai->attackRange = range;
   ai->timeSinceLastAction = 0.0f;
   ai->state = 0;
+  ai->patrolPoints = patrolPoints;
+  ai->numPatrolPoints = numPatrolPoints;
+  ai->currentPatrolIndex = 0;
 
   entityManager->componentMasks[entity] |= COMPONENT_AI_CONTROL;
 }
@@ -285,4 +289,77 @@ void AddHomingComponent(EntityManager* em, Entity entity, Entity target, float t
   hm->timer = 0.0f;
 
   em->componentMasks[entity] |= COMPONENT_HOMING;
+}
+
+void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints){
+
+  Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT);
+
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
+
+        Entity scout = CreateEntity(entityManager);
+
+        AddTransformComponent(entityManager, scout, position);
+        AddPhysicsComponent(entityManager, scout, (Vector3){0,0,0}, 0.90f);
+
+        BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
+        AddCollisionComponent(entityManager, scout, enemyBox, false, false);
+
+        AddHealthComponent(entityManager, scout, 100.0f);
+        AddAIControlComponent(entityManager, scout, 50.0f, 10.0f, scoutPoints, numPoints);
+
+        AddRenderComponent(entityManager, scout, enemyModel, WHITE);
+
+        Entity weaponLeft = CreateEntity(entityManager); // Scout weapon
+        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+
+        AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
+        AddAttachmentComponent(entityManager, weaponLeft, scout, offsetS, QuaternionIdentity());
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_LASER_BEAM, 1.0f, 100.0f, 2.0f, 300.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+
+        AddWeaponControlComponent(entityManager, scout, AIM_MODE_PHYSICAL);
+        WeaponControlComponent *wc = &entityManager->weaponControlComponents[scout];
+        wc->weaponsSlots[0] = weaponLeft;
+        wc->weaponsGroupMap[0] = 0; // Group 1  
+        wc->activeGroup[0] = true;
+    }
+}
+
+void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position){
+
+  Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT); // Using same model for placeholder
+
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(1.0f, 1.0f, 1.0f);
+
+        Entity combatent = CreateEntity(entityManager);
+
+        AddTransformComponent(entityManager, combatent, position);
+        AddPhysicsComponent(entityManager, combatent, (Vector3){0,0,0}, 0.90f);
+
+        BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
+        AddCollisionComponent(entityManager, combatent, enemyBox, false, false);
+
+        AddHealthComponent(entityManager, combatent, 150.0f);
+        AddAIControlComponent(entityManager, combatent, 150.0f, 100.0f, NULL, 0); // No patrol points for combatent
+
+        AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
+
+        
+        Entity weaponLeft = CreateEntity(entityManager); // combatent weapon
+        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+
+        AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
+        AddAttachmentComponent(entityManager, weaponLeft, combatent, offsetS, QuaternionIdentity());
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_MACHINE_GUN, 0.2f, 120.0f, 3.0f, 100.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_DUMMY);
+
+        AddWeaponControlComponent(entityManager, combatent, AIM_MODE_PHYSICAL);
+        WeaponControlComponent *wc = &entityManager->weaponControlComponents[combatent];
+        wc->weaponsSlots[0] = weaponLeft;
+        wc->weaponsGroupMap[0] = 0; // Group 1  
+        wc->activeGroup[0] = true;
+    }
 }
