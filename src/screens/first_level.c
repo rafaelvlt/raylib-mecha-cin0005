@@ -65,23 +65,79 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   // ---------------------------------------------------------
   // Weapon Setup 
   // ---------------------------------------------------------
+
+  // --- Left Laser Weapon ---
+  Entity laserLeft = CreateEntity(&systems->entityManager);
+  Vector3 offsetL = { -1.70f, 5.50f, 1.50f };
+
+  AddTransformComponent(&systems->entityManager, laserLeft, Vector3Zero());
+  AddAttachmentComponent(&systems->entityManager, laserLeft, player, offsetL, QuaternionIdentity());
+  AddWeaponComponent(
+      &systems->entityManager, laserLeft, 
+      WEAPON_PULSE_LASER, 
+      0.75f,   // fireRate 
+      150.0f, // Speed
+      5.0f,   // Damage
+      500.0f, // Range
+      2.0f,   // Heat
+      2,      // burstTotal
+      0.1f    // burstRate 
+  );
+
+  // --- Right Laser Weapon ---
+  Entity laserRight = CreateEntity(&systems->entityManager);
+  Vector3 offsetR = { 1.70f, 5.50f, 1.50f }; // Inverted X
+
+  AddTransformComponent(&systems->entityManager, laserRight, Vector3Zero());
+  AddAttachmentComponent(&systems->entityManager, laserRight, player, offsetR, QuaternionIdentity());
+  AddWeaponComponent(
+      &systems->entityManager, laserRight, 
+      WEAPON_PULSE_LASER, 
+      0.75f,   // fireRate 
+      150.0f, // Speed
+      5.0f,   // Damage
+      500.0f, // Range
+      2.0f,   // Heat
+      2,      // burstTotal
+      0.1f    // burstRate 
+  );
+
+
+  // --- Left Missile Weapon ---
   
-  // --- Left Weapon ---
-  Entity weaponLeft = CreateEntity(&systems->entityManager);
-  Vector3 offsetL = { -1.70f, 5.50f, -1.50f };
-  
-  AddTransformComponent(&systems->entityManager, weaponLeft, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, weaponLeft, player, offsetL, QuaternionIdentity());
-  AddWeaponComponent(&systems->entityManager, weaponLeft, WEAPON_PULSE_LASER, 0.5f, 150.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+  Entity missileLeft = CreateEntity(&systems->entityManager);
+  Vector3 offsetLM = { -1.70f, 7.00f, 1.50f };
 
-  // --- Right Weapon ---
-  Entity weaponRight = CreateEntity(&systems->entityManager);
-  Vector3 offsetR = { 1.70f, 5.50f, -1.50f }; // Inverted X
-
-  AddTransformComponent(&systems->entityManager, weaponRight, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, weaponRight, player, offsetR, QuaternionIdentity());
-  AddWeaponComponent(&systems->entityManager, weaponRight, WEAPON_PULSE_LASER, 0.5f, 150.0f, 5.0f, 500.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
-
+  AddTransformComponent(&systems->entityManager, missileLeft, Vector3Zero());
+  AddAttachmentComponent(&systems->entityManager, missileLeft, player, offsetLM, QuaternionIdentity());
+  AddWeaponComponent(
+    &systems->entityManager, missileLeft, 
+    WEAPON_MISSILE_LAUNCHER, 
+    5.0f,   // fireRate 
+    60.0f,  // Speed 
+    5.0f,  // Damage
+    1000.0f,// Range
+    5.0f,   // Heat
+    20,     // burstTotal 
+    0.115f   // burstRate 
+  );
+  // --- Right Missile Weapon ---
+  //
+  Entity missileRight = CreateEntity(&systems->entityManager);
+  Vector3 offsetRM = { 1.70f, 7.00f, 1.50f };
+  AddTransformComponent(&systems->entityManager, missileRight, Vector3Zero());
+  AddAttachmentComponent(&systems->entityManager, missileRight, player, offsetRM, QuaternionIdentity());
+  AddWeaponComponent(
+    &systems->entityManager, missileRight, 
+    WEAPON_MISSILE_LAUNCHER, 
+    5.0f,   // fireRate 
+    60.0f,  // Speed 
+    5.0f,  // Damage
+    1000.0f,// Range
+    5.0f,   // Heat
+    20,     // burstTotal 
+    0.115f   // burstRate 
+  );
   // ---------------------------------------------------------
   // Weapon Control System (Loadout)
   // ---------------------------------------------------------
@@ -90,12 +146,18 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   WeaponControlComponent* ctrl = &systems->entityManager.weaponControlComponents[player];
 
   // Link entities to slots and groups
-  ctrl->weaponsSlots[0] = weaponLeft;
+  ctrl->weaponsSlots[0] = laserLeft;
   ctrl->weaponsGroupMap[0] = 0; // Group 1
-  
-  ctrl->weaponsSlots[1] = weaponRight;
+
+  ctrl->weaponsSlots[1] = laserRight;
   ctrl->weaponsGroupMap[1] = 0; // Group 1
 
+  ctrl->weaponsSlots[2] = missileLeft;
+  ctrl->weaponsGroupMap[2] = 1; // Group 2
+  
+  ctrl->weaponsSlots[3] = missileRight;
+  ctrl->weaponsGroupMap[3] = 1; // Group 2
+  
   ctrl->activeGroup[0] = true;
 
   // ---------------------------------------------------------
@@ -132,6 +194,8 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   PlayerControlSystem(systems);
   AIControlSystem(systems);
   LifetimeSystem(systems); 
+  MissileSystem(systems);
+  TrailSystem(systems);
   MovementSystem(systems);  
   AttachmentSystem(systems);
   WeaponSystem(systems); 
@@ -158,7 +222,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   EffectSystem(systems, &data->camera);
   EndMode3D();
 
-
+  Hudsystem(systems);
   DrawFPS(10, 10);
 }
 
