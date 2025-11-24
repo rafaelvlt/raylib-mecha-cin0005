@@ -1,16 +1,24 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "systems.h"
+#include "map_loader.h"
+
+
+#define MAX_CLOUDS 100        
+#define CLOUD_AREA 1000.0f    
+#define CLOUD_HEIGHT 120.0f
 
 // -------------------------------------------
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
-static void DrawLevel(void);
+static void DrawLevel(struct Systems* systems, const Camera* camera);
+
 // -------------------------------------------
 // TEMPORARY FUNCTION ONLY FOR DEBUGGING 
 // -------------------------------------------
@@ -41,152 +49,48 @@ static void DrawTargetDebug(struct Systems* systems) {
     }
   }
 }
+typedef struct {
+    Vector3 position;
+    float size;
+    float speedMultiplier;
+} CloudData;
+
+static CloudData clouds[MAX_CLOUDS];
+static void InitClouds() {
+    for (int i = 0; i < MAX_CLOUDS; i++) {
+        // ... (posição X/Z) ...
+        clouds[i].position = (Vector3){
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA),
+            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), 
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA)
+        };
+        clouds[i].size = (float)GetRandomValue(40, 80); 
+        
+        // NOVO: Velocidade aleatória (ex: 0.5x até 1.5x a velocidade base)
+        clouds[i].speedMultiplier = (float)GetRandomValue(5, 15) / 10.0f;
+    }
+}
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  // 1. Reset ECS state
-  InitEntityManager(&systems->entityManager);
+    // 1. Reset ECS
+    InitEntityManager(&systems->entityManager);
 
-  // ---------------------------------------------------------
-  // Player Entity Setup
-  // ---------------------------------------------------------
-  Entity player = CreateEntity(&systems->entityManager);
+    // Camera Configuration
+    data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
+    data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
+    data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    data->camera.fovy = 60.0f;
+    data->camera.projection = CAMERA_PERSPECTIVE;
 
-  AddTransformComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f });
-  AddPhysicsComponent(&systems->entityManager, player, (Vector3){ 0.0f, 0.0f, 0.0f }, 0.90f);
-
-  // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
-  AddPlayerControlComponent(&systems->entityManager, player, &data->camera);
-  
-  BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
-  AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
-
-  AddHealthComponent(&systems->entityManager, player, 100.0f); // Vida máxima 100.0
-  // Max Heat: 100.0, Heat/Shot: 2.0, Cooldown Rate: 10.0
-  AddCockpitHUDComponent(&systems->entityManager, player, 100.0f, 2.0f, 10.0f); 
-
-  // ---------------------------------------------------------
-  // Weapon Setup 
-  // ---------------------------------------------------------
-
-  // --- Left Laser Weapon ---
-  Entity laserLeft = CreateEntity(&systems->entityManager);
-  Vector3 offsetL = { -1.70f, 5.50f, 1.50f };
-
-  AddTransformComponent(&systems->entityManager, laserLeft, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, laserLeft, player, offsetL, QuaternionIdentity());
-  AddWeaponComponent(
-      &systems->entityManager, laserLeft, 
-      WEAPON_PULSE_LASER, 
-      0.75f,   // fireRate 
-      150.0f, // Speed
-      5.0f,   // Damage
-      500.0f, // Range
-      2.0f,   // Heat
-      2,      // burstTotal
-      0.1f    // burstRate 
-  );
-
-  // --- Right Laser Weapon ---
-  Entity laserRight = CreateEntity(&systems->entityManager);
-  Vector3 offsetR = { 1.70f, 5.50f, 1.50f }; // Inverted X
-
-  AddTransformComponent(&systems->entityManager, laserRight, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, laserRight, player, offsetR, QuaternionIdentity());
-  AddWeaponComponent(
-      &systems->entityManager, laserRight, 
-      WEAPON_PULSE_LASER, 
-      0.75f,   // fireRate 
-      150.0f, // Speed
-      5.0f,   // Damage
-      500.0f, // Range
-      2.0f,   // Heat
-      2,      // burstTotal
-      0.1f    // burstRate 
-  );
-
-
-  // --- Left Missile Weapon ---
-  
-  Entity missileLeft = CreateEntity(&systems->entityManager);
-  Vector3 offsetLM = { -1.70f, 7.00f, 1.50f };
-
-  AddTransformComponent(&systems->entityManager, missileLeft, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, missileLeft, player, offsetLM, QuaternionIdentity());
-  AddWeaponComponent(
-    &systems->entityManager, missileLeft, 
-    WEAPON_MISSILE_LAUNCHER, 
-    5.0f,   // fireRate 
-    60.0f,  // Speed 
-    5.0f,  // Damage
-    1000.0f,// Range
-    5.0f,   // Heat
-    20,     // burstTotal 
-    0.115f   // burstRate 
-  );
-  // --- Right Missile Weapon ---
-  //
-  Entity missileRight = CreateEntity(&systems->entityManager);
-  Vector3 offsetRM = { 1.70f, 7.00f, 1.50f };
-  AddTransformComponent(&systems->entityManager, missileRight, Vector3Zero());
-  AddAttachmentComponent(&systems->entityManager, missileRight, player, offsetRM, QuaternionIdentity());
-  AddWeaponComponent(
-    &systems->entityManager, missileRight, 
-    WEAPON_MISSILE_LAUNCHER, 
-    5.0f,   // fireRate 
-    60.0f,  // Speed 
-    5.0f,  // Damage
-    1000.0f,// Range
-    5.0f,   // Heat
-    20,     // burstTotal 
-    0.115f   // burstRate 
-  );
-  // ---------------------------------------------------------
-  // Weapon Control System (Loadout)
-  // ---------------------------------------------------------
-  AddWeaponControlComponent(&systems->entityManager, player, AIM_MODE_CAMERA);
-  
-  WeaponControlComponent* ctrl = &systems->entityManager.weaponControlComponents[player];
-
-  // Link entities to slots and groups
-  ctrl->weaponsSlots[0] = laserLeft;
-  ctrl->weaponsGroupMap[0] = 0; // Group 1
-
-  ctrl->weaponsSlots[1] = laserRight;
-  ctrl->weaponsGroupMap[1] = 0; // Group 1
-
-  ctrl->weaponsSlots[2] = missileLeft;
-  ctrl->weaponsGroupMap[2] = 1; // Group 2
-  
-  ctrl->weaponsSlots[3] = missileRight;
-  ctrl->weaponsGroupMap[3] = 1; // Group 2
-  
-  ctrl->activeGroup[0] = true;
-
-  // ---------------------------------------------------------
-  // Enemy Entity Setup
-  // ---------------------------------------------------------
-  
-  //ajustei a função para criar vários inimigos de forma mais simples
-  Vector3 scoutPoints1[4] = { {20.0f,0.0f,70.0f}, {-20.0f,0.0f,70.0f},{-20.0f,0.0f,30.0f}, {20.0f,0.0f,30.0f} }; //square patrol
-  Vector3 scoutPoints2[2] = { {15.0f,0.0f,80.0f}, {-15.0f,0.0f,80.0f} }; //line patrol
-
-  // Creating multiple scouts with patrol points
-  createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints1[0], scoutPoints1, 4);
-  createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints2[0], scoutPoints2, 2);
-  
-  createEnemyCombatent(&systems->resourceManager,&systems->entityManager, (Vector3){ 0.0f, 0.0f, 50.0f });
-
-  // ---------------------------------------------------------
-  // Camera & Input Setup
-  // ---------------------------------------------------------
-  data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
-  data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
-  data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-  data->camera.fovy = 60.0f;
-  data->camera.projection = CAMERA_PERSPECTIVE;
-
-  DisableCursor(); 
+    // Map Loading
+    MapContext context;
+    context.mainCamera = &data->camera;
+    
+    // Loads everything from level1.map file
+    LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
+    InitClouds();
+    DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -216,10 +120,9 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  ClearBackground(RAYWHITE);
-
+  ClearBackground(SKYBLUE);
   BeginMode3D(data->camera);
-  DrawLevel();         
+  DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
   DrawTargetDebug(systems);
   EffectSystem(systems, &data->camera);
@@ -241,47 +144,10 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 }
 
-static void DrawLevel(void)
-{
-  const int floorExtent = 25;
-  const float tileSize = 5.0f;
-  const Color tileColor1 = (Color){ 150, 200, 200, 255 };
+static void DrawLevel(struct Systems* systems, const Camera* camera) {
+    Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
+    if (terrain) DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
 
-  // Floor tiles
-  for (int y = -floorExtent; y < floorExtent; y++)
-  {
-    for (int x = -floorExtent; x < floorExtent; x++)
-    {
-      if ((y & 1) && (x & 1))
-      {
-        DrawPlane((Vector3){ x*tileSize, 0.0f, y*tileSize}, (Vector2){ tileSize, tileSize }, tileColor1);
-      }
-      else if (!(y & 1) && !(x & 1))
-      {
-        DrawPlane((Vector3){ x*tileSize, 0.0f, y*tileSize}, (Vector2){ tileSize, tileSize }, LIGHTGRAY);
-      }
-    }
-  }
+    DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
 
-  const Vector3 towerSize = (Vector3){ 16.0f, 32.0f, 16.0f };
-  const Color towerColor = (Color){ 150, 200, 200, 255 };
-
-  Vector3 towerPos = (Vector3){ 16.0f, 16.0f, 16.0f };
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  towerPos.x *= -1;
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  towerPos.z *= -1;
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  towerPos.x *= -1;
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  // Red sun
-  DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 0, 0, 255 });
-} 
+}
