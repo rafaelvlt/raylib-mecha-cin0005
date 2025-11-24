@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include "systems.h"
 #include "utility.h"
+#include "raymath.h"
 
 /****************************************************
 See the resource_manager.h for how to use guideline *
@@ -60,34 +61,42 @@ void InitResourceManager(ResourceManager* resourceManager) {
   // ---------------------------------------------------------
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
+  resourceManager->textures[TEXTURE_ID_BASE_HQ] = LoadTexture("resources/textures/base_texture.png");
+  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_BASE_HQ]);
+  SetTextureFilter(resourceManager->textures[TEXTURE_ID_BASE_HQ], TEXTURE_FILTER_ANISOTROPIC_16X);
 
-  // 1. Carregar Textura de Grama
+  // Carregar Textura de Grama
   resourceManager->textures[TEXTURE_ID_SAND] = LoadTexture("resources/textures/sand.png");
-    // Isso é CRUCIAL: Faz a textura repetir em vez de esticar
   GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_SAND]);
 
-    // Passo B: Configurar Filtro Anisotrópico
-    // Faz a textura ficar nítida mesmo quando vista de ângulo raso (chão indo pro horizonte)
-    // Se o PC não aguentar 16X, a Raylib reduz automaticamente.
+    // Configurar Filtro Anisotrópico
   SetTextureFilter(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_FILTER_ANISOTROPIC_16X);
     
-    // Passo C: Repetição (Wrap)
+    // Repetição (Wrap)
   SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT);
   SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT); 
 
-    // 2. Gerar a Malha do Terreno
-    // Tamanho: 200x200 unidades, Resolução: 10x10 polígonos
+    // Gerar a Malha do Terreno
   Mesh floorMesh = GenMeshPlane(2000.0f, 2000.0f, 20, 20);
 
-    // 3. Corrigir o "Tiling" (Repetição) da Textura
-    // Multiplicamos as coordenadas UV para que a grama se repita 40 vezes
+    // Multiplicamos as coordenadas UV para que a grama se repita 400 vezes
   if (floorMesh.texcoords) {
       for (int i = 0; i < floorMesh.vertexCount * 2; i++) {
             floorMesh.texcoords[i] *= 400.0f;
         }
     }
-
-// ... (Geração da Mesh acima) ...
+  Mesh hqMesh = GenMeshCube(50.0f, 40.0f, 40.0f);
+  Mesh doorMesh = GenMeshCube(15.0f, 12.0f, 1.0f);
+  resourceManager->models[MODEL_ID_BASE_DOOR] = LoadModelFromMesh(doorMesh); 
+  resourceManager->models[MODEL_ID_BASE_DOOR].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){20, 20, 20, 255};
+    
+    // Tiling: Para a textura não ficar esticada gigante, vamos fazê-la repetir
+    // Isso faz a textura se repetir 4 vezes horizontalmente e 2 verticalmente
+    if (hqMesh.texcoords) {
+         for (int i = 0; i < hqMesh.vertexCount * 2; i++) {
+            hqMesh.texcoords[i] *= 4.0f; 
+        }
+    }
 
     // 4. Criar o Modelo
   resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
@@ -100,26 +109,10 @@ void InitResourceManager(ResourceManager* resourceManager) {
     // =======================================================
     // Define a cor base como BRANCO. Sem isso, a textura fica multiplicada por 0 (preto).
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-  Image noiseImage = GenImagePerlinNoise(256, 256, 8, 8, 1.0f);
-  Image cloudAlphaImage = GenImageColor(256, 256, BLANK);
-  for (int y = 0; y < noiseImage.height; y++) {
-    for (int x = 0; x < noiseImage.width; x++) {
-        Color pixel = GetImageColor(noiseImage, x, y);
-        // Quanto mais claro o pixel do ruído (mais próximo de 255), mais opaco ele será
-        // Podemos ajustar um threshold ou curva aqui se quiser nuvens mais densas
-        
-        // Exemplo: Usar o valor de RED (ou qualquer canal) para o Alpha
-        Color newColor = (Color){255, 255, 255, pixel.r}; // Nuvens brancas, alfa baseado no ruído
-        ImageDrawPixel(&cloudAlphaImage, x, y, newColor);
-    }
-}
+  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModelFromMesh(hqMesh);
+  resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];
+  resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
-// 4. Carrega a textura com transparência
-resourceManager->textures[TEXTURE_ID_CLOUD_BILLBOARD] = LoadTextureFromImage(cloudAlphaImage);
-
-// 5. Descarrega as imagens temporárias
-UnloadImage(noiseImage); 
-UnloadImage(cloudAlphaImage);
 }
 
 void ShutdownResourceManager(ResourceManager* resourceManager) {
