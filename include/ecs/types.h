@@ -9,8 +9,10 @@ typedef enum{
 } EntityType;
 
 typedef enum{
-  WEAPON_PULSE_LASER = 0,
+  WEAPON_TYPE_NONE = 0,
+  WEAPON_PULSE_LASER,
   WEAPON_LASER_BEAM,
+  WEAPON_MISSILE_LAUNCHER,
   WEAPON_MACHINE_GUN,
   WEAPON_COUNTER
 } WeaponType;
@@ -21,11 +23,9 @@ typedef enum{
 } AimMode;
 
 typedef enum{
-  EFFECT_NONE = 0,
-  EFFECT_SMALL_SPARK,
-  EFFECT_MEDIUM_EXPLOSION,
-  EFFECT_BIG_BOOM,
-  EFFECT_COUNTER
-} Effect;
+  FX_TYPE_SPRITESHEET = 0,
+  FX_TYPE_ARRAY,
+  FX_TYPE_STATIC,
+} EffectRenderType;
 
 #endif
