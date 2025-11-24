@@ -1,8 +1,9 @@
-#include "map_loader.h"
+#include <raylib.h>
 #include <raymath.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "map_loader.h"
 
 // Tabela simples para mapear Nomes -> IDs
 typedef struct {
@@ -18,10 +19,11 @@ Entity FindId(EntityMap* map, int count, const char* name) {
     return MAX_ENTITIES;
 }
 
-// Helper para converter string do arquivo em WeaponType
 WeaponType ParseWeaponType(const char* str) {
     if (strcmp(str, "WEAPON_PULSE_LASER") == 0) return WEAPON_PULSE_LASER;
-    // Adicione outros tipos aqui (Missil, Canhao, etc)
+    if (strcmp(str, "WEAPON_MISSILE_LAUNCHER") == 0) return WEAPON_MISSILE_LAUNCHER;
+    if (strcmp(str, "WEAPON_MACHINE_GUN") == 0) return WEAPON_MACHINE_GUN;
+    if (strcmp(str, "WEAPON_LASER_BEAM") == 0) return WEAPON_LASER_BEAM;
     return 0;
 }
 
@@ -32,28 +34,24 @@ void LoadMapFromText(EntityManager* em, ResourceManager* rm, const char* filenam
         return;
     }
 
-    char line[256];
+    char line[1024]; // Buffer aumentado para caber os pontos de patrulha
     char command[64];
     
     Entity currentEntity = MAX_ENTITIES;
     
-    // Alocação dinâmica para evitar Stack Overflow
     EntityMap* idMap = (EntityMap*)malloc(MAX_ENTITIES * sizeof(EntityMap));
     int mapCount = 0;
 
     if (idMap == NULL) {
-        TraceLog(LOG_ERROR, "MAP: Erro de memoria ao alocar idMap");
         fclose(file);
         return;
     }
 
     // =========================================================
-    // PASSO 1: Criar Entidades e Componentes Básicos
+    // PASSADA 1: Criar Entidades e Componentes
     // =========================================================
     while (fgets(line, sizeof(line), file)) {
-        // Ignora linhas curtas ou comentários
         if (strlen(line) < 2 || line[0] == '#') continue;
-
         sscanf(line, "%s", command);
 
         if (strcmp(command, "ENTITY") == 0) {
@@ -76,80 +74,104 @@ void LoadMapFromText(EntityManager* em, ResourceManager* rm, const char* filenam
                 AddTransformComponent(em, currentEntity, pos);
             }
             else if (strcmp(command, "PHYSICS") == 0) {
-                Vector3 vel;
-                float drag;
+                Vector3 vel; float drag;
                 sscanf(line, "%*s %f %f %f %f", &vel.x, &vel.y, &vel.z, &drag);
                 AddPhysicsComponent(em, currentEntity, vel, drag);
             }
             else if (strcmp(command, "RENDER") == 0) {
-                // CORREÇÃO: Lê o ID do modelo como inteiro
-                int modelIdVal; 
-                int r, g, b, a;
-                // Formato: RENDER <ID> <R> <G> <B> <A>
+                int modelIdVal, r, g, b, a;
                 sscanf(line, "%*s %d %d %d %d %d", &modelIdVal, &r, &g, &b, &a);
-                
-                // Busca o modelo usando o ID do Enum
                 Model* m = GetModel(rm, (AssetModelID)modelIdVal); 
-                
-                if (m != NULL) {
-                    AddRenderComponent(em, currentEntity, m, (Color){r,g,b,a});
-                } else {
-                    TraceLog(LOG_WARNING, "MAP: Modelo ID %d invalido ou nao carregado.", modelIdVal);
-                }
+                if (m) AddRenderComponent(em, currentEntity, m, (Color){r,g,b,a});
             }
+            else if (strcmp(command, "COLLISION") == 0) {
+                 Vector3 min, max; int isStat, isTrig;
+                 sscanf(line, "%*s %f %f %f %f %f %f %d %d", &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &isStat, &isTrig);
+                 // Ajuste conforme a assinatura atual do seu AddCollisionComponent
+                 AddCollisionComponent(em, currentEntity, (BoundingBox){min, max}, isStat, isTrig);
+            }
+            // --- COMPONENTES ESPECÍFICOS DE JOGO ---
             else if (strcmp(command, "PLAYER_CONTROL") == 0) {
                 if (context.mainCamera != NULL) {
                     AddPlayerControlComponent(em, currentEntity, context.mainCamera);
+                    // Player sempre tem controle de arma (Modo Camera)
                     AddWeaponControlComponent(em, currentEntity, AIM_MODE_CAMERA);
                 }
             }
-            else if (strcmp(command, "AI_CONTROL") == 0) {
-                float sight, range;
-                sscanf(line, "%*s %f %f", &sight, &range);
-                AddAIControlComponent(em, currentEntity, sight, range);
-                // Inimigos também precisam de WeaponControl para atirar
-                AddWeaponControlComponent(em, currentEntity, 0);
+            else if (strcmp(command, "HUD") == 0) {
+                 float maxH, heatS, cool;
+                 sscanf(line, "%*s %f %f %f", &maxH, &heatS, &cool);
+                 AddCockpitHUDComponent(em, currentEntity, maxH, heatS, cool);
             }
             else if (strcmp(command, "HEALTH") == 0) {
                 float hp;
                 sscanf(line, "%*s %f", &hp);
                 AddHealthComponent(em, currentEntity, hp);
             }
-            else if (strcmp(command, "COLLISION") == 0) {
-                 Vector3 min, max;
-                 sscanf(line, "%*s %f %f %f %f %f %f", &min.x, &min.y, &min.z, &max.x, &max.y, &max.z);
-                 AddCollisionComponent(em, currentEntity, (BoundingBox){min, max}, false, false);
+            else if (strcmp(command, "AI_CONTROL") == 0) {
+                float sight, range;
+                sscanf(line, "%*s %f %f", &sight, &range);
+                // Inicializa IA sem patrulha por padrão (será preenchido pelo AI_PATROL se houver)
+                AddAIControlComponent(em, currentEntity, sight, range, NULL, 0);
+                
+                // Inimigos precisam de WeaponControl (Modo Físico)
+                AddWeaponControlComponent(em, currentEntity, AIM_MODE_PHYSICAL);
+            }
+            else if (strcmp(command, "AI_PATROL") == 0) {
+                // Lê pontos de patrulha: AI_PATROL <NumPoints> <x y z> <x y z> ...
+                int count;
+                char* ptr = line + strlen("AI_PATROL"); // Avança ponteiro na string
+                count = (int)strtof(ptr, &ptr);
+
+                if (count > 0) {
+                    // Aloca memória para os pontos (Importante: O sistema de AI deve gerenciar isso ou ser um array fixo)
+                    // Assumindo que AddAIControlComponent copia os dados ou aceita ponteiro.
+                    // Se AIControlComponent usa ponteiro, este malloc deve ser liberado no fim do jogo.
+                    Vector3* points = (Vector3*)malloc(sizeof(Vector3) * count);
+                    
+                    for(int i=0; i<count; i++) {
+                        points[i].x = strtof(ptr, &ptr);
+                        points[i].y = strtof(ptr, &ptr);
+                        points[i].z = strtof(ptr, &ptr);
+                    }
+
+                    // Atualiza o componente de IA já existente
+                    if (em->componentMasks[currentEntity] & COMPONENT_AI_CONTROL) {
+                        em->aiControlComponents[currentEntity].patrolPoints = points;
+                        em->aiControlComponents[currentEntity].numPatrolPoints = count;
+                    }
+                }
             }
             else if (strcmp(command, "WEAPON") == 0) {
                 char typeStr[64];
-                float rate, speed, dmg, range, heat;
-                int sndId, mdlId; // Agora são inteiros para os IDs
+                float rate, speed, dmg, range, heat, bRate;
+                int bTotal;
                 
-                // Formato: WEAPON <TYPE> <RATE> <SPEED> <DMG> <RANGE> <HEAT> <SND_ID> <MDL_ID>
-                sscanf(line, "%*s %s %f %f %f %f %f %d %d", 
-                       typeStr, &rate, &speed, &dmg, &range, &heat, &sndId, &mdlId);
+                // Formato Completo: WEAPON TYPE RATE SPEED DMG RANGE HEAT BURST_TOT BURST_RATE SND MDL
+                sscanf(line, "%*s %s %f %f %f %f %f %d %f", 
+                       typeStr, &rate, &speed, &dmg, &range, &heat, &bTotal, &bRate);
                 
                 AddWeaponComponent(em, currentEntity, ParseWeaponType(typeStr), 
                                    rate, speed, dmg, range, heat, 
-                                   (AssetSoundID)sndId, (AssetModelID)mdlId);
+                                   bTotal, bRate);
             }
         }
     }
 
     // =========================================================
-    // PASSO 2: Links e Attachments (Rewind)
+    // PASSADA 2: Vínculos (Attachments e Slots)
     // =========================================================
     rewind(file); 
     currentEntity = MAX_ENTITIES; 
-    char tempName[64];
 
     while (fgets(line, sizeof(line), file)) {
         if (strlen(line) < 2 || line[0] == '#') continue;
         sscanf(line, "%s", command);
 
         if (strcmp(command, "ENTITY") == 0) {
-            sscanf(line, "%*s %s", tempName);
-            currentEntity = FindId(idMap, mapCount, tempName);
+            char name[64];
+            sscanf(line, "%*s %s", name);
+            currentEntity = FindId(idMap, mapCount, name);
         }
         else if (currentEntity != MAX_ENTITIES) {
             
@@ -164,17 +186,76 @@ void LoadMapFromText(EntityManager* em, ResourceManager* rm, const char* filenam
                 }
             }
             else if (strcmp(command, "WEAPON_SLOTS") == 0) {
-                char s1[64], s2[64];
-                int c = sscanf(line, "%*s %s %s", s1, s2);
+                // Lê até 4 slots de armas
+                char s[4][64];
+                // Inicializa strings vazias
+                for(int i=0; i<4; i++) s[i][0] = '\0';
+                
+                // Lê quantos slots tiver na linha
+                int count = sscanf(line, "%*s %s %s %s %s", s[0], s[1], s[2], s[3]);
+                
                 WeaponControlComponent* wc = &em->weaponControlComponents[currentEntity];
                 
-                if (c >= 1) { wc->weaponsSlots[0] = FindId(idMap, mapCount, s1); wc->activeGroup[0] = true; }
-                if (c >= 2) { wc->weaponsSlots[1] = FindId(idMap, mapCount, s2); }
+                // Configura Slots e Grupos
+                // Padrão: Slot 0,1 = Grupo 0 (Pri). Slot 2,3 = Grupo 1 (Sec).
+                for(int i=0; i<count; i++) {
+                    Entity weaponID = FindId(idMap, mapCount, s[i]);
+                    if (weaponID != MAX_ENTITIES) {
+                        wc->weaponsSlots[i] = weaponID;
+                        // Lógica de grupos simples: 0 e 1 são G0, 2 e 3 são G1
+                        int group = (i < 2) ? 0 : 1;
+                        wc->weaponsGroupMap[i] = group;
+                        wc->activeGroup[group] = true; // Ativa o grupo por padrão
+                    }
+                }
+            }
+
+            else if (strcmp(command, "LINK_WEAPON") == 0) {
+                char ownerName[64];
+                char weaponName[64];
+                int slot, group, isActive;
+                
+                // Lê: NomeDono Slot NomeArma Grupo Ativo
+                int matches = sscanf(line, "%*s %s %d %s %d %d", 
+                                    ownerName, &slot, weaponName, &group, &isActive);
+                
+                if (matches == 5) {
+                    // 1. Busca os IDs pelo nome
+                    Entity ownerID = FindId(idMap, mapCount, ownerName);
+                    Entity weaponID = FindId(idMap, mapCount, weaponName);
+                    
+                    // 2. Valida se existem e se o dono tem controle de armas
+                    if (ownerID < MAX_ENTITIES && weaponID < MAX_ENTITIES) {
+                        
+                        // Garante que tem o componente (se não tiver, adiciona)
+                        if (!(em->componentMasks[ownerID] & COMPONENT_WEAPON_CONTROL)) {
+                            // Adiciona com um modo padrão se faltar (ex: CAMERA para player)
+                            // Mas idealmente já foi adicionado na Passada 1 via "PLAYER_CONTROL" ou "WEAPON_CONTROL"
+                            AddWeaponControlComponent(em, ownerID, AIM_MODE_PHYSICAL); 
+                        }
+
+                        WeaponControlComponent* wc = &em->weaponControlComponents[ownerID];
+                        
+                        // 3. Realiza o Vínculo (A lógica que estava hardcoded no Init)
+                        if (slot >= 0 && slot < MAX_WEAPONS_EQUIP) {
+                            wc->weaponsSlots[slot] = weaponID;
+                            wc->weaponsGroupMap[slot] = group;
+                            
+                            if (group >= 0 && group < MAX_WEAPONS_GROUPS) {
+                                if (isActive) {
+                                    wc->activeGroup[group] = true;
+                                }
+                            }
+                        }
+                    } else {
+                        TraceLog(LOG_WARNING, "MAP: LINK_WEAPON falhou. Entidades '%s' ou '%s' nao encontradas.", ownerName, weaponName);
+                    }
+                }
             }
         }
     }
 
     free(idMap);
     fclose(file);
-    TraceLog(LOG_INFO, "MAP: Mapa carregado com sucesso.");
+    TraceLog(LOG_INFO, "MAP: Mapa '%s' carregado com sucesso.", filename);
 }
