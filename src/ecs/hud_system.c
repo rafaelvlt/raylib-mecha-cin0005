@@ -13,35 +13,40 @@
 #define BAR_HEIGHT 25.0f
 #define MARGIN_TOP 15.0f
 
-// Protótipo local
+// Helper function
 static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit);
 
-
-
+// ... (DrawHUDSystem e DrawBar mantidos iguais, focando apenas no Minimapa abaixo) ...
 
 void DrawHUDSystem(struct Systems* systems) {
-    EntityManager* em = &systems->entityManager;
-    uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_HEALTH;
+  uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_HEALTH;
 
-    for (Entity e = 0; e < em->numEntities; e++) {
-        if ((em->componentMasks[e] & neededMask) == neededMask) {
-            HealthComponent* hp = &em->healthComponents[e];
-            float screenW = (float)GetScreenWidth();
-            float x_center = (screenW - BAR_WIDTH) / 2.0f;
-            float y_pos = MARGIN_TOP;
+  Texture crosshair = *GetTexture(&systems->resourceManager, TEXTURE_ID_CROSSHAIR_SPRITE);
 
-            Color outlineColor = (Color){ 0, 255, 255, 255 };
-            Color fillColor = (Color){ 0, 100, 200, 200 };
-            
-            if (hp->currentHealth < hp->maxHealth * 0.3f) {
-                fillColor = (Color){ 200, 0, 0, 200 };
-                outlineColor = RED;
-            }
+  EntityManager* em = &systems->entityManager;
+  ConfigManager* cfg = &systems->configManager;
+  for (Entity e = 0; e < em->numEntities; e++) {
+    if ((em->componentMasks[e] & neededMask) == neededMask) {
+      HealthComponent* hp = &em->healthComponents[e];
+      int screenW = cfg->screenResolution.x;
+      int screenH = cfg->screenResolution.y;
+      float x_center = (screenW - BAR_WIDTH) / 2.0f;
+      float y_pos = MARGIN_TOP;
 
-            DrawBar(x_center, y_pos, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, "HP", "%");
-            break; 
-        }
+      Color outlineColor = (Color){ 0, 255, 255, 255 };
+      Color fillColor = (Color){ 0, 100, 200, 200 };
+
+      if (hp->currentHealth < hp->maxHealth * 0.3f) {
+        fillColor = (Color){ 200, 0, 0, 200 };
+        outlineColor = RED;
+      }
+
+      DrawTexture(crosshair, screenW/2 - crosshair.width/2, screenH/2 - crosshair.height/2, WHITE);
+
+      DrawBar(x_center, y_pos, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, "HP", "%");
+      break; 
     }
+  }
 }
 
 
@@ -100,22 +105,21 @@ void DrawCrosshair(struct Systems* systems){
 // -------------------------------------------------------------
 // IMPLEMENTAÇÃO DO MINIMAPA (CENTRALIZADO NO JOGADOR)
 // -------------------------------------------------------------
-
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
 {
-    EntityManager* em = &systems->entityManager;
-    Entity player = MAX_ENTITIES;
-    Vector3 playerPos = {0};
-    float playerYaw = 0.0f; // Para rotacionar o mapa
+  EntityManager* em = &systems->entityManager;
+  Entity player = MAX_ENTITIES;
+  Vector3 playerPos = {0};
+  float playerYaw = 0.0f; // Map rotation
 
-    // Encontrar a Entidade do Jogador e sua Posição
+    // 1. Encontrar a Entidade do Jogador e sua Posição
     for (Entity i = 0; i < em->numEntities; i++) {
         if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
             player = i;
             if (em->componentMasks[i] & COMPONENT_TRANSFORM) {
                 playerPos = em->transformComponents[i].position;
                 
-                // Pega o ângulo da câmera para rotacionar o mapa
+                // Pega o ângulo da câmera para rotacionar o mapa (Estilo Halo/COD)
                 Vector3 forward = Vector3Subtract(data->camera.target, data->camera.position);
                 playerYaw = -atan2f(forward.z, forward.x) - PI/2.0f; // Ajuste de 90 graus
             }
@@ -123,16 +127,16 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
         }
     }
 
-    if (player == MAX_ENTITIES) return;
+  if (player == MAX_ENTITIES) return;
 
     // Configuração do Minimapa
     const int mapSize = 180; // Tamanho visual em pixels do minimapa
     const int mapPadding = 20;
     
-    // RAIO DE ABRANGÊNCIA
+    // *** RAIO DE ABRANGÊNCIA (ZOOM) ***
     // Quanto maior este valor, mais "longe" o radar vê (zoom out).
     // Area abrangida do mundo pelo minimapa
-    const float mapWorldSize = 1100.0f; 
+    const float mapWorldSize = 200.0f; 
     
     int screenW = GetScreenWidth();
     int mapX = screenW - mapSize - mapPadding; 
@@ -141,46 +145,41 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
     int mapCenterX = mapX + mapSize / 2;
     int mapCenterY = mapY + mapSize / 2;
 
-    // Fundo do radar
-    DrawCircle(mapCenterX, mapCenterY, mapSize/2, Fade(DARKBLUE, 0.6f));
-    DrawCircleLines(mapCenterX, mapCenterY, mapSize/2, Fade(SKYBLUE, 0.8f));
-    
-    // Linhas de grade (opcional, giram com o jogador ou ficam fixas)
-    DrawLine(mapCenterX - mapSize/2, mapCenterY, mapCenterX + mapSize/2, mapCenterY, Fade(SKYBLUE, 0.2f));
-    DrawLine(mapCenterX, mapCenterY - mapSize/2, mapCenterX, mapCenterY + mapSize/2, Fade(SKYBLUE, 0.2f));
+  // Map background
+  DrawCircle(mapCenterX, mapCenterY, mapSize/2, Fade(DARKBLUE, 0.6f));
+  DrawCircleLines(mapCenterX, mapCenterY, mapSize/2, Fade(SKYBLUE, 0.8f));
 
-    DrawText("RADAR", mapX + mapSize/2 - MeasureText("RADAR", 10)/2, mapY + mapSize + 5, 10, SKYBLUE);
+  // Outlines 
+  DrawLine(mapCenterX - mapSize/2, mapCenterY, mapCenterX + mapSize/2, mapCenterY, Fade(SKYBLUE, 0.2f));
+  DrawLine(mapCenterX, mapCenterY - mapSize/2, mapCenterX, mapCenterY + mapSize/2, Fade(SKYBLUE, 0.2f));
 
-    float scaleFactor = (float)mapSize / mapWorldSize;
-    uint32_t mapMask = COMPONENT_TRANSFORM;
-    
-    // Pré-calcula seno e cosseno para a rotação do mapa
-    float cosYaw = cosf(playerYaw);
-    float sinYaw = sinf(playerYaw);
+  DrawText("RADAR", mapX + mapSize/2 - MeasureText("RADAR", 10)/2, mapY + mapSize + 5, 10, SKYBLUE);
 
-    for (Entity e = 0; e < em->numEntities; e++) {
-        if ((em->componentMasks[e] & mapMask) == mapMask) {
-            // Não desenha o próprio jogador no loop (desenhamos fixo no centro depois)
-            if (e == player) continue;
+  float scaleFactor = (float)mapSize / mapWorldSize;
+  uint32_t mapMask = COMPONENT_TRANSFORM;
 
-            TransformComponent* trans = &em->transformComponents[e];
-            Vector3 worldPos = trans->position;
-            
-            // *** CÁLCULO RELATIVO AO JOGADOR ***
-            float dx = worldPos.x - playerPos.x;
-            float dz = worldPos.z - playerPos.z;
+  // Map rotation calculation
+  float cosYaw = cosf(playerYaw);
+  float sinYaw = sinf(playerYaw);
 
-            // Aplica a rotação (para que "frente" seja sempre cima no minimapa)
-            // Se quiser Norte Fixo, remova estas duas linhas e use dx/dz diretamente.
-            float rotatedX = dx * cosYaw - dz * sinYaw;
-            float rotatedY = dx * sinYaw + dz * cosYaw;
+  for (Entity e = 0; e < em->numEntities; e++) {
+    if ((em->componentMasks[e] & mapMask) == mapMask) {
+      if (e == player) continue;
 
-            // Converte para coordenadas de tela do minimapa
-            int relativeX = (int)(rotatedX * scaleFactor);
-            int relativeY = (int)(rotatedY * scaleFactor); // Inverte Y pois tela é Y-down
+      TransformComponent* trans = &em->transformComponents[e];
+      Vector3 worldPos = trans->position;
 
-            int drawX = mapCenterX + relativeX;
-            int drawY = mapCenterY + relativeY;
+      float dx = worldPos.x - playerPos.x;
+      float dz = worldPos.z - playerPos.z;
+
+      float rotatedX = dx * cosYaw - dz * sinYaw;
+      float rotatedY = dx * sinYaw + dz * cosYaw;
+
+      int relativeX = (int)(rotatedX * scaleFactor);
+      int relativeY = (int)(rotatedY * scaleFactor); 
+
+      int drawX = mapCenterX + relativeX;
+      int drawY = mapCenterY + relativeY;
 
             // Verifica se está dentro do círculo do radar
             float distFromCenter = sqrtf(powf(drawX - mapCenterX, 2) + powf(drawY - mapCenterY, 2));
@@ -190,17 +189,11 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
                     // Inimigo (Ponto Vermelho)
                     DrawCircle(drawX, drawY, 4.0f, RED);
                 }
-
-            if (worldPos.y == -15.0f && worldPos.z == -500.0f)
-            {
-                DrawCircle(drawX, drawY, 8.0f, ORANGE);
-            }  
+                // Outros objetos podem ser adicionados aqui
             }
         }
     }
 
-    // Desenha o Jogador (Sempre no Centro)
-    // Triângulo apontando para cima (já que o mapa gira ao redor dele)
-    Vector2 playerScreenPos = { (float)mapCenterX, (float)mapCenterY };
-    DrawPoly(playerScreenPos, 3, 6.0f, -90.0f, YELLOW);
+  Vector2 playerScreenPos = { (float)mapCenterX, (float)mapCenterY };
+  DrawPoly(playerScreenPos, 3, 6.0f, -90.0f, YELLOW);
 }
