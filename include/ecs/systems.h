@@ -29,10 +29,11 @@ void AttachmentSystem(struct Systems* systems);
 // For deleting temporary entities, like bullets or other things
 void LifetimeSystem(struct Systems* systems);
 
-// Generalist Shooting Systems: Works both for the player and for the AI
+// Generalist Combat Systems: Works both for the player and for the AI
 void WeaponSystem(struct Systems* systems);
 void ProjectileSystem(struct Systems* systems);
 void MissileSystem(struct Systems* systems);
+void HealthSystem(struct Systems* systems);
 
 //Player Systems
 void PlayerControlSystem(struct Systems* systems);

@@ -90,7 +90,7 @@ void PlayerAudioSystem(struct Systems* systems) {
         float intensity = fabs(p->throttle); 
 
         if (p->isMoving) {
-          float stepVolume = 0.3f + (intensity * 0.7f); 
+          float stepVolume = 0.3f + (intensity * 0.3f); 
           SetSoundVolume(sfxFootstep, stepVolume * systems->configManager.audioVolume);
 
           // Randomized pitch for variance in sound

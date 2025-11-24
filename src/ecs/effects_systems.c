@@ -16,6 +16,13 @@
 #define MISSILE_EXPLOSION_COLS        4    
 #define MISSILE_EXPLOSION_ROWS        4
 
+// Missile Explosion
+#define DEATH_EXPLOSION_START_SIZE  15.0f  
+#define DEATH_EXPLOSION_END_SIZE    20.0f
+#define DEATH_EXPLOSION_DURATION    2.5f  
+#define DEATH_EXPLOSION_COLS        4    
+#define DEATH_EXPLOSION_ROWS        4
+
 // Laser Explosion
 #define LASER_HIT_START_SIZE  2.0f
 #define LASER_HIT_END_SIZE    2.0f
@@ -33,7 +40,7 @@ static void SpawnLaserPulseExplosion(struct Systems* systems, Vector3 position) 
 
   Entity effect = CreateEntity(em);
   if (effect == MAX_ENTITIES) return;
-
+  
   AddTransformComponent(em, effect, position);
 
   AddEffectSheet(
@@ -73,6 +80,31 @@ static void SpawnMissileLauncherExplosion(struct Systems* systems, Vector3 posit
   );
 }
 
+static void SpawnDeathExplosion(struct Systems* systems, Vector3 position){
+  EntityManager* em = &systems->entityManager;
+
+  Entity effect = CreateEntity(em);
+  if (effect == MAX_ENTITIES) return;
+
+  Vector3 explosionPos = position;
+  explosionPos.y += 8.0f;
+
+  AddTransformComponent(em, effect, explosionPos);
+
+  AddEffectSheet(
+    em, 
+    effect,
+    DEATH_EXPLOSION_START_SIZE,
+    DEATH_EXPLOSION_END_SIZE,
+    WHITE,              
+    DEATH_EXPLOSION_DURATION,
+    TEXTURE_ID_MISSILE_EXPLOSION_SPRITESHEET, 
+    DEATH_EXPLOSION_COLS,
+    DEATH_EXPLOSION_ROWS,
+    false
+  );
+}
+
 void EffectSystemOnEvent(struct Systems* systems, Event event){
 
   if (event.type == EVENT_PROJECTILE_COLLISION) {
@@ -82,6 +114,9 @@ void EffectSystemOnEvent(struct Systems* systems, Event event){
     else if(event.data.projectileCollisionDetected.type == WEAPON_MISSILE_LAUNCHER){
       SpawnMissileLauncherExplosion(systems, event.data.projectileCollisionDetected.impactPoint);
     }
+  }
+  if (event.type == EVENT_ENTITY_DEATH){
+    SpawnDeathExplosion(systems, event.data.deathEvent.pos);
   }
 }
 
