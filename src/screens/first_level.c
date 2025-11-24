@@ -7,6 +7,7 @@
 #include "resource_manager.h"
 #include "systems.h"
 
+
 // -------------------------------------------
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
@@ -47,6 +48,8 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   // 1. Reset ECS state
   InitEntityManager(&systems->entityManager);
 
+
+
   // ---------------------------------------------------------
   // Player Entity Setup
   // ---------------------------------------------------------
@@ -64,6 +67,8 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   AddHealthComponent(&systems->entityManager, player, 100.0f); // Vida máxima 100.0
   // Max Heat: 100.0, Heat/Shot: 2.0, Cooldown Rate: 10.0
   AddCockpitHUDComponent(&systems->entityManager, player, 100.0f, 2.0f, 10.0f); 
+
+
 
   // ---------------------------------------------------------
   // Weapon Setup 
@@ -87,6 +92,8 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
       0.1f    // burstRate 
   );
 
+
+
   // --- Right Laser Weapon ---
   Entity laserRight = CreateEntity(&systems->entityManager);
   Vector3 offsetR = { 1.70f, 5.50f, 1.50f }; // Inverted X
@@ -104,6 +111,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
       2,      // burstTotal
       0.1f    // burstRate 
   );
+
 
 
   // --- Left Missile Weapon ---
@@ -124,6 +132,9 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     20,     // burstTotal 
     0.115f   // burstRate 
   );
+
+
+
   // --- Right Missile Weapon ---
   //
   Entity missileRight = CreateEntity(&systems->entityManager);
@@ -141,6 +152,9 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     20,     // burstTotal 
     0.115f   // burstRate 
   );
+
+
+
   // ---------------------------------------------------------
   // Weapon Control System (Loadout)
   // ---------------------------------------------------------
@@ -162,6 +176,8 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   ctrl->weaponsGroupMap[3] = 1; // Group 2
   
   ctrl->activeGroup[0] = true;
+
+
 
   // ---------------------------------------------------------
   // Enemy Entity Setup
@@ -210,6 +226,36 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
     AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
   }
+
+
+
+  // ---------------------------------------------------------
+  // Structure Setup
+  // ---------------------------------------------------------
+
+  Model* turretMode1 = GetModel(&systems->resourceManager, MODEL_ID_TURRET_STRUCTURE);
+
+  if (turretMode1 != NULL) {
+
+    turretMode1->transform = MatrixScale(8.0f, 8.0f, 8.0f);
+
+    Entity structure = CreateEntity(&systems->entityManager);
+
+    // Posição no centro do mapa (0, 0, 0)
+    AddTransformComponent(&systems->entityManager, structure, (Vector3){ 0.0f, -15.0f, -500.0f });
+    
+    BoundingBox turretBox = {
+      (Vector3){ 0.0f, 0.0f, 0.0f }, 
+      (Vector3){ 0.0f, 0.0f, 0.0f } 
+    };
+    
+    AddCollisionComponent(&systems->entityManager, structure, turretBox, true, false);
+
+    // Adiciona o componente de renderização para que a estrutura seja desenhada
+    AddRenderComponent(&systems->entityManager, structure, turretMode1, WHITE);
+  }
+
+
 
   // ---------------------------------------------------------
   // Camera & Input Setup
@@ -261,12 +307,11 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   //Desenha o HUD e minimapa
   DrawHUDSystem(systems);
+  DrawCrosshair(systems);
   DrawMinimapSystem(systems, data);
 
 
 
-
-  Hudsystem(systems);
   DrawFPS(10, 10);
 }
 
@@ -296,25 +341,6 @@ static void DrawLevel(void)
       }
     }
   }
-
-  const Vector3 towerSize = (Vector3){ 16.0f, 32.0f, 16.0f };
-  const Color towerColor = (Color){ 150, 200, 200, 255 };
-
-  Vector3 towerPos = (Vector3){ 16.0f, 16.0f, 16.0f };
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  towerPos.x *= -1;
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  towerPos.z *= -1;
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
-
-  towerPos.x *= -1;
-  DrawCubeV(towerPos, towerSize, towerColor);
-  DrawCubeWiresV(towerPos, towerSize, DARKBLUE);
 
   // Red sun
   DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 0, 0, 255 });
