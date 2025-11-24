@@ -4,10 +4,7 @@
 struct Systems;
 
 #include <raylib.h>
-
-/*******************
- WORK IN PROGRESS  * 
- *******************/
+#include "event_manager.h"
 
 
 typedef struct{
@@ -15,6 +12,7 @@ typedef struct{
 } AudioManager;
 
 void InitAudioManager(struct Systems* systems);
+void AudioManagerOnEvent(struct Systems* systems, Event event);
 void UpdateAudioManager(struct Systems* systems);
 void ShutdownAudioManager();
 #endif

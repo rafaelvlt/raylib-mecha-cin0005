@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include "systems.h"
 #include "utility.h"
 
 void InitLoadoutScreen(struct Systems* systems, LoadoutData* data)

@@ -77,7 +77,12 @@ Thumbs.db
 # Raylib Examples
 lib/raylib/examples/
 
-=======
 # debug information files
 *.dwo
->>>>>>> 902377b02b6f5584e773d06f0b8021d0742444b5
+
+# LSP support
+compile_commands.json
+.clangd/
+.cache/
+
+

@@ -1,11 +1,12 @@
 #include <raylib.h>
 #include <raymath.h>
+#include "event_manager.h"
+#include "systems.h"
 #include "utility.h"
 #include "state_manager.h"
 #include "resource_manager.h"
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
+#include "ecs/entitymanager.h"
+#include "ecs/systems.h"
 
 int main(void) {
     // --- Window Initialization ---
@@ -16,6 +17,7 @@ int main(void) {
     InitConfigManager(&systems);
     InitAudioManager(&systems);
     InitResourceManager(&systems.resourceManager);
+    InitEventManager(&systems);
     InitStateManager(&systems, SCREEN_TITLE);
 
     SetTargetFPS(60);
@@ -32,6 +34,8 @@ int main(void) {
             ClearBackground(BLACK);
             DrawStateManager(&systems);
         EndDrawing();
+        
+        ClearEventManager(&systems.eventManager);
     }
 
     //Shutdown struct Systems
