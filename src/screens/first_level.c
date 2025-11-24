@@ -1,17 +1,25 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "systems.h"
+#include "map_loader.h"
+
+
+#define MAX_CLOUDS 100        
+#define CLOUD_AREA 1000.0f    
+#define CLOUD_HEIGHT 120.0f
 
 
 // -------------------------------------------
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
-static void DrawLevel(void);
+static void DrawLevel(struct Systems* systems, const Camera* camera);
+
 // -------------------------------------------
 // TEMPORARY FUNCTION ONLY FOR DEBUGGING 
 // -------------------------------------------
@@ -41,6 +49,27 @@ static void DrawTargetDebug(struct Systems* systems) {
       }
     }
   }
+}
+typedef struct {
+    Vector3 position;
+    float size;
+    float speedMultiplier;
+} CloudData;
+
+static CloudData clouds[MAX_CLOUDS];
+static void InitClouds() {
+    for (int i = 0; i < MAX_CLOUDS; i++) {
+        // ... (posição X/Z) ...
+        clouds[i].position = (Vector3){
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA),
+            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), 
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA)
+        };
+        clouds[i].size = (float)GetRandomValue(40, 80); 
+        
+        // NOVO: Velocidade aleatória (ex: 0.5x até 1.5x a velocidade base)
+        clouds[i].speedMultiplier = (float)GetRandomValue(5, 15) / 10.0f;
+    }
 }
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -267,6 +296,24 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   data->camera.projection = CAMERA_PERSPECTIVE;
 
   DisableCursor(); 
+    // 1. Reset ECS
+    InitEntityManager(&systems->entityManager);
+
+    // Camera Configuration
+    data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
+    data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
+    data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    data->camera.fovy = 60.0f;
+    data->camera.projection = CAMERA_PERSPECTIVE;
+
+    // Map Loading
+    MapContext context;
+    context.mainCamera = &data->camera;
+    
+    // Loads everything from level1.map file
+    LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
+    InitClouds();
+    DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -296,10 +343,9 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  ClearBackground(RAYWHITE);
-
+  ClearBackground(SKYBLUE);
   BeginMode3D(data->camera);
-  DrawLevel();         
+  DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
   DrawTargetDebug(systems);
   EffectSystem(systems, &data->camera);
@@ -320,28 +366,10 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 }
 
-static void DrawLevel(void)
-{
-  const int floorExtent = 25;
-  const float tileSize = 5.0f;
-  const Color tileColor1 = (Color){ 150, 200, 200, 255 };
+static void DrawLevel(struct Systems* systems, const Camera* camera) {
+    Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
+    if (terrain) DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
 
-  // Floor tiles
-  for (int y = -floorExtent; y < floorExtent; y++)
-  {
-    for (int x = -floorExtent; x < floorExtent; x++)
-    {
-      if ((y & 1) && (x & 1))
-      {
-        DrawPlane((Vector3){ x*tileSize, 0.0f, y*tileSize}, (Vector2){ tileSize, tileSize }, tileColor1);
-      }
-      else if (!(y & 1) && !(x & 1))
-      {
-        DrawPlane((Vector3){ x*tileSize, 0.0f, y*tileSize}, (Vector2){ tileSize, tileSize }, LIGHTGRAY);
-      }
-    }
-  }
+    DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
 
-  // Red sun
-  DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 0, 0, 255 });
-} 
+}
