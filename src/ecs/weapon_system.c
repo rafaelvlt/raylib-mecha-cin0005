@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include "resource_manager.h"
 #include "utility.h"
 #include "systems.h"
 #include "ecs/types.h"
@@ -10,9 +11,12 @@
 #define CONVERGENCE_POINT 75.0f
 
 // Helper functions
-static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats);
 static Vector3 GetCameraMuzzlePosition(Camera* camera, Vector3 localOffset);
 
+// Factory functions
+static Entity SpawnProjectileCore(struct Systems* systems, Vector3 pos, Vector3 direction, Entity owner, float speed, float damage, WeaponType type);
+static Entity SpawnLaserPulseProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats);
+static Entity SpawnMissileProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats, Entity target);
 
 void WeaponSystem(struct Systems* systems){
   const uint32_t mask = COMPONENT_WEAPON_CONTROL;
@@ -34,12 +38,51 @@ void WeaponSystem(struct Systems* systems){
           WeaponComponent* weapon = &em->weaponComponents[WeaponID];
 
           if (weapon->cooldownTimer > 0) weapon->cooldownTimer -= dt;
+          if (weapon->burstTimer > 0) weapon->burstTimer -= dt;
 
           int group = wc->weaponsGroupMap[idx];
 
-          if (wc->triggerPulled && wc->activeGroup[group] && weapon->cooldownTimer <= 0){
+          if (wc->triggerPulled && wc->activeGroup[group] && weapon->cooldownTimer <= 0 && weapon->burstCount == 0){
+
+            bool canFire = true;
+
+            if (weapon->type == WEAPON_MISSILE_LAUNCHER) {
+              if (wc->aimMode == AIM_MODE_CAMERA) {
+                if (wc->lockedTarget >= MAX_ENTITIES) {
+                  canFire = false;                
+                  weapon->cooldownTimer = 0.5;
+                }
+                else{
+                  Vector3 myPos = em->transformComponents[mecha].position;
+                  Vector3 targetPos = em->transformComponents[wc->lockedTarget].position;
+
+                  float distSq = Vector3LengthSqr(Vector3Subtract(targetPos, myPos));
+                  const float MIN_RANGE = 100.0f;
+
+                  if (distSq < (MIN_RANGE * MIN_RANGE)) {
+                    canFire = false;
+                    weapon->cooldownTimer = 0.5f;
+                  }
+                }
+                Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED); 
+                float finalVolume = systems->configManager.audioVolume;
+                SetSoundVolume(failSound, finalVolume);
+                float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
+                SetSoundPitch(failSound, pitch);
+                PlaySound(failSound);
+              }
+            }
+            if (canFire) {
+              weapon->burstCount = weapon->burstTotal; 
+              weapon->burstTimer = 0.0f;
+              weapon->cooldownTimer = 9999.0f;
+            }
+          }
+          if (weapon->burstCount > 0 && weapon->burstTimer <= 0){
+
             Vector3 spawnPos = {0};
             Vector3 shootDir = wc->aimDirection;
+            weapon->cooldownTimer = weapon->firingRate;
 
             if (wc->aimMode == AIM_MODE_CAMERA){
               PlayerControlComponent* pc = &em->playerControlComponents[mecha];
@@ -53,24 +96,48 @@ void WeaponSystem(struct Systems* systems){
               spawnPos = em->transformComponents[WeaponID].position;
             }
 
+            Entity targetToLock = MAX_ENTITIES;
 
-            weapon->cooldownTimer = weapon->firingRate;
-            SpawnProjectile(systems, spawnPos, shootDir, mecha, weapon);
+            if (wc->aimMode == AIM_MODE_CAMERA) {
+              targetToLock = wc->lockedTarget;
+            }
+
+            if (weapon->type == WEAPON_MISSILE_LAUNCHER) {
+              float spread = 0.8f; 
+              spawnPos.x += ((float)GetRandomValue(-10, 10)/10.0f) * spread;
+              spawnPos.y += ((float)GetRandomValue(-10, 10)/10.0f) * spread;
+            }
+
 
             // Event logic
             EventData data;
             data.weaponFired.owner = mecha;
             data.weaponFired.position = spawnPos; 
             data.weaponFired.direction = shootDir;
-            data.weaponFired.weapon = weapon->type;
+            data.weaponFired.weapon = weapon->type; 
+            if (weapon->type == WEAPON_PULSE_LASER){ 
+              data.weaponFired.projectileEntity = SpawnLaserPulseProjectile(systems, spawnPos, shootDir, mecha, weapon);
+            }
+            else if (weapon->type == WEAPON_MISSILE_LAUNCHER){
+              data.weaponFired.projectileEntity = SpawnMissileProjectile(systems, spawnPos, shootDir, mecha, weapon, targetToLock);
+            }
             PushEvent(systems, EVENT_WEAPON_FIRED, data);
-          }
 
+
+            weapon->burstCount--;
+
+            weapon->burstTimer = weapon->burstRate; 
+
+            if (weapon->burstCount <= 0) {
+              weapon->cooldownTimer = weapon->firingRate;
+            }
+          }
         }
       }
     }
   }
 }
+
 
 /* ----------------------------------------
  * Calculate where the gunshot shoud leave based on camera
@@ -101,41 +168,80 @@ static Vector3 GetCameraMuzzlePosition(Camera* camera, Vector3 localOffset) {
 /* -------------------------------------
  * Factory function to spawn projectiles
  * ------------------------------------- */
-
-static void SpawnProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats) {
+static Entity SpawnProjectileCore(struct Systems* systems, Vector3 pos, Vector3 direction, Entity owner, float speed, float damage, WeaponType type) {
   EntityManager* em = &systems->entityManager;
-  ResourceManager* rm = &systems->resourceManager;
 
   Entity bullet = CreateEntity(em);
-  if (bullet >= MAX_ENTITIES) return;
+  if (bullet >= MAX_ENTITIES) return MAX_ENTITIES;
 
-  // Gives the bullet position and direction, and rotates it in relation to the camera
-  // Fixes the problem with bullets facing the same side while leaving the muzzle
-  AddTransformComponent(em, bullet, position);
   Vector3 modelForward = { 0.0f, 0.0f, -1.0f }; 
   Vector3 targetDirection = Vector3Normalize(direction);
   Quaternion rotation = QuaternionFromVector3ToVector3(modelForward, targetDirection);
+
+  AddTransformComponent(em, bullet, pos);
   em->transformComponents[bullet].orientation = rotation;
 
-  // Gives the projectile speed, and increases it by the owner velocity too!
-  Vector3 velocity = Vector3Scale(direction, stats->projectileSpeed);
+  Vector3 velocity = Vector3Scale(direction, speed);
+
   if (em->componentMasks[owner] & COMPONENT_PHYSICS) {
     Vector3 ownerVel = em->physicsComponents[owner].velocity;
-    velocity = Vector3Add(velocity, ownerVel);
+    velocity = Vector3Add(velocity, ownerVel); // Adiciona velocidade do robô à bala
   }
-  // No air drag for the bullets
-  AddPhysicsComponent(em, bullet, velocity, 0.0f);
 
-  // Hitbox
+  AddPhysicsComponent(em, bullet, velocity, 0.0f); 
+
   BoundingBox box = (BoundingBox){(Vector3){-0.2f, -0.2f, -0.2f}, (Vector3){0.2f, 0.2f, 0.2f}};
-  AddCollisionComponent(em, bullet, box, false, true);
+  AddCollisionComponent(em, bullet, box, false, false); 
 
-  //Projectile behaviour
-  AddProjectileComponent(em, bullet, owner, stats->projectileDamage, true, 0.0f, (Effect)0, stats->type);
+  AddProjectileComponent(em, bullet, owner, damage, true, 0.0f, type);
 
-  // Gets model for visuals
-  Model* bulletModel = GetModel(rm, stats->projectileModelID);
+  return bullet;
+}
+
+static Entity SpawnLaserPulseProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats) {
+  EntityManager* em = &systems->entityManager;
+  ResourceManager* rm = &systems->resourceManager;
+
+  Entity bullet = SpawnProjectileCore(systems, position, direction, owner, stats->projectileSpeed, stats->projectileDamage, stats->type);
+  if (bullet >= MAX_ENTITIES) return MAX_ENTITIES; 
+
+  Model* bulletModel = GetModel(rm, MODEL_ID_PROJECTILE_PULSE_LASER);
   AddRenderComponent(em, bullet, bulletModel, LASER_BLUE);
   //Temporary component
   AddLifetimeComponent(em, bullet, 1.5f); 
+  return bullet;
 }
+
+static Entity SpawnMissileProjectile(struct Systems* systems, Vector3 position, Vector3 direction, Entity owner, WeaponComponent* stats, Entity target){
+
+  EntityManager* em = &systems->entityManager;
+  ResourceManager* rm = &systems->resourceManager;
+
+  // Javellin Effect 
+  Vector3 flatForward = (Vector3){direction.x, 0.0f, direction.z};
+  flatForward = Vector3Normalize(flatForward);
+
+  Vector3 upForce  = Vector3Scale((Vector3){0,1,0}, 0.45f); 
+  Vector3 fwdForce = Vector3Scale(flatForward, 1.0f);
+
+  Vector3 launchDir = Vector3Add(upForce, fwdForce);
+  launchDir = Vector3Normalize(launchDir);
+
+  Entity bullet = SpawnProjectileCore(systems, position, launchDir, owner, stats->projectileSpeed, stats->projectileDamage, stats->type);
+  if (bullet == MAX_ENTITIES) return MAX_ENTITIES;
+
+
+  if (target < MAX_ENTITIES) {
+    AddHomingComponent(em, bullet, target, 3.0f, stats->projectileSpeed, 0.8f);
+  }
+
+
+  AddLifetimeComponent(em, bullet, 7.5f); 
+
+  Model* missileModel = GetModel(rm, MODEL_ID_PROJECTILE_MISSILE_LAUNCHER);
+  AddRenderComponent(em, bullet, missileModel, ORANGE);
+
+  return bullet;
+}
+
+
