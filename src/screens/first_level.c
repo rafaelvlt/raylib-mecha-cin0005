@@ -144,21 +144,4 @@ static void DrawLevel(struct Systems* systems, const Camera* camera) {
     // 2. Sol
     DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
 
-    // 3. NUVENS
-    Texture* cloudTex = GetTexture(&systems->resourceManager, TEXTURE_ID_CLOUD_BILLBOARD);
-    if (cloudTex) {
-        rlDisableDepthMask(); 
-        
-        for (int i = 0; i < MAX_CLOUDS; i++) {
-            // Animação (Vento)
-            // Usa GetFrameTime() para movimento suave baseado em tempo
-            clouds[i].position.x += 2.0f * GetFrameTime();
-            // Wrap Around: Quando sai da área de desenho, volta para o outro lado
-            if (clouds[i].position.x > CLOUD_AREA) clouds[i].position.x = -CLOUD_AREA;
-
-            // Desenha a nuvem olhando para a câmera
-            DrawBillboard(*camera, *cloudTex, clouds[i].position, clouds[i].size, WHITE);
-        }
-        rlEnableDepthMask(); 
-    }
 }
