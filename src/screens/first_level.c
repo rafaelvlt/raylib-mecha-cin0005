@@ -58,7 +58,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   // Connects camera to player control. Sensitivity: 0.003, MaxSpeed: 15.0, TurnSpeed: 2.0
   AddPlayerControlComponent(&systems->entityManager, player, &data->camera);
-
+  
   BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
   AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
 
@@ -142,7 +142,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   // Weapon Control System (Loadout)
   // ---------------------------------------------------------
   AddWeaponControlComponent(&systems->entityManager, player, AIM_MODE_CAMERA);
-
+  
   WeaponControlComponent* ctrl = &systems->entityManager.weaponControlComponents[player];
 
   // Link entities to slots and groups
@@ -163,50 +163,16 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   // ---------------------------------------------------------
   // Enemy Entity Setup
   // ---------------------------------------------------------
+  
+  //ajustei a função para criar vários inimigos de forma mais simples
+  Vector3 scoutPoints1[4] = { {20.0f,0.0f,70.0f}, {-20.0f,0.0f,70.0f},{-20.0f,0.0f,30.0f}, {20.0f,0.0f,30.0f} }; //square patrol
+  Vector3 scoutPoints2[2] = { {15.0f,0.0f,80.0f}, {-15.0f,0.0f,80.0f} }; //line patrol
 
-  Model* enemyModel = GetModel(&systems->resourceManager, MODEL_ID_ENEMY_SCOUT);
-
-  if (enemyModel != NULL) {
-    // Apply scale fix to the shared model
-    enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
-
-    Entity enemy = CreateEntity(&systems->entityManager);
-
-    AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 0.0f, 3.0f, -50.0f });
-    AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
-
-    BoundingBox enemyBox = {
-      (Vector3){ -3.0f, 0.0f, -6.0f }, // Largura 4m, 
-      (Vector3){  3.0f, 4.0f,  12.5f }  // Altura 9m
-    };
-    AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
-
-    AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-    AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
-
-    AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
-  }
-
-  if (enemyModel != NULL) {
-    // Apply scale fix to the shared model
-    enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
-
-    Entity enemy = CreateEntity(&systems->entityManager);
-
-    AddTransformComponent(&systems->entityManager, enemy, (Vector3){ 10.0f, 3.0f, -50.0f });
-    AddPhysicsComponent(&systems->entityManager, enemy, (Vector3){0,0,0}, 0.90f);
-
-    BoundingBox enemyBox = {
-      (Vector3){ -3.0f, 0.0f, -6.0f }, // Largura 4m, 
-      (Vector3){  3.0f, 4.0f,  12.5f }  // Altura 9m
-    };
-    AddCollisionComponent(&systems->entityManager, enemy, enemyBox, false, false);
-
-    AddHealthComponent(&systems->entityManager, enemy, 100.0f);
-    AddAIControlComponent(&systems->entityManager, enemy, 50.0f, 10.0f);
-
-    AddRenderComponent(&systems->entityManager, enemy, enemyModel, WHITE);
-  }
+  // Creating multiple scouts with patrol points
+  createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints1[0], scoutPoints1, 4);
+  createEnemyScout(&systems->resourceManager,&systems->entityManager, scoutPoints2[0], scoutPoints2, 2);
+  
+  createEnemyCombatent(&systems->resourceManager,&systems->entityManager, (Vector3){ 0.0f, 0.0f, 50.0f });
 
   // ---------------------------------------------------------
   // Camera & Input Setup
