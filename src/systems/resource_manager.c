@@ -62,18 +62,18 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
 
   // 1. Carregar Textura de Grama
-  resourceManager->textures[TEXTURE_ID_GRASS] = LoadTexture("resources/textures/grass.png");
+  resourceManager->textures[TEXTURE_ID_SAND] = LoadTexture("resources/textures/sand.png");
     // Isso é CRUCIAL: Faz a textura repetir em vez de esticar
-  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_GRASS]);
+  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_SAND]);
 
     // Passo B: Configurar Filtro Anisotrópico
     // Faz a textura ficar nítida mesmo quando vista de ângulo raso (chão indo pro horizonte)
     // Se o PC não aguentar 16X, a Raylib reduz automaticamente.
-  SetTextureFilter(resourceManager->textures[TEXTURE_ID_GRASS], TEXTURE_FILTER_ANISOTROPIC_16X);
+  SetTextureFilter(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_FILTER_ANISOTROPIC_16X);
     
     // Passo C: Repetição (Wrap)
-  SetTextureWrap(resourceManager->textures[TEXTURE_ID_GRASS], TEXTURE_WRAP_REPEAT);
-  SetTextureWrap(resourceManager->textures[TEXTURE_ID_GRASS], TEXTURE_WRAP_REPEAT); 
+  SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT);
+  SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT); 
 
     // 2. Gerar a Malha do Terreno
     // Tamanho: 200x200 unidades, Resolução: 10x10 polígonos
@@ -93,16 +93,33 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
     
     // Aplicar a textura
-  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_GRASS];
+  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_SAND];
 
     // =======================================================
     // CORREÇÃO CRÍTICA AQUI
     // =======================================================
     // Define a cor base como BRANCO. Sem isso, a textura fica multiplicada por 0 (preto).
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-  Image cloudImg = GenImageGradientRadial(256, 256, 0.0f, (Color){255, 255, 255, 200}, (Color){255, 255, 255, 0});
-  resourceManager->textures[TEXTURE_ID_CLOUD_BILLBOARD] = LoadTextureFromImage(cloudImg);
-  UnloadImage(cloudImg); 
+  Image noiseImage = GenImagePerlinNoise(256, 256, 8, 8, 1.0f);
+  Image cloudAlphaImage = GenImageColor(256, 256, BLANK);
+  for (int y = 0; y < noiseImage.height; y++) {
+    for (int x = 0; x < noiseImage.width; x++) {
+        Color pixel = GetImageColor(noiseImage, x, y);
+        // Quanto mais claro o pixel do ruído (mais próximo de 255), mais opaco ele será
+        // Podemos ajustar um threshold ou curva aqui se quiser nuvens mais densas
+        
+        // Exemplo: Usar o valor de RED (ou qualquer canal) para o Alpha
+        Color newColor = (Color){255, 255, 255, pixel.r}; // Nuvens brancas, alfa baseado no ruído
+        ImageDrawPixel(&cloudAlphaImage, x, y, newColor);
+    }
+}
+
+// 4. Carrega a textura com transparência
+resourceManager->textures[TEXTURE_ID_CLOUD_BILLBOARD] = LoadTextureFromImage(cloudAlphaImage);
+
+// 5. Descarrega as imagens temporárias
+UnloadImage(noiseImage); 
+UnloadImage(cloudAlphaImage);
 }
 
 void ShutdownResourceManager(ResourceManager* resourceManager) {
