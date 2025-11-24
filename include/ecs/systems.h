@@ -12,6 +12,10 @@ void MovementSystem(struct Systems* systems);
 void RenderSystem(struct Systems* systems);
 void EffectSystem(struct Systems* systems, Camera* camera);
 
+//Draw HUD
+void DrawHUDSystem(struct Systems* systems);
+
+
 // Deals with all types of collisions
 void CollisionSystem(struct Systems* systems);
 

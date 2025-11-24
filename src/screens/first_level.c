@@ -11,7 +11,6 @@
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
 static void DrawLevel(void);
-
 // -------------------------------------------
 // TEMPORARY FUNCTION ONLY FOR DEBUGGING 
 // -------------------------------------------
@@ -61,6 +60,10 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   BoundingBox playerBounds = (BoundingBox){(Vector3){-1,-1,-1}, (Vector3){1,2,1}};
   AddCollisionComponent(&systems->entityManager, player, playerBounds, false, false);
+
+  AddHealthComponent(&systems->entityManager, player, 100.0f); // Vida máxima 100.0
+  // Max Heat: 100.0, Heat/Shot: 2.0, Cooldown Rate: 10.0
+  AddCockpitHUDComponent(&systems->entityManager, player, 100.0f, 2.0f, 10.0f); 
 
   // ---------------------------------------------------------
   // Weapon Setup 
@@ -191,6 +194,12 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawTargetDebug(systems);
   EffectSystem(systems, &data->camera);
   EndMode3D();
+
+  //Desenha o HUD e minimapa
+  DrawHUDSystem(systems);
+  DrawMinimapSystem(systems, data);
+
+
 
 
   DrawFPS(10, 10);
