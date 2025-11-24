@@ -74,6 +74,7 @@ void InitResourceManager(ResourceManager* resourceManager) {
     SetTextureFilter(resourceManager->textures[TEXTURE_ID_SMOKE + i], TEXTURE_FILTER_BILINEAR);
   }
 
+  resourceManager->textures[TEXTURE_ID_CROSSHAIR_SPRITE] = LoadTexture("resources/textures/crosshair.png");
 
   // ---------------------------------------------------------
   // RENDER TEXTURES 

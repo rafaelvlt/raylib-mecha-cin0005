@@ -256,7 +256,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   EffectSystem(systems, &data->camera);
   EndMode3D();
 
-
+  Hudsystem(systems);
   DrawFPS(10, 10);
 }
 

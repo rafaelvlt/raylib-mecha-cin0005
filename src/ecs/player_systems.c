@@ -10,8 +10,8 @@
 #define MAX_YAW_RAD           1.4f
 #define MAX_PITCH_RAD         0.8f
 #define THROTTLE_LERP_SPEED   4.5f 
-#define TURN_LERP_SPEED       1.0f
-#define VELOCITY_LERP_SPEED  2.0f
+#define TURN_LERP_SPEED       2.0f
+#define VELOCITY_LERP_SPEED   2.0f
 // Centering
 #define CENTERING_TORSO_LEGS_SPEED 5.0f
 #define CENTERING_LEGS_TORSO_SPEED 4.0f
@@ -23,11 +23,11 @@
 #define MAX_LOCK_DISTANCE     1000.0f * 1000.0f
 // Animation
 #define MECH_HEIGHT     6.5f  
-#define BOB_FREQUENCY   1.10f
+#define BOB_FREQUENCY   1.5f
 #define BOB_AMPLITUDE   0.2f
 #define SWAY_SPEED      4.5f
 #define LEAN_TURN       -0.06f
-#define LEAN_MOUSE      0.005f
+#define LEAN_MOUSE      0.0f
 #define LEAN_MOVE       0.02f  
 
 // Input function
