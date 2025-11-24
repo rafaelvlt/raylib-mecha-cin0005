@@ -1,6 +1,5 @@
 #include "resource_manager.h"
 #include <raylib.h>
-#include <raymath.h>
 #include "systems.h"
 #include "utility.h"
 #include "raymath.h"
@@ -13,7 +12,6 @@ Don't forget to add the ID to the enum              *
 
 
 void InitResourceManager(ResourceManager* resourceManager) {
-
 
   // ---------------------------------------------------------
   // MODELS 
@@ -87,49 +85,38 @@ void InitResourceManager(ResourceManager* resourceManager) {
   GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_BASE_HQ]);
   SetTextureFilter(resourceManager->textures[TEXTURE_ID_BASE_HQ], TEXTURE_FILTER_ANISOTROPIC_16X);
 
-  // Carregar Textura de Grama
   resourceManager->textures[TEXTURE_ID_SAND] = LoadTexture("resources/textures/sand.png");
   GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_SAND]);
 
-    // Configurar Filtro Anisotrópico
   SetTextureFilter(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_FILTER_ANISOTROPIC_16X);
     
-    // Repetição (Wrap)
   SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT);
   SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT); 
 
-    // Gerar a Malha do Terreno
   Mesh floorMesh = GenMeshPlane(2000.0f, 2000.0f, 20, 20);
 
-    // Multiplicamos as coordenadas UV para que a grama se repita 400 vezes
-  if (floorMesh.texcoords) {
-      for (int i = 0; i < floorMesh.vertexCount * 2; i++) {
-            floorMesh.texcoords[i] *= 400.0f;
-        }
-    }
+
+if (floorMesh.texcoords) {
+    for (int i = 0; i < floorMesh.vertexCount * 2; i++) {
+          floorMesh.texcoords[i] *= 400.0f;
+      }
+  }
   Mesh hqMesh = GenMeshCube(50.0f, 40.0f, 40.0f);
   Mesh doorMesh = GenMeshCube(15.0f, 12.0f, 1.0f);
   resourceManager->models[MODEL_ID_BASE_DOOR] = LoadModelFromMesh(doorMesh); 
   resourceManager->models[MODEL_ID_BASE_DOOR].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){20, 20, 20, 255};
     
-    // Tiling: Para a textura não ficar esticada gigante, vamos fazê-la repetir
-    // Isso faz a textura se repetir 4 vezes horizontalmente e 2 verticalmente
-    if (hqMesh.texcoords) {
-         for (int i = 0; i < hqMesh.vertexCount * 2; i++) {
-            hqMesh.texcoords[i] *= 4.0f; 
-        }
-    }
+    // Tiling
+  if (hqMesh.texcoords) {
+        for (int i = 0; i < hqMesh.vertexCount * 2; i++) {
+          hqMesh.texcoords[i] *= 4.0f; 
+      }
+  }
 
-    // 4. Criar o Modelo
+    // Creates Model and apply texture
   resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
-    
-    // Aplicar a textura
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_SAND];
 
-    // =======================================================
-    // CORREÇÃO CRÍTICA AQUI
-    // =======================================================
-    // Define a cor base como BRANCO. Sem isso, a textura fica multiplicada por 0 (preto).
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
   resourceManager->models[MODEL_ID_BASE_HQ] = LoadModelFromMesh(hqMesh);
   resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];

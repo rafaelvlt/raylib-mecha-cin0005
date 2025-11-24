@@ -61,7 +61,7 @@ static void InitClouds() {
         // ... (posição X/Z) ...
         clouds[i].position = (Vector3){
             (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA),
-            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), // <--- Aumenta o range de altura (entre 70m e 170m)
+            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), 
             (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA)
         };
         clouds[i].size = (float)GetRandomValue(40, 80); 
@@ -70,6 +70,7 @@ static void InitClouds() {
         clouds[i].speedMultiplier = (float)GetRandomValue(5, 15) / 10.0f;
     }
 }
+
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
     // 1. Reset ECS
@@ -146,7 +147,7 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 static void DrawLevel(struct Systems* systems, const Camera* camera) {
     Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
     if (terrain) DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
-    
+
     DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
 
 }
