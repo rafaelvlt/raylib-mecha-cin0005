@@ -6,7 +6,7 @@
 #include "types.h"
 
 // Definition for maximum array size, and typedef for UID
-#define MAX_ENTITIES 1024
+#define MAX_ENTITIES 2048
 #define MAX_WEAPONS_EQUIP 8
 #define MAX_WEAPONS_GROUPS 5
 
@@ -69,6 +69,7 @@ typedef struct {
   bool isMoving;
   bool isRotating; 
   bool isZooming;
+  bool wasZooming;
   bool centeringTorsotoLegs;
   bool centeringLegstoTorso;
   bool lockTargetRequested;
@@ -93,19 +94,20 @@ typedef struct  {
 
   // State
   float cooldownTimer;
-  
+  int burstCount;
+  float burstTimer;
+
+
   // Attributes
   float firingRate;
   float projectileSpeed;
   float projectileDamage;
   float range;
+  float burstTotal;
+  float burstRate;
 
   // TBD HEAT
   float heatGenerated;
-  
-  // Animation
-  AssetSoundID launchSoundID;
-  AssetModelID projectileModelID;
 }  WeaponComponent;
 
 // Used to prevent own death
@@ -117,7 +119,6 @@ typedef struct  {
   //Animation
   float blastRadius;
   WeaponType type;
-  Effect hitEffectID;
 } ProjectileComponent;
 
 typedef struct{
@@ -158,14 +159,36 @@ typedef struct  {
 } CockpitHUDComponent;
 
 typedef struct {
-  float startSize; 
-  float endSize;   
+  EffectRenderType type;
   Color color;
-  AssetTextureID textureID; // If textureID = 0, procedural 
-  int columns;
-  int rows;
+  float startSize;
+  float endSize;
+  float rotation;
+  bool loop;
+
   int totalFrames;
+
+  union {
+    struct {
+      AssetTextureID id;
+      int columns;
+      int rows;
+    } sheet;
+
+    struct {
+      AssetTextureID frameIDstart; 
+    } arr;
+
+  } data;
 } EffectComponent;
+
+typedef struct {
+  Entity target; 
+  float turnSpeed;
+  float speed;   
+  float armingTime;
+  float timer;    
+} HomingComponent;
 
 /* =======================================
   Bitmask for querying by the systems
@@ -187,6 +210,7 @@ typedef enum {
   COMPONENT_COCKPIT_HUD = 1 << 11,
   COMPONENT_COLLISION = 1 << 12,
   COMPONENT_EFFECT = 1 << 13,
+  COMPONENT_HOMING = 1 << 14,
 } ComponentMask;
 
 #endif //components.h

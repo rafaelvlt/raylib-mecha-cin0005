@@ -8,7 +8,7 @@
 
 // Movement
 #define MAX_YAW_RAD           1.4f
-#define MAX_PITCH_RAD         1.4f
+#define MAX_PITCH_RAD         0.8f
 #define THROTTLE_LERP_SPEED   4.5f 
 #define TURN_LERP_SPEED       1.0f
 #define VELOCITY_LERP_SPEED  2.0f
@@ -71,7 +71,8 @@ void PlayerAudioSystem(struct Systems* systems) {
 
   EntityManager* em = &systems->entityManager;
 
-  Sound sfxFootstep  = systems->resourceManager.sounds[SOUND_ID_MECHA_FOOTSTEP];
+  Sound sfxFootstep  = *GetSound(&systems->resourceManager, SOUND_ID_MECHA_FOOTSTEP);
+  Sound sfxZoom = *GetSound(&systems->resourceManager, SOUND_ID_MECHA_ZOOM);
 
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & mask) == mask) {
@@ -100,9 +101,24 @@ void PlayerAudioSystem(struct Systems* systems) {
         }
       }
 
-      // Updates timer variables
+      if (p->isZooming && !p->wasZooming) {
+
+        float vol = systems->configManager.audioVolume;
+        SetSoundVolume(sfxZoom, vol);
+        SetSoundPitch(sfxZoom, 1.0f + ((float)GetRandomValue(-5, 5)/100.0f));
+
+        if (!IsSoundPlaying(sfxZoom)) {
+          PlaySound(sfxZoom);
+        }
+      }
+
+
+      // Updates timer/state variables
       if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer; else p->lastHeadTimer = p->headTimer;
+      p->wasZooming = p->isZooming;
     }
+    
+
   }
 }
 
