@@ -45,12 +45,14 @@ static AssetSoundID GetGunfightSoundByType(EventType et, WeaponType wt){
   if (et == EVENT_WEAPON_FIRED){
     switch (wt) {
       case WEAPON_PULSE_LASER:   return SOUND_ID_PULSE_LASER_FIRING;
+      case WEAPON_MISSILE_LAUNCHER: return SOUND_ID_MISSILE_LAUNCHER_FIRING;
       default: return SOUND_ID_COUNT;
     }
   }
   else{
     switch (wt) {
       case WEAPON_PULSE_LASER:  return SOUND_ID_PULSE_LASER_IMPACT;
+      case WEAPON_MISSILE_LAUNCHER: return SOUND_ID_MISSILE_LAUNCHER_IMPACT;
       default: return SOUND_ID_COUNT;
     }
   }
