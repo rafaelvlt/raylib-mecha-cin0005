@@ -17,6 +17,7 @@ Entity CreateEntity(EntityManager* em) {
 
   for (int i = 0; i < MAX_ENTITIES; i++) {
 
+    // Find the first available spot by checking for a none bitmask
     if (em->componentMasks[i] == COMPONENT_NONE) {
       // increases numEntities if the new ID is higher than the largest being used
       if (i >= em->numEntities) {
@@ -127,6 +128,7 @@ void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Came
   player->isMoving = false;
   player->isRotating = false;
   player->isZooming = false;
+  player->wasZooming = false;
   player->lockTargetRequested = false;
 
   entityManager->componentMasks[entity] |= COMPONENT_PLAYER_CONTROL;
@@ -141,27 +143,32 @@ void AddHealthComponent(EntityManager* entityManager, Entity entity, float healt
   entityManager->componentMasks[entity] |= COMPONENT_HEALTH;
 }
 
-void AddWeaponComponent
-(EntityManager* entityManager, Entity entity, WeaponType type,
- float firingRate, float projectileSpeed,
- float projectileDamage,  float range,  float heatGenerated,
- AssetSoundID launchSoundID,  AssetModelID projectileModelID
- ) {
-  WeaponComponent* weapon = &entityManager->weaponComponents[entity];
+void AddWeaponComponent(EntityManager* em, Entity entity, WeaponType type, 
+                        float fireRate, float projSpeed, float damage, float range, float heat, 
+                        int burstTotal, float burstRate)
+{
 
-  weapon->type = type;
-  weapon->firingRate = firingRate;
-  weapon->projectileSpeed = projectileSpeed;
-  weapon->projectileDamage = projectileDamage;
-  weapon->range = range;
-  weapon->heatGenerated = heatGenerated;
-  weapon->launchSoundID = launchSoundID;
-  weapon->projectileModelID = projectileModelID;
+  WeaponComponent* w = &em->weaponComponents[entity];
+
+  // base Stats
+  w->type = type;
+  w->firingRate = fireRate;
+  w->projectileSpeed = projSpeed;
+  w->projectileDamage = damage;
+  w->range = range;
+  w->heatGenerated = heat;
+
+  // Burst stats
+  w->burstTotal = burstTotal;
+  w->burstRate = burstRate;
 
 
-  weapon->cooldownTimer = 0.0f;
+  // Zero-init
+  w->cooldownTimer = 0.0f;
+  w->burstCount = 0;     
+  w->burstTimer = 0.0f;
 
-  entityManager->componentMasks[entity] |= COMPONENT_WEAPON;
+  em->componentMasks[entity] |= COMPONENT_WEAPON;
 }
 
 void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float lifetime){
@@ -173,14 +180,14 @@ void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float li
   entityManager->componentMasks[entity] |= COMPONENT_LIFETIME;
 }
 
-void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, Effect hitEffectID, WeaponType type){
+void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius,  WeaponType type){
   ProjectileComponent* projectile = &entityManager->projectileComponents[entity];
 
   projectile->owner = owner;
   projectile->damage = damage;
   projectile->destroyOnHit = destroyOnHit;
   projectile->blastRadius = blastRadius;
-  projectile->hitEffectID = hitEffectID;
+  projectile->type = type;
 
   entityManager->componentMasks[entity] |= COMPONENT_PROJECTILE;
 }
@@ -208,7 +215,7 @@ void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimM
   entityManager->componentMasks[entity] |= COMPONENT_WEAPON_CONTROL;
 }
 
-void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range) {
+void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range, Vector3* patrolPoints, int numPatrolPoints) {
   AIControlComponent* ai = &entityManager->aiControlComponents[entity];
 
   ai->target = MAX_ENTITIES;
@@ -216,6 +223,9 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
   ai->attackRange = range;
   ai->timeSinceLastAction = 0.0f;
   ai->state = 0;
+  ai->patrolPoints = patrolPoints;
+  ai->numPatrolPoints = numPatrolPoints;
+  ai->currentPatrolIndex = 0;
 
   entityManager->componentMasks[entity] |= COMPONENT_AI_CONTROL;
 }
@@ -231,22 +241,125 @@ void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float m
   entityManager->componentMasks[entity] |= COMPONENT_COCKPIT_HUD;
 }
 
-void AddEffectComponent(EntityManager* em, Entity entity, float startSize, float endSize, Color color, AssetTextureID texID, int cols, int rows) {
-  EffectComponent* fx = &em->effectComponents[entity];
+static EffectComponent* AddBaseEffect(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, bool looping) {
+    EffectComponent* fx = &em->effectComponents[entity];
+    fx->startSize = startSize;
+    fx->endSize = endSize;
+    fx->color = color;
+    fx->rotation = 0.0f;
+    fx->loop = looping;
+    em->componentMasks[entity] |= COMPONENT_EFFECT;
+    
+    AddLifetimeComponent(em, entity, duration);
+    
+    return fx;
+}
 
-  fx->startSize = startSize;
-  fx->endSize = endSize;
-  fx->color = color;
-
-  fx->textureID = texID;
-  fx->columns = cols;
-  fx->rows = rows;
-
-  if (texID != TEXTURE_ID_COUNT && cols > 0 && rows > 0) {
+void AddEffectSheet(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, 
+                     AssetTextureID texID, int cols, int rows, bool looping) {
+    
+    EffectComponent* fx = AddBaseEffect(em, entity, startSize, endSize, color, duration, looping);
+    
+    fx->type = FX_TYPE_SPRITESHEET;
     fx->totalFrames = cols * rows;
-  } else {
-    fx->totalFrames = 0;
-  }
+    
+    // Preenche a Union
+    fx->data.sheet.id = texID;
+    fx->data.sheet.columns = cols;
+    fx->data.sheet.rows = rows;
+}
 
-  em->componentMasks[entity] |= COMPONENT_EFFECT;
+void AddEffectArray(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, 
+                     AssetTextureID id, int count, bool looping) {
+                         
+    EffectComponent* fx = AddBaseEffect(em, entity, startSize, endSize, color, duration, looping);
+    
+    fx->type = FX_TYPE_ARRAY;
+    fx->totalFrames = count;
+    fx->data.arr.frameIDstart = id;
+}
+
+void AddHomingComponent(EntityManager* em, Entity entity, Entity target, float turnSpeed, float speed, float armingTime){
+  HomingComponent* hm = &em->homingComponents[entity];
+
+  hm->target = target;
+  hm->turnSpeed = turnSpeed;
+  hm->speed = speed;
+  hm->armingTime = armingTime;
+  hm->timer = 0.0f;
+
+  em->componentMasks[entity] |= COMPONENT_HOMING;
+}
+
+void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints){
+
+  Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT);
+
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
+
+        Entity scout = CreateEntity(entityManager);
+
+        AddTransformComponent(entityManager, scout, position);
+        AddPhysicsComponent(entityManager, scout, (Vector3){0,0,0}, 0.90f);
+
+        BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
+        AddCollisionComponent(entityManager, scout, enemyBox, false, false);
+
+        AddHealthComponent(entityManager, scout, 100.0f);
+        AddAIControlComponent(entityManager, scout, 50.0f, 10.0f, scoutPoints, numPoints);
+
+        AddRenderComponent(entityManager, scout, enemyModel, WHITE);
+
+        Entity weaponLeft = CreateEntity(entityManager); // Scout weapon
+        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+
+        AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
+        AddAttachmentComponent(entityManager, weaponLeft, scout, offsetS, QuaternionIdentity());
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_LASER_BEAM, 1.0f, 100.0f, 2.0f, 300.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_PROJECTILE_PULSE_LASER);
+
+        AddWeaponControlComponent(entityManager, scout, AIM_MODE_PHYSICAL);
+        WeaponControlComponent *wc = &entityManager->weaponControlComponents[scout];
+        wc->weaponsSlots[0] = weaponLeft;
+        wc->weaponsGroupMap[0] = 0; // Group 1  
+        wc->activeGroup[0] = true;
+    }
+}
+
+void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position){
+
+  Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT); // Using same model for placeholder
+
+    if (enemyModel != NULL) {
+        // Apply scale fix to the shared model
+        enemyModel->transform = MatrixScale(1.0f, 1.0f, 1.0f);
+
+        Entity combatent = CreateEntity(entityManager);
+
+        AddTransformComponent(entityManager, combatent, position);
+        AddPhysicsComponent(entityManager, combatent, (Vector3){0,0,0}, 0.90f);
+
+        BoundingBox enemyBox = GetModelBoundingBox(*enemyModel); 
+        AddCollisionComponent(entityManager, combatent, enemyBox, false, false);
+
+        AddHealthComponent(entityManager, combatent, 150.0f);
+        AddAIControlComponent(entityManager, combatent, 150.0f, 100.0f, NULL, 0); // No patrol points for combatent
+
+        AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
+
+        
+        Entity weaponLeft = CreateEntity(entityManager); // combatent weapon
+        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+
+        AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
+        AddAttachmentComponent(entityManager, weaponLeft, combatent, offsetS, QuaternionIdentity());
+        AddWeaponComponent(entityManager, weaponLeft, WEAPON_MACHINE_GUN, 0.2f, 120.0f, 3.0f, 100.0f, 0.0f, SOUND_ID_COUNT, MODEL_ID_DUMMY);
+
+        AddWeaponControlComponent(entityManager, combatent, AIM_MODE_PHYSICAL);
+        WeaponControlComponent *wc = &entityManager->weaponControlComponents[combatent];
+        wc->weaponsSlots[0] = weaponLeft;
+        wc->weaponsGroupMap[0] = 0; // Group 1  
+        wc->activeGroup[0] = true;
+    }
 }

@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
@@ -7,7 +8,7 @@
 #include "resource_manager.h"
 #include "systems.h"
 #include "map_loader.h"
-#include <rlgl.h> // <--- IMPORTANTE: Necessário para rlDisableDepthMask
+
 
 #define MAX_CLOUDS 100        
 #define CLOUD_AREA 1000.0f    
@@ -74,23 +75,21 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     // 1. Reset ECS
     InitEntityManager(&systems->entityManager);
 
-    // 2. Configura Câmera (Necessário passar para o Loader)
+    // Camera Configuration
     data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
     data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
     data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     data->camera.fovy = 60.0f;
     data->camera.projection = CAMERA_PERSPECTIVE;
 
-    // 3. Prepara Contexto e Carrega o Mapa
+    // Map Loading
     MapContext context;
     context.mainCamera = &data->camera;
     
-    // Carrega tudo (Player, Armas, Inimigos, Base) do arquivo de texto
+    // Loads everything from level1.map file
     LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
-
-    // 4. Input
-    DisableCursor(); 
     InitClouds();
+    DisableCursor(); 
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -101,6 +100,8 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   PlayerControlSystem(systems);
   AIControlSystem(systems);
   LifetimeSystem(systems); 
+  MissileSystem(systems);
+  TrailSystem(systems);
   MovementSystem(systems);  
   AttachmentSystem(systems);
   WeaponSystem(systems); 
@@ -126,7 +127,14 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   EffectSystem(systems, &data->camera);
   EndMode3D();
 
+  //Desenha o HUD e minimapa
+  DrawHUDSystem(systems);
+  DrawMinimapSystem(systems, data);
 
+
+
+
+  Hudsystem(systems);
   DrawFPS(10, 10);
 }
 
@@ -135,13 +143,10 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 }
 
-// A função agora recebe a Câmera
 static void DrawLevel(struct Systems* systems, const Camera* camera) {
-    // 1. Terreno
     Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
     if (terrain) DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
     
-    // 2. Sol
     DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
 
 }

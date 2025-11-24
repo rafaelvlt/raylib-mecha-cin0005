@@ -1,5 +1,6 @@
 #include "resource_manager.h"
 #include <raylib.h>
+#include <raymath.h>
 #include "systems.h"
 #include "utility.h"
 #include "raymath.h"
@@ -12,12 +13,12 @@ Don't forget to add the ID to the enum              *
 
 
 void InitResourceManager(ResourceManager* resourceManager) {
-  
+
 
   // ---------------------------------------------------------
   // MODELS 
   // ---------------------------------------------------------
-  
+
   //Mechas
   resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
   resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
@@ -28,6 +29,13 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->models[MODEL_ID_PROJECTILE_PULSE_LASER] = LoadModelFromMesh(pulseLaserGunProjectileMesh);
   // Lighting up
   resourceManager->models[MODEL_ID_PROJECTILE_PULSE_LASER].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+
+  //Missile
+  Mesh missileMesh = GenMeshCone(0.3f, 1.0f, 4);
+  Matrix rotation = MatrixRotateX(-90 * DEG2RAD);
+  Model missileModel = LoadModelFromMesh(missileMesh);
+  missileModel.transform = rotation;
+  resourceManager->models[MODEL_ID_PROJECTILE_MISSILE_LAUNCHER] = missileModel;
 
   // Dummy
   Mesh cubmesh = GenMeshCube(3.0f, 3.0f, 3.0f);
@@ -43,9 +51,14 @@ void InitResourceManager(ResourceManager* resourceManager) {
   // SOUNDS 
   // ---------------------------------------------------------
   resourceManager->sounds[SOUND_ID_MECHA_FOOTSTEP] = LoadSound("resources/sounds/mecha_footstep.wav");
+  resourceManager->sounds[SOUND_ID_MECHA_ZOOM] = LoadSound("resources/sounds/zoom.wav");
 
   resourceManager->sounds[SOUND_ID_PULSE_LASER_FIRING] = LoadSound("resources/sounds/pulse_laser_firing.wav");
   resourceManager->sounds[SOUND_ID_PULSE_LASER_IMPACT] = LoadSound("resources/sounds/pulse_laser_impact.wav");
+
+  resourceManager->sounds[SOUND_ID_MISSILE_LAUNCHER_FIRING] = LoadSound("resources/sounds/missile_launcher_firing.wav");
+  resourceManager->sounds[SOUND_ID_MISSILE_LAUNCHER_IMPACT] = LoadSound("resources/sounds/missile_launcher_impact.wav");
+  resourceManager->sounds[SOUND_ID_MISSILE_FAILED] = LoadSound("resources/sounds/missile_failed.wav");
   // ---------------------------------------------------------
   // MUSIC 
   // ---------------------------------------------------------
@@ -54,8 +67,17 @@ void InitResourceManager(ResourceManager* resourceManager) {
   // ---------------------------------------------------------
   // TEXTURES 
   // ---------------------------------------------------------
-  resourceManager->textures[TEXTURE_ID_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/explosion.png");
-  
+  resourceManager->textures[TEXTURE_ID_LASER_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/laser_pulse_explosion.png");
+  resourceManager->textures[TEXTURE_ID_MISSILE_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/missile_explosion.png");
+  // Smoke
+  for (int i = 0; i < 10; i++) {
+    const char* fileName = TextFormat("resources/textures/smoke_%02d.png", i + 1);
+    resourceManager->textures[TEXTURE_ID_SMOKE + i] = LoadTexture(fileName);
+    SetTextureFilter(resourceManager->textures[TEXTURE_ID_SMOKE + i], TEXTURE_FILTER_BILINEAR);
+  }
+
+  resourceManager->textures[TEXTURE_ID_CROSSHAIR_SPRITE] = LoadTexture("resources/textures/crosshair.png");
+
   // ---------------------------------------------------------
   // RENDER TEXTURES 
   // ---------------------------------------------------------
