@@ -51,9 +51,24 @@ static void DrawTargetDebug(struct Systems* systems) {
 typedef struct {
     Vector3 position;
     float size;
+    float speedMultiplier;
 } CloudData;
 
 static CloudData clouds[MAX_CLOUDS];
+static void InitClouds() {
+    for (int i = 0; i < MAX_CLOUDS; i++) {
+        // ... (posição X/Z) ...
+        clouds[i].position = (Vector3){
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA),
+            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), // <--- Aumenta o range de altura (entre 70m e 170m)
+            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA)
+        };
+        clouds[i].size = (float)GetRandomValue(40, 80); 
+        
+        // NOVO: Velocidade aleatória (ex: 0.5x até 1.5x a velocidade base)
+        clouds[i].speedMultiplier = (float)GetRandomValue(5, 15) / 10.0f;
+    }
+}
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
     // 1. Reset ECS
@@ -75,6 +90,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
     // 4. Input
     DisableCursor(); 
+    InitClouds();
 }
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
