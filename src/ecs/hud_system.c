@@ -16,7 +16,8 @@
 // Protótipo local
 static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit);
 
-// ... (DrawHUDSystem e DrawBar mantidos iguais, focando apenas no Minimapa abaixo) ...
+
+
 
 void DrawHUDSystem(struct Systems* systems) {
     EntityManager* em = &systems->entityManager;
@@ -42,6 +43,9 @@ void DrawHUDSystem(struct Systems* systems) {
         }
     }
 }
+
+
+
 
 static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit) {
     if (max <= 0.0f) max = 1.0f;
@@ -77,9 +81,26 @@ static void DrawBar(float x, float y, float current, float max, Color fillColor,
     DrawText(text, x + (BAR_WIDTH / 2) - (textWidth / 2), y + (BAR_HEIGHT / 2) - (fontSize / 2), fontSize, WHITE);
 }
 
+
+
+
+void DrawCrosshair(struct Systems* systems){
+  ConfigManager* cfg = &systems->configManager;
+  Texture crosshair = *GetTexture(&systems->resourceManager, TEXTURE_ID_CROSSHAIR_SPRITE);
+
+  int screenW = cfg->screenResolution.x;
+  int screenH = cfg->screenResolution.y;
+
+  DrawTexture(crosshair, screenW/2 - crosshair.width/2, screenH/2 - crosshair.height/2, WHITE);
+}
+
+
+
+
 // -------------------------------------------------------------
 // IMPLEMENTAÇÃO DO MINIMAPA (CENTRALIZADO NO JOGADOR)
 // -------------------------------------------------------------
+
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
 {
     EntityManager* em = &systems->entityManager;
@@ -87,14 +108,14 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
     Vector3 playerPos = {0};
     float playerYaw = 0.0f; // Para rotacionar o mapa
 
-    // 1. Encontrar a Entidade do Jogador e sua Posição
+    // Encontrar a Entidade do Jogador e sua Posição
     for (Entity i = 0; i < em->numEntities; i++) {
         if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
             player = i;
             if (em->componentMasks[i] & COMPONENT_TRANSFORM) {
                 playerPos = em->transformComponents[i].position;
                 
-                // Pega o ângulo da câmera para rotacionar o mapa (Estilo Halo/COD)
+                // Pega o ângulo da câmera para rotacionar o mapa
                 Vector3 forward = Vector3Subtract(data->camera.target, data->camera.position);
                 playerYaw = -atan2f(forward.z, forward.x) - PI/2.0f; // Ajuste de 90 graus
             }
@@ -108,10 +129,10 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
     const int mapSize = 180; // Tamanho visual em pixels do minimapa
     const int mapPadding = 20;
     
-    // *** RAIO DE ABRANGÊNCIA (ZOOM) ***
+    // RAIO DE ABRANGÊNCIA
     // Quanto maior este valor, mais "longe" o radar vê (zoom out).
     // Area abrangida do mundo pelo minimapa
-    const float mapWorldSize = 200.0f; 
+    const float mapWorldSize = 1100.0f; 
     
     int screenW = GetScreenWidth();
     int mapX = screenW - mapSize - mapPadding; 
@@ -169,7 +190,11 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
                     // Inimigo (Ponto Vermelho)
                     DrawCircle(drawX, drawY, 4.0f, RED);
                 }
-                // Outros objetos podem ser adicionados aqui
+
+            if (worldPos.y == -15.0f && worldPos.z == -500.0f)
+            {
+                DrawCircle(drawX, drawY, 8.0f, ORANGE);
+            }  
             }
         }
     }
