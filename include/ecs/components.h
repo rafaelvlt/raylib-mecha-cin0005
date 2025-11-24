@@ -152,10 +152,14 @@ typedef struct  {
 
 // Dumb container for HUD numbers
 typedef struct  {
-  float currentHeat;
+  float maxSpeed;
+  float currentSpeed;
   float maxHeat;
+  float currentHeat;
   float heatPerShot;
   float cooldownRate;
+  float LRMammocount;
+  float MGammocount;
 } CockpitHUDComponent;
 
 typedef struct {
