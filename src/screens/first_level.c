@@ -50,20 +50,44 @@ static void DrawTargetDebug(struct Systems* systems) {
   }
 }
 
-static CloudData clouds[MAX_CLOUDS];
-static void InitClouds() {
-    for (int i = 0; i < MAX_CLOUDS; i++) {
-        // ... (posição X/Z) ...
-        clouds[i].position = (Vector3){
-            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA),
-            CLOUD_HEIGHT + (float)GetRandomValue(-50, 50), 
-            (float)GetRandomValue(-CLOUD_AREA, CLOUD_AREA)
-        };
-        clouds[i].size = (float)GetRandomValue(40, 80); 
-        
-        // NOVO: Velocidade aleatória (ex: 0.5x até 1.5x a velocidade base)
-        clouds[i].speedMultiplier = (float)GetRandomValue(5, 15) / 10.0f;
+void DrawAIDebug(struct Systems* systems, Camera camera) {
+  EntityManager* em = &systems->entityManager;
+
+  for (Entity i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & (COMPONENT_AI_CONTROL | COMPONENT_TRANSFORM)) == 
+      (COMPONENT_AI_CONTROL | COMPONENT_TRANSFORM)) {
+
+      AIControlComponent* ai = &em->aiControlComponents[i];
+      Vector3 pos = em->transformComponents[i].position;
+
+      Vector3 headPos = Vector3Add(pos, (Vector3){0, 20.0f, 0});
+
+      Vector2 screenPos = GetWorldToScreen(headPos, camera);
+
+      if (screenPos.x > 0 && screenPos.x < GetScreenWidth() &&
+        screenPos.y > 0 && screenPos.y < GetScreenHeight()) {
+
+        const char* stateText = "UNKNOWN";
+        Color color = WHITE;
+
+        switch (ai->state) {
+          case 0: stateText = "IDLE / PATROL"; color = GREEN; break;
+          case 1: stateText = "CHASE"; color = YELLOW; break;
+          case 2: stateText = "ATTACK"; color = RED; break;
+        }
+
+        int fontSize = 20;
+        int textWidth = MeasureText(stateText, fontSize);
+        DrawText(stateText, (int)screenPos.x - textWidth/2, (int)screenPos.y, fontSize, color);
+
+        if (em->componentMasks[i] & COMPONENT_HEALTH) {
+          char hpStr[32];
+          sprintf(hpStr, "HP: %.0f", em->healthComponents[i].currentHealth);
+          DrawText(hpStr, (int)screenPos.x - MeasureText(hpStr, 10)/2, (int)screenPos.y + 20, 10, GREEN);
+        }
+      }
     }
+  }
 }
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
@@ -84,7 +108,6 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     
     // Loads everything from level1.map file
     LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
-    InitClouds();
     DisableCursor(); 
 }
 
@@ -128,6 +151,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawHUDSystem(systems);
   DrawMinimapSystem(systems, data);
 
+  DrawAIDebug(systems, data->camera);
   DrawFPS(10, 10);
 }
 
