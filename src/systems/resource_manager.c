@@ -22,7 +22,7 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
   //Military Base
   resourceManager->models[MODEL_ID_BASE_HQ] = LoadModel("resources/models/base.glb");
-  resourceManager->models[MODEL_ID_BASE_HQ].transform = MatrixScale(50.0f, 50.0f, 50.0f);
+  resourceManager->models[MODEL_ID_BASE_HQ].transform = MatrixScale(15.0f, 15.0f, 15.0f);
   //Projectiles
   //Pulse Laser 
   Mesh pulseLaserGunProjectileMesh = GenMeshCube(0.025f, 0.025f, 3.0f);
