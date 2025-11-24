@@ -1,5 +1,6 @@
 #ifndef ECS_SYSTEMS_H
 #define ECS_SYSTEMS_H
+#include "screens/screen_first_level.h"
 
 struct Systems;
 
@@ -11,6 +12,10 @@ void MovementSystem(struct Systems* systems);
 // Draw every visible Entity
 void RenderSystem(struct Systems* systems);
 void EffectSystem(struct Systems* systems, Camera* camera);
+
+//Draw HUD
+void DrawHUDSystem(struct Systems* systems);
+void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
 
 // Effects helper, should be in updates
 void TrailSystem(struct Systems* systems);
