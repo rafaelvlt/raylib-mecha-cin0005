@@ -60,13 +60,12 @@ void AIControlSystem(struct Systems* systems) {
       //optional: simplificação da lógica acima
       ai->state = ((dist<ai->attackRange)+(dist<ai->sightRadius));
 
-      if (angleToTarget > 90.0f && angleToTarget < 270.0f){ {
+      if (angleToTarget > 90.0f && angleToTarget < 270.0f) {
         ai->state = 0; // Volta para patrulha se o player sair do campo de visão
       }
     
 
-      switch (ai->state)
-      {
+      switch (ai->state){
       case 0: // Patrol
         // Implementar patrulha se houver pontos de patrulha
         if (ai->numPatrolPoints > 0) {
@@ -119,3 +118,4 @@ void AIControlSystem(struct Systems* systems) {
     }
   }
 }
+
