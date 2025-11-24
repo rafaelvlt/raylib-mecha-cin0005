@@ -20,7 +20,9 @@ void InitResourceManager(ResourceManager* resourceManager) {
   //Mechas
   resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
   resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
-
+  //Military Base
+  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModel("resources/models/base.glb");
+  resourceManager->models[MODEL_ID_BASE_HQ].transform = MatrixScale(50.0f, 50.0f, 50.0f);
   //Projectiles
   //Pulse Laser 
   Mesh pulseLaserGunProjectileMesh = GenMeshCube(0.025f, 0.025f, 3.0f);
@@ -101,24 +103,11 @@ if (floorMesh.texcoords) {
           floorMesh.texcoords[i] *= 400.0f;
       }
   }
-  Mesh hqMesh = GenMeshCube(50.0f, 40.0f, 40.0f);
-  Mesh doorMesh = GenMeshCube(15.0f, 12.0f, 1.0f);
-  resourceManager->models[MODEL_ID_BASE_DOOR] = LoadModelFromMesh(doorMesh); 
-  resourceManager->models[MODEL_ID_BASE_DOOR].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){20, 20, 20, 255};
-    
-    // Tiling
-  if (hqMesh.texcoords) {
-        for (int i = 0; i < hqMesh.vertexCount * 2; i++) {
-          hqMesh.texcoords[i] *= 4.0f; 
-      }
-  }
-
     // Creates Model and apply texture
   resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_SAND];
 
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModelFromMesh(hqMesh);
   resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];
   resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 

@@ -28,7 +28,6 @@ typedef enum {
     MODEL_ID_DUMMY,
     MODEL_ID_TERRAIN,
     MODEL_ID_BASE_HQ,
-    MODEL_ID_BASE_DOOR,
     MODEL_ID_COUNT
 } AssetModelID;
 
