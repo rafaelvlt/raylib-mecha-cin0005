@@ -1,5 +1,6 @@
 #ifndef ECS_SYSTEMS_H
 #define ECS_SYSTEMS_H
+#include "screens/screen_first_level.h"
 
 struct Systems;
 
@@ -14,7 +15,7 @@ void EffectSystem(struct Systems* systems, Camera* camera);
 
 //Draw HUD
 void DrawHUDSystem(struct Systems* systems);
-
+void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
 
 // Deals with all types of collisions
 void CollisionSystem(struct Systems* systems);

@@ -9,206 +9,173 @@
 #include <stdio.h>
 
 // Definições visuais para o HUD
-#define BAR_WIDTH 250.0f
-#define BAR_HEIGHT 20.0f
-#define MARGIN 25.0f
+#define BAR_WIDTH 400.0f
+#define BAR_HEIGHT 25.0f
+#define MARGIN_TOP 15.0f
 
-// Protótipo local para a função de desenho da barra
+// Protótipo local
 static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit);
 
-/**
- * @brief Sistema de Desenho do HUD para Barras de Status. 
- * Itera sobre as entidades e desenha as informações de HP e Calor para o jogador.
- * @param systems Ponteiro para a estrutura Systems global.
- */
+// ... (DrawHUDSystem e DrawBar mantidos iguais, focando apenas no Minimapa abaixo) ...
+
 void DrawHUDSystem(struct Systems* systems) {
     EntityManager* em = &systems->entityManager;
-    uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_COCKPIT_HUD | COMPONENT_HEALTH;
+    uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_HEALTH;
 
-    // Apenas precisamos de um jogador (Entidade com PlayerControl)
     for (Entity e = 0; e < em->numEntities; e++) {
         if ((em->componentMasks[e] & neededMask) == neededMask) {
-            
-            CockpitHUDComponent* hud = &em->cockpitHUDComponents[e];
             HealthComponent* hp = &em->healthComponents[e];
-
-            // Posições baseadas no canto superior esquerdo (HP) e superior direito (Heat)
             float screenW = (float)GetScreenWidth();
-            float x_left = MARGIN;
-            float y_top = MARGIN;
+            float x_center = (screenW - BAR_WIDTH) / 2.0f;
+            float y_pos = MARGIN_TOP;
 
-            // 1. Desenhar a Barra de Vida (Health) - Topo Esquerdo
-            DrawBar(x_left, y_top, hp->currentHealth, hp->maxHealth, LIME, DARKGRAY, "HP", "%%");
-
-            // 2. Desenhar a Barra de Calor (Heat) - Topo Direito
-            float x_right = screenW - BAR_WIDTH - MARGIN;
-            DrawBar(x_right, y_top, hud->currentHeat, hud->maxHeat, ORANGE, DARKGRAY, "CALOR", "%%");
+            Color outlineColor = (Color){ 0, 255, 255, 255 };
+            Color fillColor = (Color){ 0, 100, 200, 200 };
             
-            break; // Apenas um jogador é esperado
+            if (hp->currentHealth < hp->maxHealth * 0.3f) {
+                fillColor = (Color){ 200, 0, 0, 200 };
+                outlineColor = RED;
+            }
+
+            DrawBar(x_center, y_pos, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, "HP", "%");
+            break; 
         }
     }
 }
 
-/**
- * @brief Desenha uma barra de progresso genérica.
- * @param x Coordenada X da barra.
- * @param y Coordenada Y da barra.
- * @param current Valor atual.
- * @param max Valor máximo.
- * @param fillColor Cor de preenchimento.
- * @param outlineColor Cor da borda.
- * @param label Rótulo do valor (e.g., "HP").
- * @param unit Unidade para o valor percentual (e.g., "%%").
- */
 static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit) {
-    if (max <= 0.0f) max = 1.0f; // Evita divisão por zero
+    if (max <= 0.0f) max = 1.0f;
     float percentage = current / max;
+    if (percentage < 0.0f) percentage = 0.0f;
+    if (percentage > 1.0f) percentage = 1.0f;
+
     float fillWidth = BAR_WIDTH * percentage;
-
-    // 1. Fundo da barra (Barra completa)
-    DrawRectangle(x, y, BAR_WIDTH, BAR_HEIGHT, outlineColor);
-
-    // 2. Preenchimento da barra
+    const float cornerSize = 12.0f;
+    const float thickness = 2.0f;
+    
+    DrawRectangle(x, y, BAR_WIDTH, BAR_HEIGHT, Fade(BLACK, 0.6f));
     DrawRectangle(x, y, fillWidth, BAR_HEIGHT, fillColor);
 
-    // 3. Borda (para destacar)
-    DrawRectangleLinesEx((Rectangle){ x, y, BAR_WIDTH, BAR_HEIGHT }, 2, outlineColor);
+    DrawLineEx((Vector2){x + cornerSize, y}, (Vector2){x + BAR_WIDTH - cornerSize, y}, thickness, outlineColor);
+    DrawLineEx((Vector2){x + cornerSize, y + BAR_HEIGHT}, (Vector2){x + BAR_WIDTH - cornerSize, y + BAR_HEIGHT}, thickness, outlineColor);
+    
+    DrawLineEx((Vector2){x, y + cornerSize}, (Vector2){x + cornerSize, y}, thickness, outlineColor);
+    DrawLineEx((Vector2){x, y + BAR_HEIGHT - cornerSize}, (Vector2){x + cornerSize, y + BAR_HEIGHT}, thickness, outlineColor);
+    DrawLineEx((Vector2){x, y + cornerSize}, (Vector2){x, y + BAR_HEIGHT - cornerSize}, thickness, outlineColor);
 
-    // 4. Texto do rótulo e valor
+    DrawLineEx((Vector2){x + BAR_WIDTH - cornerSize, y}, (Vector2){x + BAR_WIDTH, y + cornerSize}, thickness, outlineColor);
+    DrawLineEx((Vector2){x + BAR_WIDTH - cornerSize, y + BAR_HEIGHT}, (Vector2){x + BAR_WIDTH, y + BAR_HEIGHT - cornerSize}, thickness, outlineColor);
+    DrawLineEx((Vector2){x + BAR_WIDTH, y + cornerSize}, (Vector2){x + BAR_WIDTH, y + BAR_HEIGHT - cornerSize}, thickness, outlineColor);
+
     char text[64];
     float value = percentage * 100.0f;
-    // Formatando o texto: "HP 75%"
     snprintf(text, 64, "%s %.0f%s", label, value, unit);
 
-    // Centraliza o texto na barra
-    int fontSize = 16;
+    int fontSize = 20;
     int textWidth = MeasureText(text, fontSize);
-    DrawText(text, x + (BAR_WIDTH / 2) - (textWidth / 2), y + (BAR_HEIGHT / 2) - (fontSize / 2), fontSize, RAYWHITE);
+    DrawText(text, x + (BAR_WIDTH / 2) - (textWidth / 2) + 1, y + (BAR_HEIGHT / 2) - (fontSize / 2) + 1, fontSize, BLACK);
+    DrawText(text, x + (BAR_WIDTH / 2) - (textWidth / 2), y + (BAR_HEIGHT / 2) - (fontSize / 2), fontSize, WHITE);
 }
 
 // -------------------------------------------------------------
-// IMPLEMENTAÇÃO DO MINIMAPA
+// IMPLEMENTAÇÃO DO MINIMAPA (CENTRALIZADO NO JOGADOR)
 // -------------------------------------------------------------
-
-/**
- * @brief Sistema de Desenho do Minimapa.
- * Desenha o radar/minimapa no canto superior direito, abaixo da barra de CALOR.
- * Esta função deve ser chamada pela DrawFirstLevelScreen.
- * @param systems Ponteiro para a estrutura Systems global.
- * @param data Ponteiro para os dados da fase (necessário para a câmera e minimapa).
- */
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
 {
     EntityManager* em = &systems->entityManager;
     Entity player = MAX_ENTITIES;
+    Vector3 playerPos = {0};
+    float playerYaw = 0.0f; // Para rotacionar o mapa
 
-    // 1. Encontrar a Entidade do Jogador
+    // 1. Encontrar a Entidade do Jogador e sua Posição
     for (Entity i = 0; i < em->numEntities; i++) {
         if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
             player = i;
+            if (em->componentMasks[i] & COMPONENT_TRANSFORM) {
+                playerPos = em->transformComponents[i].position;
+                
+                // Pega o ângulo da câmera para rotacionar o mapa (Estilo Halo/COD)
+                Vector3 forward = Vector3Subtract(data->camera.target, data->camera.position);
+                playerYaw = -atan2f(forward.z, forward.x) - PI/2.0f; // Ajuste de 90 graus
+            }
             break;
         }
     }
 
     if (player == MAX_ENTITIES) return;
 
-    // ---------------------------------------------------------
-    // 2. Desenhar Minimapa (Canto Superior Direito, Abaixo da Barra de Heat)
-    // ---------------------------------------------------------
-    const int mapSize = 150;
-    const int mapPadding = MARGIN;
+    // Configuração do Minimapa
+    const int mapSize = 180; // Tamanho visual em pixels do minimapa
+    const int mapPadding = 20;
     
-    // O minimapa cobre uma área de 50x50 no mundo (-25 a +25)
-    // Ajustado para 50.0f para um bom campo de visão
-    const float mapWorldSize = 50.0f; 
+    // *** RAIO DE ABRANGÊNCIA (ZOOM) ***
+    // Quanto maior este valor, mais "longe" o radar vê (zoom out).
+    // Area abrangida do mundo pelo minimapa
+    const float mapWorldSize = 200.0f; 
     
-    // Posição X da barra de CALOR para centralizar o minimapa
     int screenW = GetScreenWidth();
-    int barX = (int)(screenW - BAR_WIDTH - MARGIN);
-
-    // Posição Y, abaixo da barra de CALOR + MARGIN
-    int mapX = barX + (BAR_WIDTH / 2) - (mapSize / 2); // Centralizado sob a barra
-    int mapY = (int)(MARGIN + BAR_HEIGHT + MARGIN); 
+    int mapX = screenW - mapSize - mapPadding; 
+    int mapY = mapPadding + 10;
+    
     int mapCenterX = mapX + mapSize / 2;
     int mapCenterY = mapY + mapSize / 2;
 
-    // Fundo do Minimapa
-    DrawRectangle(mapX, mapY, mapSize, mapSize, Fade(DARKGRAY, 0.7f));
-    DrawRectangleLines(mapX, mapY, mapSize, mapSize, RAYWHITE);
+    // Fundo do radar
+    DrawCircle(mapCenterX, mapCenterY, mapSize/2, Fade(DARKBLUE, 0.6f));
+    DrawCircleLines(mapCenterX, mapCenterY, mapSize/2, Fade(SKYBLUE, 0.8f));
     
-    // Rótulo
-    DrawText("RADAR", mapX + mapSize/2 - MeasureText("RADAR", 14)/2, mapY + 5, 14, RAYWHITE);
+    // Linhas de grade (opcional, giram com o jogador ou ficam fixas)
+    DrawLine(mapCenterX - mapSize/2, mapCenterY, mapCenterX + mapSize/2, mapCenterY, Fade(SKYBLUE, 0.2f));
+    DrawLine(mapCenterX, mapCenterY - mapSize/2, mapCenterX, mapCenterY + mapSize/2, Fade(SKYBLUE, 0.2f));
 
-    // Fator de escala: (tamanho do mapa / tamanho do mundo)
+    DrawText("RADAR", mapX + mapSize/2 - MeasureText("RADAR", 10)/2, mapY + mapSize + 5, 10, SKYBLUE);
+
     float scaleFactor = (float)mapSize / mapWorldSize;
-
-    // Iterar sobre as Entidades para desenhar no Minimapa
     uint32_t mapMask = COMPONENT_TRANSFORM;
     
+    // Pré-calcula seno e cosseno para a rotação do mapa
+    float cosYaw = cosf(playerYaw);
+    float sinYaw = sinf(playerYaw);
+
     for (Entity e = 0; e < em->numEntities; e++) {
-        // Apenas desenha entidades que têm TransformComponent
         if ((em->componentMasks[e] & mapMask) == mapMask) {
+            // Não desenha o próprio jogador no loop (desenhamos fixo no centro depois)
+            if (e == player) continue;
+
             TransformComponent* trans = &em->transformComponents[e];
             Vector3 worldPos = trans->position;
             
-            // Projeta a posição 3D (X, Z) para a posição 2D do minimapa
-            // X (mundo) -> X (minimapa), Z (mundo) -> Y (minimapa)
-            int relativeX = (int)(worldPos.x * scaleFactor);
-            int relativeY = (int)(worldPos.z * scaleFactor);
+            // *** CÁLCULO RELATIVO AO JOGADOR ***
+            float dx = worldPos.x - playerPos.x;
+            float dz = worldPos.z - playerPos.z;
+
+            // Aplica a rotação (para que "frente" seja sempre cima no minimapa)
+            // Se quiser Norte Fixo, remova estas duas linhas e use dx/dz diretamente.
+            float rotatedX = dx * cosYaw - dz * sinYaw;
+            float rotatedY = dx * sinYaw + dz * cosYaw;
+
+            // Converte para coordenadas de tela do minimapa
+            int relativeX = (int)(rotatedX * scaleFactor);
+            int relativeY = (int)(rotatedY * scaleFactor); // Inverte Y pois tela é Y-down
 
             int drawX = mapCenterX + relativeX;
             int drawY = mapCenterY + relativeY;
 
-            // Ponto para desenhar
-            int dotSize = 4;
-            Color dotColor = GRAY;
-
-            // Desenha o Player (Transformado em Círculo Verde)
-            if (e == player) {
-                dotColor = GREEN;
-                dotSize = 6;
-                
-                // Desenha o círculo se estiver dentro do mapa
-                if (drawX >= mapX && drawX <= mapX + mapSize && 
-                    drawY >= mapY && drawY <= mapY + mapSize) 
-                {
-                    DrawCircle(drawX, drawY, dotSize, dotColor);
-                    
-                    // Linha de Visão Simples (indicando a frente)
-                    // Pega a direção da câmera no plano XZ
-                    Vector3 forward = Vector3Normalize(Vector3Subtract(data->camera.target, data->camera.position));
-                    
-                    Vector2 center = (Vector2){ (float)drawX, (float)drawY };
-                    // Projeta a direção no minimapa (X e Z) e estende a linha
-                    Vector2 lineEnd = (Vector2){ drawX + forward.x * (float)dotSize * 3, drawY + forward.z * (float)dotSize * 3 };
-                    
-                    DrawLineV(center, lineEnd, YELLOW);
+            // Verifica se está dentro do círculo do radar
+            float distFromCenter = sqrtf(powf(drawX - mapCenterX, 2) + powf(drawY - mapCenterY, 2));
+            
+            if (distFromCenter <= mapSize / 2) {
+                if (em->componentMasks[e] & COMPONENT_AI_CONTROL) {
+                    // Inimigo (Ponto Vermelho)
+                    DrawCircle(drawX, drawY, 4.0f, RED);
                 }
-
-            } 
-            // Desenha o Inimigo (Quadrado Vermelho)
-            else if (em->componentMasks[e] & COMPONENT_AI_CONTROL) {
-                dotColor = RED;
-                dotSize = 5;
-                
-                // Certifique-se de que o ponto esteja dentro dos limites do minimapa
-                if (drawX >= mapX && drawX <= mapX + mapSize && 
-                    drawY >= mapY && drawY <= mapY + mapSize) 
-                {
-                    DrawRectangle(drawX - dotSize/2, drawY - dotSize/2, dotSize, dotSize, dotColor);
-                }
-            }
-            // Desenha outros objetos (Círculo Cinza)
-            else {
-                 if (drawX >= mapX && drawX <= mapX + mapSize && 
-                    drawY >= mapY && drawY <= mapY + mapSize) 
-                {
-                    DrawCircle(drawX, drawY, dotSize, dotColor);
-                }
+                // Outros objetos podem ser adicionados aqui
             }
         }
     }
-    
-    // Ocluir partes que saem da borda
-    DrawRectangleLines(mapX, mapY, mapSize, mapSize, RAYWHITE);
+
+    // Desenha o Jogador (Sempre no Centro)
+    // Triângulo apontando para cima (já que o mapa gira ao redor dele)
+    Vector2 playerScreenPos = { (float)mapCenterX, (float)mapCenterY };
+    DrawPoly(playerScreenPos, 3, 6.0f, -90.0f, YELLOW);
 }
