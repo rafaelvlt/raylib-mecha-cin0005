@@ -17,6 +17,7 @@ void EffectSystem(struct Systems* systems, Camera* camera);
 void DrawHUDSystem(struct Systems* systems);
 void DrawCrosshair(struct Systems* systems);
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
+void Hud3DSystem(struct Systems* systems);
 // Effects helper, should be in updates
 void TrailSystem(struct Systems* systems);
 
