@@ -1,6 +1,8 @@
 #ifndef ECS_ENTITYMANAGER_H
 #define ECS_ENTITYMANAGER_H
-#include "ecs/ecs_components.h"
+#include "components.h"
+#include "ecs/types.h"
+#include "raylib.h"
 
 typedef struct  {
   // Array for every component
@@ -11,10 +13,14 @@ typedef struct  {
   PlayerControlComponent  playerControlComponents[MAX_ENTITIES];
   HealthComponent         healthComponents[MAX_ENTITIES];
   WeaponComponent         weaponComponents[MAX_ENTITIES];
+  LifetimeComponent       lifetimeComponents[MAX_ENTITIES];
   ProjectileComponent     projectileComponents[MAX_ENTITIES];
   WeaponControlComponent  weaponControlComponents[MAX_ENTITIES];
   AIControlComponent      aiControlComponents[MAX_ENTITIES];
   CockpitHUDComponent     cockpitHUDComponents[MAX_ENTITIES];
+  CollisionComponent      collisionComponents[MAX_ENTITIES];
+  EffectComponent         effectComponents[MAX_ENTITIES];
+  HomingComponent         homingComponents[MAX_ENTITIES];
   
   // Bitmask for every Entity
   uint32_t                componentMasks[MAX_ENTITIES];
@@ -40,14 +46,43 @@ void ClearEntityManager(EntityManager* entityManager);
 
 // Functions to add components to entities.
 void AddTransformComponent(EntityManager* entityManager, Entity entity, Vector3 position);
-void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity);
+
+void AddPhysicsComponent(EntityManager* entityManager, Entity entity, Vector3 velocity, float drag);
+
+void AddCollisionComponent(EntityManager* entityManager, Entity entity, BoundingBox hitbox, bool isStatic, bool isTrigger);
+
 void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* model, Color tint);
+
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot);
-void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera, float sensitivity);
+
+void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera);
+
 void AddHealthComponent(EntityManager* entityManager, Entity entity, float health);
-void AddWeaponComponent(EntityManager* entityManager, Entity entity, float fireRate, float projSpeed, float projDamage);
-void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, Entity primary, Entity secondary);
-void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range);
+
+void AddWeaponComponent(EntityManager* em, Entity entity, WeaponType type, 
+                        float fireRate, float projSpeed, float damage, float range, float heat, 
+                        int burstTotal, float burstRate);
+
+void AddLifetimeComponent (EntityManager* entityManager, Entity entity, float lifetime);
+
+void AddProjectileComponent(EntityManager* entityManager, Entity entity, Entity owner, float damage, bool destroyOnHit, float blastRadius, WeaponType type);
+
+void AddWeaponControlComponent(EntityManager* entityManager, Entity entity, AimMode aimMode);
+
+void AddAIControlComponent(EntityManager* entityManager, Entity entity, float sight, float range, Vector3* patrolPoints, int numPatrolPoints);
+
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown);
+
+void AddEffectSheet(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, 
+                     AssetTextureID texID, int cols, int rows, bool looping);
+
+void AddEffectArray(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, 
+                     AssetTextureID id, int count, bool looping);
+
+void AddHomingComponent(EntityManager* em, Entity entity, Entity target, float turnSpeed, float speed, float armingTime);
+
+void createEnemyScout(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position, Vector3* scoutPoints, int numPoints);
+
+void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entityManager, Vector3 position);
 
 #endif // ECS_ENTITYMANAGER_H

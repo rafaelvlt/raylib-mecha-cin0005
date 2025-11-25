@@ -22,6 +22,14 @@ and add a array to the resourceManager Struct + Make a Get function for it      
 
 typedef enum {
     MODEL_ID_MENU = 0,
+    MODEL_ID_ENEMY_SCOUT,
+    MODEL_ID_PROJECTILE_PULSE_LASER,
+    MODEL_ID_PROJECTILE_MISSILE_LAUNCHER,
+    MODEL_ID_TURRET_STRUCTURE, 
+    MODEL_ID_DUMMY,
+    MODEL_ID_TERRAIN,
+    MODEL_ID_BASE_HQ,
+    MODEL_ID_BASE_DOOR,
     MODEL_ID_COUNT
 } AssetModelID;
 
@@ -34,9 +42,39 @@ typedef enum {
 
 typedef enum {
     MUSIC_ID_MENU = 0,
-    MUSIC_ID_FASE_1,
+    MUSIC_ID_FIRST_LEVEL,
     MUSIC_ID_COUNT
 } AssetMusicID;
+
+typedef enum {
+  SOUND_ID_MECHA_FOOTSTEP = 0,
+  SOUND_ID_MECHA_ROTATING,
+  SOUND_ID_MECHA_ZOOM,
+  SOUND_ID_PULSE_LASER_FIRING,
+  SOUND_ID_PULSE_LASER_IMPACT,
+  SOUND_ID_MISSILE_LAUNCHER_FIRING,
+  SOUND_ID_MISSILE_LAUNCHER_IMPACT,
+  SOUND_ID_MISSILE_FAILED,
+  SOUND_ID_ENEMY_MECH_DESTROYED,
+  SOUND_ID_ENEMY_TARGET_DESTROYED,
+  SOUND_ID_MISSION_SUCCESS,
+  SOUND_ID_COUNT
+} AssetSoundID;
+
+typedef enum{
+  EFFECT_ID_EXPLOSION,
+  EFFECT_ID_COUNT
+} AssetEffectID;
+
+typedef enum{
+  TEXTURE_ID_SMOKE,
+  TEXTURE_ID_LASER_EXPLOSION_SPRITESHEET = TEXTURE_ID_SMOKE + 10,
+  TEXTURE_ID_MISSILE_EXPLOSION_SPRITESHEET,
+  TEXTURE_ID_CROSSHAIR_SPRITE,
+  TEXTURE_ID_SAND,
+  TEXTURE_ID_BASE_HQ,
+  TEXTURE_ID_COUNT 
+} AssetTextureID;
 
 typedef enum {
     RENDERTEXTURE_ID_SPLITSCREEN_MENU = 0,
@@ -50,6 +88,8 @@ typedef struct ResourceManager {
     Model models[MODEL_ID_COUNT];
     Font  fonts[FONT_ID_COUNT];
     Music musics[MUSIC_ID_COUNT];
+    Sound sounds[SOUND_ID_COUNT];
+    Texture textures[TEXTURE_ID_COUNT];
     RenderTexture renderTextures[RENDERTEXTURE_ID_COUNT];
 } ResourceManager;
 
@@ -59,6 +99,8 @@ void ShutdownResourceManager(ResourceManager* resourceManager) ;
 Model* GetModel(ResourceManager* resourceManager, AssetModelID id);
 Font* GetFont(ResourceManager* resourceManager, AssetFontID id);
 Music* GetMusic(ResourceManager* resourceManager, AssetMusicID id);
+Sound* GetSound(ResourceManager* resourceManager, AssetSoundID id);
+Texture* GetTexture(ResourceManager* resourceManager, AssetTextureID id);
 RenderTexture* GetRenderTexture(ResourceManager* resourceManager, AssetRenderTextureID id);
 
 #endif

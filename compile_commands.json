@@ -1,0 +1,223 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/systems/state_manager.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/systems/state_manager.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/systems/resource_manager.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/systems/resource_manager.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/systems/config_manager.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/systems/config_manager.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/systems/audio_manager.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/systems/audio_manager.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/main.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/main.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/ecs/ecs_systems.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/ecs/ecs_systems.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/ecs/ecs_entitymanager.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/ecs/ecs_entitymanager.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/screens/screen_credits.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/screens/screen_credits.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/screens/screen_options.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/screens/screen_options.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/screens/screen_title.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/screens/screen_title.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/screens/screen_main_menu.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/screens/screen_main_menu.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/screens/screen_loadout.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/screens/screen_loadout.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinclude",
+      "-Ilib",
+      "-Ilib/raylib/src",
+      "-o",
+      "mechaGame",
+      "src/screens/screen_first_level.c"
+    ],
+    "directory": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005",
+    "file": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/src/screens/screen_first_level.c",
+    "output": "/home/rafaelvlt/repositorios/raylib-mecha-cin0005/mechaGame"
+  }
+]

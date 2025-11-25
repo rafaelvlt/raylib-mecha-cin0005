@@ -29,10 +29,39 @@ typedef enum ScreenResolution {
     RESOLUTION_1920x1080
 } ScreenResolution;
 
+// Key Mappings, maybe will be set a option to configure all of them
+typedef struct{
+  // Movement
+  KeyboardKey KeyMoveForward;
+  KeyboardKey KeyMoveBackward;
+  KeyboardKey KeyTurnLeft;
+  KeyboardKey KeyTurnRight;
+ 
+  // Movement Helper Buttons
+  KeyboardKey KeyCenterTorsoToLegs;
+  KeyboardKey KeyCenterLegsToTorso;
+
+  // Weapon Groups
+  KeyboardKey KeyWeaponGroups[5];
+
+  // Firing
+  MouseButton KeyShoot;
+  MouseButton KeyZoom;
+  KeyboardKey KeyLockTarget;
+
+  // System
+  KeyboardKey KeyShowMap;
+  KeyboardKey KeyPause;
+} InputSystem;
+
+
 // Struct to hold configuration values
 typedef struct {
     Language language; //0 = EN, 1 = PT-BR
     float audioVolume;
+    
+    InputSystem KeyMap;
+    //Screen
     Vector2 screenResolution;
     bool fullscreen;
 } ConfigManager;
@@ -42,6 +71,10 @@ void UpdateConfigManager(struct Systems* systems);
 void ShutdownConfigManager();
 
 float GetAudioVolume(ConfigManager* configManager);
+
+// Input System;
+
+//Fullscreen
 Vector2 GetScreenResolution(ConfigManager* configManager);
 bool GetFullscreen(ConfigManager* configManager);
 

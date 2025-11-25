@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include "systems.h"
 #include "utility.h"
 
 
@@ -178,7 +179,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
             //Draw model wires to be a neon outline before drawing
             DrawModelWires(*(systems->entityManager.renderComponents->model), systems->entityManager.transformComponents->position, 1.0f, GREEN);
             //====================================================================
-            RenderSystem_Draw(&(systems->entityManager));
+            RenderSystem(systems);
             DrawGrid(15, 0.45f);
         EndMode3D();
     EndTextureMode();
@@ -199,7 +200,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     DrawRectangleRec(menuPanel, Fade(BLACK, 0.75f));
     DrawRectangleLinesEx(menuPanel, 4, GREEN);
 
-    //------- Buttons Specs (to scale with Resolution) ----------
+    //------ Buttons Specs (to scale with Resolution) ----------
     const float contentPaddingX = panelWidth * 0.1f;  
     const float contentPaddingY = panelHeight * 0.05f; 
     const float contentAreaX = panelX + contentPaddingX;
