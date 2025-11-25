@@ -29,6 +29,9 @@ void DestroyCurrentScreen(struct Systems* systems) {
     case SCREEN_FIRST_LEVEL:
       DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
+    case SCREEN_SECOND_LEVEL:
+      InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      break;
     default:
       break;
   }
@@ -63,6 +66,9 @@ void SwitchScreen(struct Systems* systems) {
       break;
     case SCREEN_FIRST_LEVEL:
       InitFirstLevelScreen(systems, &stateManager->data.firstLevel);
+      break;
+    case SCREEN_SECOND_LEVEL:
+      InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
       break;
     default:
       break;
@@ -103,6 +109,8 @@ void UpdateStateManager(struct Systems* systems) {
     case SCREEN_FIRST_LEVEL:
       UpdateFirstLevelScreen(systems, &sm->data.firstLevel);
       break;
+    case SCREEN_SECOND_LEVEL:
+      UpdateSecondLevelScreen(systems, &sm->data.secondLevel);
     default:
       break;
   }
@@ -143,6 +151,8 @@ void DrawStateManager(struct Systems* systems) {
     case SCREEN_FIRST_LEVEL:
       DrawFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
+    case SCREEN_SECOND_LEVEL:
+      DrawSecondLevelScreen(systems, &stateManager->data.secondLevel);
     default:
       break;
   }

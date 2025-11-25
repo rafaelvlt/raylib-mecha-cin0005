@@ -6,6 +6,7 @@
 #include "ecs/types.h"
 #include "event_manager.h"
 #include "resource_manager.h"
+#include "state_manager.h"
 #include "systems.h"
 #include "map_loader.h"
 
@@ -30,7 +31,11 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     // Loads everything from level1.map file
     LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
     DisableCursor(); 
+
+  data->levelFinished = false;
+  data->finishTimer = 0.0f;
 }
+
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
@@ -49,10 +54,37 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   HealthSystem(systems);
   PlayerAudioSystem(systems);
 
-  if (IsKeyPressed(systems->configManager.KeyMap.KeyPause)) 
+  if (IsKeyPressed(KEY_ENTER)) 
   {
     EnableCursor();
     RequestScreenChange(systems, SCREEN_MAIN_MENU);
+  }
+
+  if (!data->levelFinished) {
+    EventManager* em = &systems->eventManager;
+    for (int i = 0; i < em->eventCounter; i++) {
+      Event event = em->eventQueue[i];
+      if (event.type == EVENT_ENTITY_DEATH){
+         TraceLog(LOG_INFO, "DEBUG MORTE: OwnerID: %d", event.data.deathEvent.owner);
+        if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE){
+          TraceLog(LOG_INFO, "DEBUG: ESTRUTURA DESTRUIDA DETECTADA!");
+          data->levelFinished = true;
+          data->finishTimer = 5.0f; 
+        }
+      }
+    }
+  }
+  if (data->levelFinished) {
+    data->finishTimer -= systems->delta_time;
+    
+    if (data->finishTimer <= 2.5f){
+      Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
+      SetSoundVolume(*endSfx, systems->configManager.audioVolume);
+      PlaySound(*endSfx);
+    }
+    if (data->finishTimer <= 0.0f) {
+      RequestScreenChange(systems, SCREEN_SECOND_LEVEL); 
+    }
   }
 
   ProcessGameEvents(systems);

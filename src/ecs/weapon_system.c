@@ -208,7 +208,7 @@ static Entity SpawnLaserPulseProjectile(struct Systems* systems, Vector3 positio
   Model* bulletModel = GetModel(rm, MODEL_ID_PROJECTILE_PULSE_LASER);
   AddRenderComponent(em, bullet, bulletModel, LASER_BLUE);
   //Temporary component
-  AddLifetimeComponent(em, bullet, 2.5f); 
+  AddLifetimeComponent(em, bullet, 1.5f); 
   return bullet;
 }
 
