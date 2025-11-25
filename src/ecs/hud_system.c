@@ -1,8 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
-#include "ecs/entitymanager.h"
-#include "ecs/systems.h"
-#include "ecs/types.h"
+#include <rlgl.h> 
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "systems.h"
@@ -15,9 +13,6 @@
 
 // Protótipo local
 static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit);
-
-
-
 
 void DrawHUDSystem(struct Systems* systems) {
     EntityManager* em = &systems->entityManager;
@@ -204,3 +199,47 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data)
     Vector2 playerScreenPos = { (float)mapCenterX, (float)mapCenterY };
     DrawPoly(playerScreenPos, 3, 6.0f, -90.0f, YELLOW);
 }
+
+
+
+void Hud3DSystem(struct Systems* systems){
+  uint32_t mask = (COMPONENT_PLAYER_CONTROL | COMPONENT_WEAPON_CONTROL);
+  EntityManager* em = &systems->entityManager;
+
+  for (int i = 0; i < em->numEntities; i++) {
+    if ((em->componentMasks[i] & mask) == mask) {
+
+      WeaponControlComponent* wc = &em->weaponControlComponents[i];
+      Entity target = wc->lockedTarget;
+
+      // Checks for locked target
+      if (target < MAX_ENTITIES && (em->componentMasks[target] & (COMPONENT_TRANSFORM | COMPONENT_COLLISION))) {
+
+        TransformComponent* tTarget = &em->transformComponents[target];
+        CollisionComponent* cTarget = &em->collisionComponents[target];
+
+        BoundingBox worldBox;
+        worldBox.min = Vector3Add(cTarget->hitbox.min, tTarget->position);
+        worldBox.max = Vector3Add(cTarget->hitbox.max, tTarget->position);
+
+        // Calculation for center of mass
+        Vector3 center = Vector3Scale(Vector3Add(worldBox.min, worldBox.max), 0.5f);
+        Vector3 size = Vector3Subtract(worldBox.max, worldBox.min);
+
+        // Desabilita o teste de profundidade.
+        // Tudo desenhado agora vai aparecer "na frente" das paredes.
+        rlDisableDepthTest();
+
+        // Draws a marker above the locked target
+        Color lockColor = (Color){ 255, 0, 0, 200 }; // Verde transparente
+        Vector3 markerPos = (Vector3){ center.x, worldBox.max.y + 2.0f, center.z };
+        DrawCylinderWires(markerPos, 1.0f, 0.0f, 2.0f, 4, lockColor);
+
+
+        rlEnableDepthTest();
+      }
+    }
+  }
+}
+
+

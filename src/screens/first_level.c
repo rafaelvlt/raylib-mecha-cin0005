@@ -65,6 +65,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
   EffectSystem(systems, &data->camera);
+  Hud3DSystem(systems);
   EndMode3D();
 
   //Desenha o HUD e minimapa
