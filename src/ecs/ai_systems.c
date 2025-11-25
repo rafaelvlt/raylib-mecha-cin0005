@@ -4,7 +4,7 @@
 
 #define AI_TURN_SPEED      1.5f  
 #define AI_MOVE_SPEED      12.5f 
-#define AI_FOV_THRESHOLD   0.4f
+#define AI_FOV_THRESHOLD   0.8f
 #define AI_AIM_ERROR       0.1
 
 static void AiMovementControl(TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float speed, float dt);
@@ -46,7 +46,7 @@ void AIControlSystem(struct Systems* systems) {
       bool canSeePlayer = false;
       if (dist <= ai->sightRadius) {
         Vector3 toPlayer = Vector3Normalize(Vector3Subtract(targetPos, transform->position));
-        Vector3 forward = Vector3RotateByQuaternion((Vector3){0,0,-1}, transform->orientation);
+        Vector3 forward = Vector3RotateByQuaternion((Vector3){0,0,1}, transform->orientation);
 
         float dot = Vector3DotProduct(forward, toPlayer);
 
@@ -168,19 +168,20 @@ static void AiMovementControl(TransformComponent* trans, PhysicsComponent* phys,
   Vector3 desiredDir = Vector3Normalize(toTarget);
   if (Vector3LengthSqr(desiredDir) < 0.001f) return;
 
-  Vector3 currentForward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
+  Vector3 currentForward = Vector3RotateByQuaternion((Vector3){0, 0, 1}, trans->orientation);
 
   Vector3 newDir = Vector3Lerp(currentForward, desiredDir, AI_TURN_SPEED * dt);
+  if (Vector3LengthSqr(newDir) < 0.001f) newDir = currentForward;
 
   newDir = Vector3Normalize(newDir);
 
-  trans->orientation = QuaternionFromVector3ToVector3((Vector3){0, 0, -1}, newDir);
+  trans->orientation = QuaternionFromVector3ToVector3((Vector3){0, 0, 1}, newDir);
 
   float alignment = Vector3DotProduct(currentForward, desiredDir);
-  float throttle = (alignment > 0.0f) ? alignment : 0.0f; // Só anda se estiver olhando +- pro alvo
+  float throttle = (alignment > 0.0f) ? alignment : 0.0f;
 
-  if (alignment > 0.5f) { // Só acelera se o alvo estiver no cone frontal
-    throttle = alignment; // Acelera mais quanto mais reto estiver
+  if (alignment > 0.5f) { 
+    throttle = alignment; 
   }
 
   phys->velocity = Vector3Scale(newDir, speed * throttle);
