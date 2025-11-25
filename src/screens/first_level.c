@@ -14,6 +14,7 @@
 #define CLOUD_AREA 1000.0f    
 #define CLOUD_HEIGHT 120.0f
 
+
 // -------------------------------------------
 // TEMPORARY FUNCTION WHILE THE MAP ISN'T READY 
 // -------------------------------------------
@@ -149,6 +150,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   //Desenha o HUD e minimapa
   DrawHUDSystem(systems);
+  DrawCrosshair(systems);
   DrawMinimapSystem(systems, data);
 
   DrawAIDebug(systems, data->camera);

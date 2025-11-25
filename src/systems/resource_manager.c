@@ -20,6 +20,14 @@ void InitResourceManager(ResourceManager* resourceManager) {
   //Mechas
   resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
   resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
+  resourceManager->models[MODEL_ID_ENEMY_SCOUT].transform = MatrixMultiply(
+    MatrixScale(0.5f, 0.5f, 0.5f), 
+    MatrixRotateY(PI)
+  );
+
+  //Structures
+  resourceManager->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
+  resourceManager->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(8.0f, 8.0f, 8.0f);
 
   //Projectiles
   //Pulse Laser 
