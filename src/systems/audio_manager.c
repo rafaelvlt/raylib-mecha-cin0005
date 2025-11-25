@@ -10,6 +10,8 @@
 static AssetSoundID GetGunfightSoundByType(EventType et, WeaponType wt);
 static void PlaySpatialGunfightSound(struct Systems* systems, Event event);
 static void PlayEnemyDeath(struct Systems* systems);
+static void PlayTargetDestroyed(struct Systems* systems);
+
 void InitAudioManager(struct Systems* systems){
 
   InitAudioDevice();
@@ -23,7 +25,8 @@ void AudioManagerOnEvent(struct Systems* systems, Event event) {
     PlaySpatialGunfightSound(systems, event);
   }
   if (event.type == EVENT_ENTITY_DEATH){
-    PlayEnemyDeath(systems);
+    if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) PlayTargetDestroyed(systems);
+    else PlayEnemyDeath(systems);
   }
 }
 
@@ -152,4 +155,11 @@ static void PlayEnemyDeath(struct Systems* systems){
   Sound* deathSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_MECH_DESTROYED);
   SetSoundVolume(*deathSfx, systems->configManager.audioVolume);
   PlaySound(*deathSfx);
+}
+
+
+static void PlayTargetDestroyed(struct Systems* systems){
+  Sound* destroyedSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_TARGET_DESTROYED);
+  SetSoundVolume(*destroyedSfx, systems->configManager.audioVolume);
+  PlaySound(*destroyedSfx);
 }

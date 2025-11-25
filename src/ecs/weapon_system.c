@@ -48,9 +48,15 @@ void WeaponSystem(struct Systems* systems){
 
             if (weapon->type == WEAPON_MISSILE_LAUNCHER) {
               if (wc->aimMode == AIM_MODE_CAMERA) {
+                Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED); 
+                float finalVolume = systems->configManager.audioVolume;
+                SetSoundVolume(failSound, finalVolume);
+                float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
+                SetSoundPitch(failSound, pitch);
                 if (wc->lockedTarget >= MAX_ENTITIES) {
                   canFire = false;                
                   weapon->cooldownTimer = 0.5;
+                  PlaySound(failSound);
                 }
                 else{
                   Vector3 myPos = em->transformComponents[mecha].position;
@@ -62,14 +68,9 @@ void WeaponSystem(struct Systems* systems){
                   if (distSq < (MIN_RANGE * MIN_RANGE)) {
                     canFire = false;
                     weapon->cooldownTimer = 0.5f;
+                    PlaySound(failSound);
                   }
                 }
-                Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED); 
-                float finalVolume = systems->configManager.audioVolume;
-                SetSoundVolume(failSound, finalVolume);
-                float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
-                SetSoundPitch(failSound, pitch);
-                PlaySound(failSound);
               }
             }
             if (canFire) {

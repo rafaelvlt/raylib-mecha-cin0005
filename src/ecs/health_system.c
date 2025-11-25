@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdio.h>
+#include "ecs/components.h"
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 #include "ecs/types.h"
@@ -37,6 +38,9 @@ void HealthSystem(struct Systems* systems) {
           deathData.deathEvent.owner = victim;
           deathData.deathEvent.killer = attacker;
           deathData.deathEvent.pos = em->transformComponents[victim].position;
+          if ((em->componentMasks[victim] & COMPONENT_COLLISION) == COMPONENT_COLLISION){
+            if (em->collisionComponents[victim].isTrigger) deathData.deathEvent.type = ENTITY_TURRET_STRUCTURE;
+          }
           PushEvent(systems, EVENT_ENTITY_DEATH, deathData);
 
           DestroyEntity(em, victim);

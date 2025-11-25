@@ -23,6 +23,11 @@
 #define DEATH_EXPLOSION_COLS        4    
 #define DEATH_EXPLOSION_ROWS        4
 
+// Objective Explosion
+#define    OBJECTIVE_EXPLOSION_START_SIZE 30.00f
+#define    OBJECTIVE_EXPLOSION_END_SIZE 50.00f
+#define   OBJECTIVE_EXPLOSION_DURATION 5.0
+
 // Laser Explosion
 #define LASER_HIT_START_SIZE  2.0f
 #define LASER_HIT_END_SIZE    2.0f
@@ -105,6 +110,32 @@ static void SpawnDeathExplosion(struct Systems* systems, Vector3 position){
   );
 }
 
+static void SpawnWinExplosion(struct Systems* systems, Vector3 position){
+  EntityManager* em = &systems->entityManager;
+
+  Entity effect = CreateEntity(em);
+  if (effect == MAX_ENTITIES) return;
+
+  Vector3 explosionPos = position;
+  explosionPos.y += 8.0f;
+
+  AddTransformComponent(em, effect, explosionPos);
+
+  AddEffectSheet(
+    em, 
+    effect,
+    OBJECTIVE_EXPLOSION_START_SIZE,
+    OBJECTIVE_EXPLOSION_END_SIZE,
+    WHITE,              
+    OBJECTIVE_EXPLOSION_DURATION,
+    TEXTURE_ID_MISSILE_EXPLOSION_SPRITESHEET, 
+    MISSILE_EXPLOSION_COLS,
+    MISSILE_EXPLOSION_ROWS,
+    false
+  );
+}
+
+
 void EffectSystemOnEvent(struct Systems* systems, Event event){
 
   if (event.type == EVENT_PROJECTILE_COLLISION) {
@@ -116,7 +147,8 @@ void EffectSystemOnEvent(struct Systems* systems, Event event){
     }
   }
   if (event.type == EVENT_ENTITY_DEATH){
-    SpawnDeathExplosion(systems, event.data.deathEvent.pos);
+    if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) SpawnWinExplosion(systems, event.data.deathEvent.pos);
+    else SpawnDeathExplosion(systems, event.data.deathEvent.pos);
   }
 }
 
