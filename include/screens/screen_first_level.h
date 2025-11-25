@@ -4,14 +4,14 @@
 
 struct Systems;
 
-
 typedef struct {
-    //TBD
+  Camera3D camera;
+  bool levelFinished;
+  float finishTimer;
 } FirstLevelData;
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
 void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
-
 #endif

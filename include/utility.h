@@ -1,37 +1,18 @@
 #ifndef UTILITY_H_11102025
 #define UTILITY_H_11102025
 
+#include <raylib.h>
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-
-#include <raylib.h>
-#include <stdlib.h>
-#include "resource_manager.h"
-#include "state_manager.h"
-#include "ecs/ecs_components.h"
-#include "ecs/ecs_entitymanager.h"
-#include "ecs/ecs_systems.h"
-#include "audio_manager.h"
-#include "config_manager.h"
-
 #define GAME_TITLE "MECHA GAME"
 
+// Camera Height
+#define MECH_HEIGHT 6.5f  
+
 // Colors
-#define GREENISH_BLACK  CLITERAL(Color){ 0, 25, 0, 255 }
-
-
-// Holds all managers, is passed around alot as a pointer to have a "global" system that any function can acess
-struct Systems{
-    EntityManager entityManager;
-    StateManager stateManager;
-    ResourceManager resourceManager;
-    AudioManager audioManager;
-    ConfigManager configManager;
-    //TBD Below
-    //EventSystem eventSystem
-    
-    bool shouldExit;
-};
-
+#define GREENISH_BLACK  (Color){ 0, 25, 0, 255 }
+#define LASER_BLUE      (Color){ 50, 180, 255, 255 }
+#define ENGINE_COLOR    (Color){ 255, 100, 10, 255 }
 
 #endif
