@@ -105,7 +105,7 @@ void AIControlSystem(struct Systems* systems) {
             //phys->velocity = Vector3Scale(dir, AI_MOVE_SPEED);
 
             // Verifica se chegou perto o suficiente do ponto de patrulha
-            if (Vector3Distance(transform->position, patrolTarget) < 1.0f) {
+            if (Vector3Distance(transform->position, patrolTarget) < 8.0f) {
               // Move para o próximo ponto de patrulha
               ai->currentPatrolIndex++;
               if (ai->currentPatrolIndex >= ai->numPatrolPoints) {
