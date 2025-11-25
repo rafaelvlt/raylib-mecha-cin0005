@@ -21,8 +21,12 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
   resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
   //Military Base
-  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModel("resources/models/base.glb");
-  resourceManager->models[MODEL_ID_BASE_HQ].transform = MatrixScale(15.0f, 15.0f, 15.0f);
+  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModel("resources/models/base_frente.glb");
+  resourceManager->models[MODEL_ID_BASE_HQ].transform = MatrixScale(10.0f, 10.0f, 14.0f);
+  resourceManager->models[MODEL_ID_BASE_SIDE] = LoadModel("resources/models/base_lateral.glb"); 
+  Matrix baseScale = MatrixScale(10.0f, 10.0f, 13.0f);
+  Matrix baseRotation = MatrixRotateY(90.0f * DEG2RAD);
+  resourceManager->models[MODEL_ID_BASE_SIDE].transform = MatrixMultiply(baseScale, baseRotation);
   //Projectiles
   //Pulse Laser 
   Mesh pulseLaserGunProjectileMesh = GenMeshCube(0.025f, 0.025f, 3.0f);
@@ -110,6 +114,8 @@ if (floorMesh.texcoords) {
   resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
   resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];
   resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+  resourceManager->models[MODEL_ID_BASE_SIDE].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];
+  resourceManager->models[MODEL_ID_BASE_SIDE].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
 }
 

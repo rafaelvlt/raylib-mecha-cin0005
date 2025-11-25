@@ -1,48 +1,105 @@
 =========================================================
 
+
+
 MAPA NÍVEL 1
+
+
 
 Este arquivo define a localização de todos os objetos 3D.
 
+
+
 =========================================================
+
+
 
 --- ZONA 1: INÍCIO (JOGADOR) ---
 
+
+
 ENTITY player
+
 TRANSFORM 0.0 0.0 -200.0
+
 PHYSICS 0.0 0.0 0.0 0.9
+
 PLAYER_CONTROL
+
 WEAPON_SLOTS weapon_left weapon_right
+
 COLLISION -1.0 -1.0 -1.0 1.0 2.0 1.0
+
+
 
 --- PATRULHA INIMIGA ---
 
+
+
 ENTITY scout_patrol_1
+
 TRANSFORM -50.0 0.0 -150.0
+
 RENDER 1 255 255 255 255  # ID 1 = MODEL_ID_ENEMY_SCOUT
+
 AI_CONTROL 60.0 20.0
+
 WEAPON WEAPON_PULSE_LASER 0.5 150.0 5.0 100.0 0.0 2 2
+
 COLLISION -1.0 0.0 -1.0 1.0 3.0 1.0
+
+
 
 ENTITY scout_patrol_2
+
 TRANSFORM 50.0 0.0 -150.0
+
 RENDER 1 255 255 255 255  # ID 1 = MODEL_ID_ENEMY_SCOUT
+
 AI_CONTROL 60.0 20.0
+
 WEAPON WEAPON_PULSE_LASER 0.5 150.0 5.0 100.0 0.0 2 2
+
 COLLISION -1.0 0.0 -1.0 1.0 3.0 1.0
 
+
+
 =========================================================
+
+a
 
 ZONA 2: A BASE MILITAR (QG)
 
+
+
 =========================================================
 
-1. O PRÉDIO PRINCIPAL (QG)
 
-ID 6 = MODEL_ID_BASE_HQ (A base carregada do base.glb)
+
+1. O PRÉDIO PRINCIPAL (QG - FRENTE)
+
+
+
+ID 6 = MODEL_ID_BASE_HQ (A base carregada do base_frente.glb)
+
+
 
 ENTITY base_hq_main
+
 TRANSFORM 0.0 -4.0 200.0
+
 RENDER 6 255 255 255 255
+
 COLLISION -25.0 -20.0 -20.0 25.0 20.0 20.0
+
 HEALTH 3000.0
+
+
+
+2. O PRÉDIO LATERAL (QG - LATERAL)
+
+ENTITY base_hq_side
+TRANSFORM 0.0 -4.0 200.0 <--- MUDAR AQUI (Acompanha a base principal)
+RENDER 7 255 255 255 255
+COLLISION -20.0 -20.0 -20.0 20.0 20.0 20.0
+HEALTH 2000.0
