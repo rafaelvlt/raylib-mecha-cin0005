@@ -15,8 +15,8 @@ void EffectSystem(struct Systems* systems, Camera* camera);
 
 //Draw HUD
 void DrawHUDSystem(struct Systems* systems);
+void DrawCrosshair(struct Systems* systems);
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
-
 // Effects helper, should be in updates
 void TrailSystem(struct Systems* systems);
 
@@ -41,8 +41,6 @@ void PlayerAudioSystem(struct Systems* systems);
 
 //Enemy AI Systems
 void AIControlSystem(struct Systems* systems);
-
-//
 void Hudsystem(struct Systems* systems);
 
 #endif // ECS_SYSTEMS_H
