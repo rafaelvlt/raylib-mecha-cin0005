@@ -107,7 +107,7 @@ void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Came
 
 
   player->mouseSensitivity = 0.001f;
-  player->maxSpeed = 15.0f;
+  player->maxSpeed = 25.0f;
   player->turnSpeed = 1.5f;
 
   // Zero-init the rest
