@@ -69,6 +69,7 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->sounds[SOUND_ID_ENEMY_MECH_DESTROYED] = LoadSound("resources/sounds/enemy_mech_death.wav");
   resourceManager->sounds[SOUND_ID_ENEMY_TARGET_DESTROYED] = LoadSound("resources/sounds/target_destroyed.wav");
 
+  resourceManager->sounds[SOUND_ID_MISSION_SUCCESS] = LoadSound("resources/sounds/mission_success.wav");
   // ---------------------------------------------------------
   // MUSIC 
   // ---------------------------------------------------------

@@ -18,6 +18,7 @@ void UpdateSecondLevelScreen(struct Systems* systems, SecondLevelData* data)
 
 void DrawSecondLevelScreen(struct Systems* systems, SecondLevelData* data)
 {
+    ClearBackground(BLACK);
     DrawText("Second Level", SCREEN_WIDTH/2 - MeasureText("Second Level", 100)/2, SCREEN_HEIGHT/2, 100, WHITE);
     DrawText("Press Enter to go to Menu", SCREEN_WIDTH/2 - MeasureText("Press Enter to go to Menu", 30)/2, SCREEN_HEIGHT/2 + 100, 30, WHITE);
 
