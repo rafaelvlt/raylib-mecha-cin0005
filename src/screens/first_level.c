@@ -9,12 +9,7 @@
 #include "systems.h"
 #include "map_loader.h"
 
-
-#define MAX_CLOUDS 100        
-#define CLOUD_AREA 1000.0f    
-#define CLOUD_HEIGHT 120.0f
-
-
+static void DrawLevel(struct Systems* systems, const Camera* camera);
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
@@ -69,7 +64,6 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   BeginMode3D(data->camera);
   DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
-  DrawTargetDebug(systems);
   EffectSystem(systems, &data->camera);
   EndMode3D();
 
@@ -78,7 +72,6 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawCrosshair(systems);
   DrawMinimapSystem(systems, data);
 
-  DrawAIDebug(systems, data->camera);
   DrawFPS(10, 10);
 }
 
