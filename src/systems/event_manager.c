@@ -35,8 +35,6 @@ void ProcessGameEvents(struct Systems* systems) {
     AudioManagerOnEvent(systems, event); 
     EffectSystemOnEvent(systems, event);
   }
-
-  ClearEventManager(ev);
 }
 
 void ClearEventManager(EventManager* em) {

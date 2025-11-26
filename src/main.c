@@ -25,6 +25,7 @@ int main(void) {
     // --- Game Loop ---
     systems.shouldExit = false;
     while (!systems.shouldExit) {
+        systems.delta_time = GetFrameTime(); 
         systems.shouldExit = WindowShouldClose();
         // Update Phase
         UpdateStateManager(&systems);
