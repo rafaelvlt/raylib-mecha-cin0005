@@ -36,7 +36,6 @@ void ProcessGameEvents(struct Systems* systems) {
     EffectSystemOnEvent(systems, event);
   }
 
-  ClearEventManager(ev);
 }
 
 void ClearEventManager(EventManager* em) {

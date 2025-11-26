@@ -39,8 +39,9 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  systems->delta_time = GetFrameTime(); 
 
+  systems->delta_time = GetFrameTime(); 
+  if (data->finishTimer) systems->delta_time *= 0.5;
   // Run Gameplay Systems
   PlayerControlSystem(systems);
   AIControlSystem(systems);
@@ -104,6 +105,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawHUDSystem(systems);
   DrawCrosshair(systems);
   DrawMinimapSystem(systems, data);
+  DrawLevelMessage(systems);
 
   DrawFPS(10, 10);
 }
