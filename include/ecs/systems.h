@@ -17,6 +17,7 @@ void EffectSystem(struct Systems* systems, Camera* camera);
 void DrawHUDSystem(struct Systems* systems);
 void DrawCrosshair(struct Systems* systems);
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
+void Hud3DSystem(struct Systems* systems);
 // Effects helper, should be in updates
 void TrailSystem(struct Systems* systems);
 
@@ -29,10 +30,11 @@ void AttachmentSystem(struct Systems* systems);
 // For deleting temporary entities, like bullets or other things
 void LifetimeSystem(struct Systems* systems);
 
-// Generalist Shooting Systems: Works both for the player and for the AI
+// Generalist Combat Systems: Works both for the player and for the AI
 void WeaponSystem(struct Systems* systems);
 void ProjectileSystem(struct Systems* systems);
 void MissileSystem(struct Systems* systems);
+void HealthSystem(struct Systems* systems);
 
 //Player Systems
 void PlayerControlSystem(struct Systems* systems);
