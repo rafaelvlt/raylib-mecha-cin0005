@@ -228,3 +228,33 @@ void Hud3DSystem(struct Systems* systems){
 }
 
 
+
+void DrawLevelMessage(struct Systems* systems) {
+  StateManager* state = &systems->stateManager;
+
+  int fontSize = 20;
+
+  int screenX = GetScreenWidth() / 2.0f;
+  int screenY =  MARGIN_TOP;
+
+  switch (state->currentScreen)  {
+  case SCREEN_FIRST_LEVEL:
+    DrawText("OBJETIVO:", screenX - MeasureText("OBJETIVO:", fontSize) / 2.0, 4.0 * screenY, fontSize, WHITE);
+    DrawText("Destrua a estrutura inimiga", screenX - MeasureText("Destrua a estrutura inimiga", fontSize) / 2.0, 5.5 * screenY, fontSize, WHITE);
+    break;
+  
+  default:
+    break;
+  }
+}
+
+// ALGUEM CONSERTA DPS
+void DrawDeathEntityMessage() {
+  
+  int screenX = GetScreenWidth() / 2.0f;
+  int screenY = GetScreenHeight();
+
+  DrawText("Inimigo destruído", screenX - MeasureText("Inimigo destruído", 20) / 2.0, screenY / 1.5, 20, RED);
+
+  
+}
