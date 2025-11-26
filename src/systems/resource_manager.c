@@ -1,8 +1,8 @@
 #include "resource_manager.h"
 #include <raylib.h>
-#include <raymath.h>
 #include "systems.h"
 #include "utility.h"
+#include "raymath.h"
 
 /****************************************************
 See the resource_manager.h for how to use guideline *
@@ -10,8 +10,8 @@ Only Change the init function to add more assets    *
 Don't forget to add the ID to the enum              *
 *****************************************************/
 
-void InitResourceManager(ResourceManager* resourceManager) {
 
+void InitResourceManager(ResourceManager* resourceManager) {
 
   // ---------------------------------------------------------
   // MODELS 
@@ -20,9 +20,14 @@ void InitResourceManager(ResourceManager* resourceManager) {
   //Mechas
   resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
   resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
+  resourceManager->models[MODEL_ID_ENEMY_SCOUT].transform = MatrixMultiply(
+    MatrixScale(0.5f, 0.5f, 0.5f), 
+    MatrixRotateY(PI)
+  );
 
   //Structures
   resourceManager->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
+  resourceManager->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(8.0f, 8.0f, 8.0f);
 
   //Projectiles
   //Pulse Laser 
@@ -60,10 +65,16 @@ void InitResourceManager(ResourceManager* resourceManager) {
   resourceManager->sounds[SOUND_ID_MISSILE_LAUNCHER_FIRING] = LoadSound("resources/sounds/missile_launcher_firing.wav");
   resourceManager->sounds[SOUND_ID_MISSILE_LAUNCHER_IMPACT] = LoadSound("resources/sounds/missile_launcher_impact.wav");
   resourceManager->sounds[SOUND_ID_MISSILE_FAILED] = LoadSound("resources/sounds/missile_failed.wav");
+
+  resourceManager->sounds[SOUND_ID_ENEMY_MECH_DESTROYED] = LoadSound("resources/sounds/enemy_mech_death.wav");
+  resourceManager->sounds[SOUND_ID_ENEMY_TARGET_DESTROYED] = LoadSound("resources/sounds/target_destroyed.wav");
+
+  resourceManager->sounds[SOUND_ID_MISSION_SUCCESS] = LoadSound("resources/sounds/mission_success.wav");
   // ---------------------------------------------------------
   // MUSIC 
   // ---------------------------------------------------------
   resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
+  resourceManager->musics[MUSIC_ID_FIRST_LEVEL] = LoadMusicStream("resources/musics/first_level_music.mp3");
 
   // ---------------------------------------------------------
   // TEXTURES 
@@ -84,6 +95,47 @@ void InitResourceManager(ResourceManager* resourceManager) {
   // ---------------------------------------------------------
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
   resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
+  resourceManager->textures[TEXTURE_ID_BASE_HQ] = LoadTexture("resources/textures/base_texture.png");
+  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_BASE_HQ]);
+  SetTextureFilter(resourceManager->textures[TEXTURE_ID_BASE_HQ], TEXTURE_FILTER_ANISOTROPIC_16X);
+
+  resourceManager->textures[TEXTURE_ID_SAND] = LoadTexture("resources/textures/sand.png");
+  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_SAND]);
+
+  SetTextureFilter(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_FILTER_ANISOTROPIC_16X);
+
+  SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT);
+  SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT); 
+
+  Mesh floorMesh = GenMeshPlane(2000.0f, 2000.0f, 20, 20);
+
+
+  if (floorMesh.texcoords) {
+    for (int i = 0; i < floorMesh.vertexCount * 2; i++) {
+      floorMesh.texcoords[i] *= 400.0f;
+    }
+  }
+  Mesh hqMesh = GenMeshCube(50.0f, 40.0f, 40.0f);
+  Mesh doorMesh = GenMeshCube(15.0f, 12.0f, 1.0f);
+  resourceManager->models[MODEL_ID_BASE_DOOR] = LoadModelFromMesh(doorMesh); 
+  resourceManager->models[MODEL_ID_BASE_DOOR].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){20, 20, 20, 255};
+
+  // Tiling
+  if (hqMesh.texcoords) {
+    for (int i = 0; i < hqMesh.vertexCount * 2; i++) {
+      hqMesh.texcoords[i] *= 4.0f; 
+    }
+  }
+
+  // Creates Model and apply texture
+  resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
+  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_SAND];
+
+  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModelFromMesh(hqMesh);
+  resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];
+  resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+
 }
 
 void ShutdownResourceManager(ResourceManager* resourceManager) {

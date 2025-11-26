@@ -4,12 +4,10 @@
 
 struct Systems;
 
-typedef struct{
-  char forward;
-  char backward;
-} playerInput;
 typedef struct {
   Camera3D camera;
+  bool levelFinished;
+  float finishTimer;
 } FirstLevelData;
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data);

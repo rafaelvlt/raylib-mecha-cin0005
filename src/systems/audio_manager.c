@@ -9,31 +9,53 @@
 // Helper Functions
 static AssetSoundID GetGunfightSoundByType(EventType et, WeaponType wt);
 static void PlaySpatialGunfightSound(struct Systems* systems, Event event);
+static void PlayEnemyDeath(struct Systems* systems);
+static void PlayTargetDestroyed(struct Systems* systems);
 
 void InitAudioManager(struct Systems* systems){
 
-    InitAudioDevice();
-    systems->audioManager.playingNow = GetMusic(&systems->resourceManager, MUSIC_ID_MENU);
-    systems->audioManager.playingNow->looping = true;
+  InitAudioDevice();
+  systems->audioManager.playingNow = GetMusic(&systems->resourceManager, MUSIC_ID_MENU);
+  systems->audioManager.playingNow->looping = true;
 
 }
 
 void AudioManagerOnEvent(struct Systems* systems, Event event) {
-    if (event.type == EVENT_WEAPON_FIRED || event.type == EVENT_PROJECTILE_COLLISION) {
-        PlaySpatialGunfightSound(systems, event);
-    }
+  if (event.type == EVENT_WEAPON_FIRED || event.type == EVENT_PROJECTILE_COLLISION) {
+    PlaySpatialGunfightSound(systems, event);
+  }
+  if (event.type == EVENT_ENTITY_DEATH){
+    if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) PlayTargetDestroyed(systems);
+    else PlayEnemyDeath(systems);
+  }
 }
 
 void UpdateAudioManager(struct Systems* systems){
   // If the current screen is one of the menu screen, stay playing the music
-  if (systems->stateManager.currentScreen < SCREEN_FIRST_LEVEL){
-    systems->audioManager.playingNow = GetMusic(&systems->resourceManager, MUSIC_ID_MENU);
-    UpdateMusicStream(*systems->audioManager.playingNow);
+  Music* targetMusic = NULL; 
+  Music* currentMusic = systems->audioManager.playingNow;
+
+  if (systems->stateManager.currentScreen < SCREEN_FIRST_LEVEL) {
+    targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_MENU);
   }
-  else{
-    StopMusicStream(*GetMusic(&systems->resourceManager, MUSIC_ID_MENU));
+  else if (systems->stateManager.currentScreen == SCREEN_FIRST_LEVEL) {
+    targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
+  }
+  else {
+    targetMusic = NULL;
   }
 
+  if (targetMusic != currentMusic){
+    if (currentMusic != NULL) StopMusicStream(*currentMusic);
+    if (targetMusic != NULL) PlayMusicStream(*targetMusic);
+    systems->audioManager.playingNow = targetMusic;
+  }
+
+  if (systems->audioManager.playingNow != NULL){
+    float volume = systems->configManager.audioVolume;
+    SetMusicVolume(*systems->audioManager.playingNow, volume);
+    UpdateMusicStream(*systems->audioManager.playingNow);
+  }
 }
 
 void ShutdownAudioManager(){
@@ -124,4 +146,20 @@ static void PlaySpatialGunfightSound(struct Systems* systems, Event event) {
   SetSoundPitch(sfx, pitch);
 
   if (finalVolume >= 0.01f) PlaySound(sfx);
+}
+
+
+
+
+static void PlayEnemyDeath(struct Systems* systems){
+  Sound* deathSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_MECH_DESTROYED);
+  SetSoundVolume(*deathSfx, systems->configManager.audioVolume);
+  PlaySound(*deathSfx);
+}
+
+
+static void PlayTargetDestroyed(struct Systems* systems){
+  Sound* destroyedSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_TARGET_DESTROYED);
+  SetSoundVolume(*destroyedSfx, systems->configManager.audioVolume);
+  PlaySound(*destroyedSfx);
 }

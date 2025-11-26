@@ -5,7 +5,7 @@
 struct Systems;
 
 typedef struct {
-    //TBD
+    Camera* camera;
 } SecondLevelData;
 
 void InitSecondLevelScreen(struct Systems* systems, SecondLevelData* data);
