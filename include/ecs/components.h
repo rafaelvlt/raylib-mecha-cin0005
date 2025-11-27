@@ -86,6 +86,7 @@ typedef struct {
 typedef struct  {
   float currentHealth;
   float maxHealth;
+  bool hasTakenDamage;
 }  HealthComponent;
 
 // Used for stats about a weapon

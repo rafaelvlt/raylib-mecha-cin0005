@@ -29,6 +29,11 @@ void DrawHUDSystem(struct Systems* systems) {
       Color outlineColor = (Color){ 0, 255, 255, 255 };
       Color fillColor = (Color){ 0, 100, 200, 200 };
 
+      if (hp->currentHealth < hp->maxHealth * 0.6f) {
+        fillColor = (Color){ 200, 70, 0, 200 };
+        outlineColor = ORANGE;
+      }
+
       if (hp->currentHealth < hp->maxHealth * 0.3f) {
         fillColor = (Color){ 200, 0, 0, 200 };
         outlineColor = RED;
