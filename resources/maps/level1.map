@@ -69,13 +69,14 @@ HEALTH 100.0
 RENDER 1 255 255 255 255 
 AI_CONTROL 200.0 100.0
 # Patrulha em linha horizontal: Esquerda <-> Direita
-AI_PATROL 2 -50 0 -300 50 0 -300
+AI_PATROL 2 -0 0 -400 0 0 -250
 
 ENTITY scout1_gun
 TRANSFORM 0 0 0
 WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
 ATTACHMENT scout1 0.0 3.0 2.0
 LINK_WEAPON scout1 0 scout1_gun 0 1
+
 
 
 # ==========================================
@@ -99,8 +100,96 @@ ATTACHMENT scout2 0.0 3.0 2.0
 LINK_WEAPON scout2 0 scout2_gun 0 1
 
 
+
 # ==========================================
-# INIMIGO 3: COMBATENT (Guarda da Porta)
+# INIMIGO 3: SCOUT (Patrulha Flanco Direito)
+# ==========================================
+# Protege o lado da torre (Z = -400)
+ENTITY scout2
+TRANSFORM 100.0 0.0 -200.0
+PHYSICS 0.0 0.0 0.0 0.90
+COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
+HEALTH 100.0
+RENDER 1 255 255 255 255
+AI_CONTROL 200.0 125.0
+# Patrulha vertical: Frente <-> Trás no flanco
+AI_PATROL 2 100 0 -200 -100 0 -200
+
+ENTITY scout3_gun
+TRANSFORM 0 0 0
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+ATTACHMENT scout3 0.0 3.0 2.0
+LINK_WEAPON scout3 0 scout3_gun 0 1
+
+
+# ==========================================
+# INIMIGO 4: SCOUT (Patrulha Flanco Direito)
+# ==========================================
+# Protege o lado da torre (Z = -400)
+ENTITY scout2
+TRANSFORM -100.0 0.0 -300.0
+PHYSICS 0.0 0.0 0.0 0.90
+COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
+HEALTH 100.0
+RENDER 1 255 255 255 255
+AI_CONTROL 200.0 125.0
+# Patrulha vertical: Frente <-> Trás no flanco
+AI_PATROL 2 -100 0 -300 100 0 -300
+
+ENTITY scout3_gun
+TRANSFORM 0 0 0
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+ATTACHMENT scout3 0.0 3.0 2.0
+LINK_WEAPON scout3 0 scout3_gun 0 1
+
+
+
+# ==========================================
+# INIMIGO 5: SCOUT (Patrulha Flanco Direito)
+# ==========================================
+# Protege o lado da torre (Z = -400)
+ENTITY scout5
+TRANSFORM 150.0 0.0 -500.0
+PHYSICS 0.0 0.0 0.0 0.90
+COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
+HEALTH 100.0
+RENDER 1 255 255 255 255
+AI_CONTROL 200.0 125.0
+# Patrulha diagonal: Frente <-> Trás no flanco
+AI_PATROL 2 150 0 -500 50 0 -400
+
+ENTITY scout5_gun
+TRANSFORM 0 0 0
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+ATTACHMENT scout5 0.0 3.0 2.0
+LINK_WEAPON scout5 0 scout5_gun 0 1
+
+
+
+# ==========================================
+# INIMIGO 6: SCOUT (Patrulha Flanco Direito)
+# ==========================================
+# Protege o lado da torre (Z = -400)
+ENTITY scout6
+TRANSFORM -150.0 0.0 -500.0
+PHYSICS 0.0 0.0 0.0 0.90
+COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
+HEALTH 100.0
+RENDER 1 255 255 255 255
+AI_CONTROL 200.0 125.0
+# Patrulha vertical: Frente <-> Trás no flanco
+AI_PATROL 2 -150 0 -500 -50 0 -400
+
+ENTITY scout6_gun
+TRANSFORM 0 0 0
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+ATTACHMENT scout6 0.0 3.0 2.0
+LINK_WEAPON scout6 0 scout6_gun 0 1
+
+
+
+# ==========================================
+# INIMIGO 5: COMBATENT (Guarda da Porta)
 # ==========================================
 # Fica parado logo na frente da torre (-450)
 ENTITY combatent1
@@ -120,7 +209,7 @@ LINK_WEAPON combatent1 0 comb1_gun 0 1
 
 
 # ==========================================
-# INIMIGO 4: COMBATENT (Reforço Traseiro)
+# INIMIGO 6: COMBATENT (Reforço Traseiro)
 # ==========================================
 # Escondido atrás da torre (-550) ou lado esquerdo (-50)
 ENTITY combatent2
@@ -139,7 +228,7 @@ LINK_WEAPON combatent2 0 comb2_gun 0 1
 
 
 # ==========================================
-# INIMIGO 5: COMBATENT (Reforço Traseiro)
+# INIMIGO 7: COMBATENT (Reforço Traseiro)
 # ==========================================
 # Escondido atrás da torre (-550) ou lado esquerdo (-50)
 ENTITY combatent3
