@@ -39,9 +39,9 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
+
   systems->delta_time = GetFrameTime(); 
-  // Slow motion effect
-  if (data->levelFinished) systems->delta_time *= 0.5;
+
   // Run Gameplay Systems
   PlayerControlSystem(systems);
   AIControlSystem(systems);
@@ -68,15 +68,15 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
       if (event.type == EVENT_ENTITY_DEATH){
         if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE){
           data->levelFinished = true;
-          data->finishTimer = 2.5f; 
+          data->finishTimer = 5.0f; 
         }
       }
     }
   }
-
   if (data->levelFinished) {
     data->finishTimer -= systems->delta_time;
-    if (data->finishTimer <= 2.50f){
+    
+    if (data->finishTimer <= 2.5f){
       Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
       SetSoundVolume(*endSfx, systems->configManager.audioVolume);
       PlaySound(*endSfx);
@@ -103,6 +103,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   DrawHUDSystem(systems);
   DrawCrosshair(systems);
   DrawMinimapSystem(systems, data);
+  DrawLevelMessage(systems);
 
   DrawFPS(10, 10);
 }
