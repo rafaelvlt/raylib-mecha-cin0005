@@ -38,9 +38,7 @@ void DestroyEntity(EntityManager* em, Entity entity) {
   if (entity < MAX_ENTITIES) {
     em->componentMasks[entity] = COMPONENT_NONE;
     // Reduces numEntities if the one being removed is the highest ID
-    if (entity == em->numEntities - 1) {
-      em->numEntities--;
-    }
+    if (entity == em->numEntities - 1) em->numEntities--;
   }
 }
 
