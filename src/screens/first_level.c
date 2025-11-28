@@ -41,7 +41,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
 
   systems->delta_time = GetFrameTime(); 
-  if (data->finishTimer) systems->delta_time *= 0.5;
+
   // Run Gameplay Systems
   PlayerControlSystem(systems);
   AIControlSystem(systems);
@@ -66,9 +66,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     for (int i = 0; i < em->eventCounter; i++) {
       Event event = em->eventQueue[i];
       if (event.type == EVENT_ENTITY_DEATH){
-         TraceLog(LOG_INFO, "DEBUG MORTE: OwnerID: %d", event.data.deathEvent.owner);
         if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE){
-          TraceLog(LOG_INFO, "DEBUG: ESTRUTURA DESTRUIDA DETECTADA!");
           data->levelFinished = true;
           data->finishTimer = 5.0f; 
         }
