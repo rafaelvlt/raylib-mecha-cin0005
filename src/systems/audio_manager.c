@@ -35,7 +35,7 @@ void UpdateAudioManager(struct Systems* systems){
   Music* targetMusic = NULL; 
   Music* currentMusic = systems->audioManager.playingNow;
 
-  if (systems->stateManager.currentScreen < SCREEN_FIRST_LEVEL) {
+  if (systems->stateManager.currentScreen < SCREEN_DEBRIEFING) {
     targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_MENU);
   }
   else if (systems->stateManager.currentScreen == SCREEN_FIRST_LEVEL) {

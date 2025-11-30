@@ -17,8 +17,8 @@ void UpdateLoadoutScreen(struct Systems* systems, LoadoutData* data)
 
 void DrawLoadoutScreen(struct Systems* systems, LoadoutData* data)
 {
-    DrawText("Loadout", SCREEN_WIDTH/2 - MeasureText("Loadout", 100)/2, SCREEN_HEIGHT/2, 100, WHITE);
-    DrawText("Press Enter to go to Menu", SCREEN_WIDTH/2 - MeasureText("Press Enter to go to Menu", 30)/2, SCREEN_HEIGHT/2 + 100, 30, WHITE);
+    DrawText("Loadout", systems->configManager.screenResolution.x/2 - MeasureText("Loadout", 100)/2, systems->configManager.screenResolution.y/2, 100, WHITE);
+    DrawText("Press Enter to go to Menu", systems->configManager.screenResolution.x/2 - MeasureText("Press Enter to go to Menu", 30)/2, systems->configManager.screenResolution.y/2 + 100, 30, WHITE);
 
 }
 
