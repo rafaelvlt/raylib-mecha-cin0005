@@ -1,6 +1,7 @@
 #ifndef STATE_MANAGER_H
 #define STATE_MANAGER_H
 
+#include "screens/screen_debriefing.h"
 struct Systems;
 
 #include <raylib.h>
@@ -21,6 +22,7 @@ typedef enum GameScreen {
     SCREEN_LOADOUT,
     SCREEN_OPTIONS,
     SCREEN_CREDITS,
+    SCREEN_DEBRIEFING,
     SCREEN_FIRST_LEVEL,
     SCREEN_SECOND_LEVEL,
 } GameScreen;
@@ -35,6 +37,7 @@ typedef union {
     LoadoutData loadout;
     OptionsData options;
     CreditsData credits;
+    DebriefingData debriefing;
     FirstLevelData firstLevel;
     SecondLevelData secondLevel;
 } ScreenData;
