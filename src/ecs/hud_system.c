@@ -244,8 +244,8 @@ void DrawLevelMessage(struct Systems* systems) {
 
   switch (state->currentScreen)  {
   case SCREEN_FIRST_LEVEL:
-    DrawText("OBJETIVO:", screenX - MeasureText("OBJETIVO:", fontSize) / 2.0, 4.0 * screenY, fontSize, WHITE);
-    DrawText("Destrua a estrutura inimiga", screenX - MeasureText("Destrua a estrutura inimiga", fontSize) / 2.0, 5.5 * screenY, fontSize, WHITE);
+    DrawText("OBJECTIVE:", screenX - MeasureText("OBJECTIVE:", fontSize) / 2.0, 4.0 * screenY, fontSize, WHITE);
+    DrawText("Destroy the enemy structure", screenX - MeasureText("Destroy the enemy structure", fontSize) / 2.0, 5.5 * screenY, fontSize, WHITE);
     break;
   
   default:
