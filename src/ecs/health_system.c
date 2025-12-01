@@ -30,9 +30,6 @@ void HealthSystem(struct Systems* systems) {
         hp->hasTakenDamage = true;
         hp->currentHealth -= damage;
 
-        TraceLog(LOG_INFO, "DMG: Entity %d took %.1f dmg. HP: %.1f/%0.1f", 
-                 victim, damage, hp->currentHealth, hp->maxHealth);
-
         if (hp->currentHealth <= 0) {
 
           EventData deathData;
@@ -45,7 +42,6 @@ void HealthSystem(struct Systems* systems) {
           PushEvent(systems, EVENT_ENTITY_DEATH, deathData);
 
           DestroyEntity(em, victim);
-          TraceLog(LOG_INFO, "KILL: Entity %d destroyed.", victim);
         }
       }
     }

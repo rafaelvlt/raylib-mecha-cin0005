@@ -11,200 +11,196 @@ Don't forget to add the ID to the enum              *
 *****************************************************/
 
 
-void InitResourceManager(ResourceManager* resourceManager) {
+void InitResourceManager(struct Systems* systems) {
+  
+  ResourceManager* rm = &systems->resourceManager;
 
   // ---------------------------------------------------------
   // MODELS 
   // ---------------------------------------------------------
 
   //Mechas
-  resourceManager->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
-  resourceManager->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
-  resourceManager->models[MODEL_ID_ENEMY_SCOUT].transform = MatrixMultiply(
+  rm->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
+  rm->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/scout.glb");
+  rm->models[MODEL_ID_ENEMY_SCOUT].transform = MatrixMultiply(
     MatrixScale(0.5f, 0.5f, 0.5f), 
     MatrixRotateY(PI)
   );
-
+  rm->models[MODEL_ID_DEBRIEFING] = LoadModel("resources/models/player/debriefing.glb");
+  rm->models[MODEL_ID_DEBRIEFING].transform = MatrixMultiply(MatrixScale(3.5f, 3.5f, 3.5f), MatrixRotateY(0)); 
   //Structures
-  resourceManager->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
-  resourceManager->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(8.0f, 8.0f, 8.0f);
+  rm->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
+  rm->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(8.0f, 8.0f, 8.0f);
+  
+  rm->models[MODEL_ID_HANGAR_ENV] = LoadModel("resources/models/environment/hangar.glb");
+  // Darken the model
+  for(int i = 0; i < rm->models[MODEL_ID_HANGAR_ENV].materialCount; i++) {
+    rm->models[MODEL_ID_HANGAR_ENV].materials[i].maps[MATERIAL_MAP_DIFFUSE].color = (Color){100, 100, 100, 255};
+  }
 
   //Projectiles
   //Pulse Laser 
   Mesh pulseLaserGunProjectileMesh = GenMeshCube(0.025f, 0.025f, 3.0f);
-  resourceManager->models[MODEL_ID_PROJECTILE_PULSE_LASER] = LoadModelFromMesh(pulseLaserGunProjectileMesh);
+  rm->models[MODEL_ID_PROJECTILE_PULSE_LASER] = LoadModelFromMesh(pulseLaserGunProjectileMesh);
   // Lighting up
-  resourceManager->models[MODEL_ID_PROJECTILE_PULSE_LASER].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+  rm->models[MODEL_ID_PROJECTILE_PULSE_LASER].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
   //Missile
   Mesh missileMesh = GenMeshCone(0.3f, 1.0f, 4);
   Matrix rotation = MatrixRotateX(-90 * DEG2RAD);
   Model missileModel = LoadModelFromMesh(missileMesh);
   missileModel.transform = rotation;
-  resourceManager->models[MODEL_ID_PROJECTILE_MISSILE_LAUNCHER] = missileModel;
+  rm->models[MODEL_ID_PROJECTILE_MISSILE_LAUNCHER] = missileModel;
 
   // Dummy
   Mesh cubmesh = GenMeshCube(3.0f, 3.0f, 3.0f);
-  resourceManager->models[MODEL_ID_DUMMY] =  LoadModelFromMesh(cubmesh); 
+  rm->models[MODEL_ID_DUMMY] =  LoadModelFromMesh(cubmesh); 
   // ---------------------------------------------------------
   // FONTS 
   // ---------------------------------------------------------
-  resourceManager->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
-  resourceManager->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
-  resourceManager->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources/fonts/capture_it.ttf", 150, NULL, 0);
+  rm->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
+  rm->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
+  rm->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources/fonts/capture_it.ttf", 150, NULL, 0);
 
   // ---------------------------------------------------------
   // SOUNDS 
   // ---------------------------------------------------------
-  resourceManager->sounds[SOUND_ID_MECHA_FOOTSTEP] = LoadSound("resources/sounds/mecha_footstep.wav");
-  resourceManager->sounds[SOUND_ID_MECHA_ZOOM] = LoadSound("resources/sounds/zoom.wav");
+  rm->sounds[SOUND_ID_MECHA_FOOTSTEP] = LoadSound("resources/sounds/mecha_footstep.wav");
+  rm->sounds[SOUND_ID_MECHA_ZOOM] = LoadSound("resources/sounds/zoom.wav");
 
-  resourceManager->sounds[SOUND_ID_PULSE_LASER_FIRING] = LoadSound("resources/sounds/pulse_laser_firing.wav");
-  resourceManager->sounds[SOUND_ID_PULSE_LASER_IMPACT] = LoadSound("resources/sounds/pulse_laser_impact.wav");
+  rm->sounds[SOUND_ID_PULSE_LASER_FIRING] = LoadSound("resources/sounds/pulse_laser_firing.wav");
+  rm->sounds[SOUND_ID_PULSE_LASER_IMPACT] = LoadSound("resources/sounds/pulse_laser_impact.wav");
 
-  resourceManager->sounds[SOUND_ID_MISSILE_LAUNCHER_FIRING] = LoadSound("resources/sounds/missile_launcher_firing.wav");
-  resourceManager->sounds[SOUND_ID_MISSILE_LAUNCHER_IMPACT] = LoadSound("resources/sounds/missile_launcher_impact.wav");
-  resourceManager->sounds[SOUND_ID_MISSILE_FAILED] = LoadSound("resources/sounds/missile_failed.wav");
+  rm->sounds[SOUND_ID_MISSILE_LAUNCHER_FIRING] = LoadSound("resources/sounds/missile_launcher_firing.wav");
+  rm->sounds[SOUND_ID_MISSILE_LAUNCHER_IMPACT] = LoadSound("resources/sounds/missile_launcher_impact.wav");
+  rm->sounds[SOUND_ID_MISSILE_FAILED] = LoadSound("resources/sounds/missile_failed.wav");
 
-  resourceManager->sounds[SOUND_ID_ENEMY_MECH_DESTROYED] = LoadSound("resources/sounds/enemy_mech_death.wav");
-  resourceManager->sounds[SOUND_ID_ENEMY_TARGET_DESTROYED] = LoadSound("resources/sounds/target_destroyed.wav");
+  rm->sounds[SOUND_ID_ENEMY_MECH_DESTROYED] = LoadSound("resources/sounds/enemy_mech_death.wav");
+  rm->sounds[SOUND_ID_ENEMY_TARGET_DESTROYED] = LoadSound("resources/sounds/target_destroyed.wav");
 
-  resourceManager->sounds[SOUND_ID_MISSION_SUCCESS] = LoadSound("resources/sounds/mission_success.wav");
+  rm->sounds[SOUND_ID_MISSION_SUCCESS] = LoadSound("resources/sounds/mission_success.wav");
+
+  rm->sounds[SOUND_ID_HUMAN_FOOTSTEP] = LoadSound("resources/sounds/human_footstep.wav");
+  rm->sounds[SOUND_ID_SKYDROP] = LoadSound("resources/sounds/skydrop.wav");
+  rm->sounds[SOUND_ID_STARTUP_SEQUENCE] = LoadSound("resources/sounds/startup_sequence.wav");
   // ---------------------------------------------------------
   // MUSIC 
   // ---------------------------------------------------------
-  resourceManager->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
-  resourceManager->musics[MUSIC_ID_FIRST_LEVEL] = LoadMusicStream("resources/musics/first_level_music.mp3");
+  rm->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
+  rm->musics[MUSIC_ID_FIRST_LEVEL] = LoadMusicStream("resources/musics/first_level_music.mp3");
 
+  rm->musics[MUSIC_ID_DEBRIEFING] = LoadMusicStream("resources/musics/debriefing.mp3");
   // ---------------------------------------------------------
   // TEXTURES 
   // ---------------------------------------------------------
-  resourceManager->textures[TEXTURE_ID_LASER_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/laser_pulse_explosion.png");
-  resourceManager->textures[TEXTURE_ID_MISSILE_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/missile_explosion.png");
+  rm->textures[TEXTURE_ID_LASER_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/laser_pulse_explosion.png");
+  rm->textures[TEXTURE_ID_MISSILE_EXPLOSION_SPRITESHEET] = LoadTexture("resources/textures/missile_explosion.png");
   // Smoke
   for (int i = 0; i < 10; i++) {
     const char* fileName = TextFormat("resources/textures/smoke_%02d.png", i + 1);
-    resourceManager->textures[TEXTURE_ID_SMOKE + i] = LoadTexture(fileName);
-    SetTextureFilter(resourceManager->textures[TEXTURE_ID_SMOKE + i], TEXTURE_FILTER_BILINEAR);
+    rm->textures[TEXTURE_ID_SMOKE + i] = LoadTexture(fileName);
+    SetTextureFilter(rm->textures[TEXTURE_ID_SMOKE + i], TEXTURE_FILTER_BILINEAR);
   }
 
-  resourceManager->textures[TEXTURE_ID_CROSSHAIR_SPRITE] = LoadTexture("resources/textures/crosshair.png");
+  rm->textures[TEXTURE_ID_CROSSHAIR_SPRITE] = LoadTexture("resources/textures/crosshair.png");
 
   // ---------------------------------------------------------
   // RENDER TEXTURES 
   // ---------------------------------------------------------
-  resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
-  resourceManager->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(SCREEN_WIDTH/2, SCREEN_HEIGHT);
-  resourceManager->textures[TEXTURE_ID_BASE_HQ] = LoadTexture("resources/textures/base_texture.png");
-  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_BASE_HQ]);
-  SetTextureFilter(resourceManager->textures[TEXTURE_ID_BASE_HQ], TEXTURE_FILTER_ANISOTROPIC_16X);
+  rm->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(systems->configManager.screenResolution.x/2, systems->configManager.screenResolution.y);
+  rm->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(systems->configManager.screenResolution.x/2, systems->configManager.screenResolution.y);
+  
+  rm->textures[TEXTURE_ID_SAND] = LoadTexture("resources/textures/floor.png");
 
-  resourceManager->textures[TEXTURE_ID_SAND] = LoadTexture("resources/textures/sand.png");
-  GenTextureMipmaps(&resourceManager->textures[TEXTURE_ID_SAND]);
+  GenTextureMipmaps(&rm->textures[TEXTURE_ID_SAND]);
 
-  SetTextureFilter(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_FILTER_ANISOTROPIC_16X);
+  SetTextureFilter(rm->textures[TEXTURE_ID_SAND], TEXTURE_FILTER_ANISOTROPIC_16X); 
 
-  SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT);
-  SetTextureWrap(resourceManager->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT); 
+  SetTextureWrap(rm->textures[TEXTURE_ID_SAND], TEXTURE_WRAP_REPEAT); 
 
-  Mesh floorMesh = GenMeshPlane(2000.0f, 2000.0f, 20, 20);
+  Mesh groundMesh = GenMeshPlane(2000.0f, 2000.0f, 40, 40);
 
-
-  if (floorMesh.texcoords) {
-    for (int i = 0; i < floorMesh.vertexCount * 2; i++) {
-      floorMesh.texcoords[i] *= 400.0f;
-    }
-  }
-  Mesh hqMesh = GenMeshCube(50.0f, 40.0f, 40.0f);
-  Mesh doorMesh = GenMeshCube(15.0f, 12.0f, 1.0f);
-  resourceManager->models[MODEL_ID_BASE_DOOR] = LoadModelFromMesh(doorMesh); 
-  resourceManager->models[MODEL_ID_BASE_DOOR].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){20, 20, 20, 255};
-
-  // Tiling
-  if (hqMesh.texcoords) {
-    for (int i = 0; i < hqMesh.vertexCount * 2; i++) {
-      hqMesh.texcoords[i] *= 4.0f; 
-    }
+  for (int i = 0; i < groundMesh.vertexCount * 2; i++) {
+    groundMesh.texcoords[i] *= 2000.0f; 
   }
 
-  // Creates Model and apply texture
-  resourceManager->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(floorMesh);
-  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_SAND];
+  rm->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(groundMesh);
+  Texture2D* tex = &rm->textures[TEXTURE_ID_SAND];
+  *tex = LoadTexture("resources/textures/floor.png"); 
+  SetTextureWrap(*tex, TEXTURE_WRAP_REPEAT); 
+  SetTextureFilter(*tex, TEXTURE_FILTER_ANISOTROPIC_16X);
 
-  resourceManager->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-  resourceManager->models[MODEL_ID_BASE_HQ] = LoadModelFromMesh(hqMesh);
-  resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resourceManager->textures[TEXTURE_ID_BASE_HQ];
-  resourceManager->models[MODEL_ID_BASE_HQ].materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
+  rm->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = *tex;
 }
 
-void ShutdownResourceManager(ResourceManager* resourceManager) {
+void ShutdownResourceManager(ResourceManager* rm) {
 
   for (int i = 0; i < MODEL_ID_COUNT; i++) {
-    UnloadModel(resourceManager->models[i]);
+    UnloadModel(rm->models[i]);
   }
   for (int i = 0; i < FONT_ID_COUNT; i++) {
-    UnloadFont(resourceManager->fonts[i]);
+    UnloadFont(rm->fonts[i]);
   }
   for(int i = 0; i < MUSIC_ID_COUNT; i++){
-    UnloadMusicStream(resourceManager->musics[i]);
+    UnloadMusicStream(rm->musics[i]);
   }
   for (int i = 0; i < SOUND_ID_COUNT; i++){
-    UnloadSound(resourceManager->sounds[i]);
+    UnloadSound(rm->sounds[i]);
   }
   for (int i = 0; i < TEXTURE_ID_COUNT; i++){
-    UnloadTexture(resourceManager->textures[i]);
+    UnloadTexture(rm->textures[i]);
   }
   for(int i = 0; i < RENDERTEXTURE_ID_COUNT; i++){
-    UnloadRenderTexture(resourceManager->renderTextures[i]);
+    UnloadRenderTexture(rm->renderTextures[i]);
   }
 }
 
 
-Model* GetModel(ResourceManager* resourceManager, AssetModelID id) {
+Model* GetModel(ResourceManager* rm, AssetModelID id) {
   if (id < MODEL_ID_COUNT) {
-    return &resourceManager->models[id];
+    return &rm->models[id];
   }
   // Return nullpointer if ID is not valid
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Model access");
   return NULL;
 }
 
-Font* GetFont(ResourceManager* resourceManager, AssetFontID id) {
+Font* GetFont(ResourceManager* rm, AssetFontID id) {
   if (id < FONT_ID_COUNT) {
-    return &resourceManager->fonts[id];
+    return &rm->fonts[id];
   }
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Font access");
   return NULL;
 }
 
-Sound* GetSound(ResourceManager* resourceManager, AssetSoundID id) {
+Sound* GetSound(ResourceManager* rm, AssetSoundID id) {
   if (id < SOUND_ID_COUNT) {
-    return &resourceManager->sounds[id];
+    return &rm->sounds[id];
   }
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Sound access");
   return NULL;
 }
 
-Music* GetMusic(ResourceManager* resourceManager, AssetMusicID id) {
+Music* GetMusic(ResourceManager* rm, AssetMusicID id) {
   if (id < MUSIC_ID_COUNT) {
-    return &resourceManager->musics[id];
+    return &rm->musics[id];
   }
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Music access");
   return NULL;
 }
 
-Texture* GetTexture(ResourceManager* resourceManager, AssetTextureID id){
+Texture* GetTexture(ResourceManager* rm, AssetTextureID id){
   if (id < TEXTURE_ID_COUNT) {
-    return &resourceManager->textures[id];
+    return &rm->textures[id];
   }
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Texture access");
   return NULL;
 }
 
-RenderTexture* GetRenderTexture(ResourceManager* resourceManager, AssetRenderTextureID id){
+RenderTexture* GetRenderTexture(ResourceManager* rm, AssetRenderTextureID id){
   if (id < RENDERTEXTURE_ID_COUNT) {
-    return &resourceManager->renderTextures[id];
+    return &rm->renderTextures[id];
   }
   TraceLog(LOG_WARNING, "RESOURCE MANAGER: Invalid Render Texture access");
   return NULL;

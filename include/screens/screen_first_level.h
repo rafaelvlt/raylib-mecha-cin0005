@@ -8,6 +8,9 @@ typedef struct {
   Camera3D camera;
   bool levelFinished;
   float finishTimer;
+  float dropTimer;
+  bool hasLanded;
+  bool canControl;
 } FirstLevelData;
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data);
