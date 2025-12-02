@@ -33,7 +33,7 @@ void HealthSystem(struct Systems* systems) {
           Vector3 attackerPos = em->transformComponents[attacker].position;
           Vector3 victimPos = em->transformComponents[victim].position;
           hp->lastDamageDirection = Vector3Normalize(Vector3Subtract(victimPos, attackerPos));
-          hp->damageReactionTimer = 1.0f; // Reaction animation duration (2 seconds)
+          hp->damageReactionTimer = 1.0f;
         }
         
         hp->hasTakenDamage = true;

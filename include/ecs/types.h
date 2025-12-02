@@ -35,7 +35,6 @@ typedef enum {
   AI_STATE_ATTACK = 2
 } AIState;
 
-// Animation indices for enemy scout model
 typedef enum {
   SCOUT_ANIM_IDLE = 0,            
   SCOUT_ANIM_DAMAGE_RIGHT = 1,   

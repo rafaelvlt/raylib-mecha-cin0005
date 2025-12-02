@@ -159,7 +159,7 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
       p->centeringTorsotoLegs = false;
     }
 
-    // QOL: If the player tries to move alot during the centering, cancels it
+    // If the player tries to move alot during the centering, cancels it
     if (fabs(mouseDelta.x) > 1.0f || fabs(mouseDelta.y) > 1.0f) {
       p->centeringTorsotoLegs = false;
     }

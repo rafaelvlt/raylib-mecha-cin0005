@@ -147,12 +147,11 @@ static void DrawMinimapEntities(EntityManager* em, Entity player, Vector3 player
       TransformComponent* trans = &em->transformComponents[e];
       Vector3 worldPos = trans->position;
 
-      // Calculate relative position from player (only X and Z, ignoring Y height)
+      // Calculate relative position from player 
       float dx = worldPos.x - playerPos.x;
       float dz = worldPos.z - playerPos.z;
 
-      // Rotate coordinates to match player's facing direction (2D rotation matrix)
-      // This makes the minimap always show player facing "up" regardless of actual rotation
+      // Rotate coordinates to match player's facing direction
       float rotatedX = dx * cosYaw - dz * sinYaw;
       float rotatedY = dx * sinYaw + dz * cosYaw;
 
@@ -196,6 +195,7 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data) {
   }
 
   // Minimap dimensions and positioning
+
   // Diameter of minimap circle in pixels
   const int mapSize = 180;
   // Distance from screen edges

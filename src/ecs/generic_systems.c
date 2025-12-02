@@ -7,6 +7,7 @@
 #include "ecs/systems.h"
 #include "raymath.h" 
 
+// Query all components with Transform and Physics Components, make them move based on their data
 void MovementSystem(struct Systems* systems) {
   const uint32_t mask = COMPONENT_TRANSFORM | COMPONENT_PHYSICS;
   EntityManager* em = &(systems->entityManager);
@@ -33,19 +34,16 @@ void MovementSystem(struct Systems* systems) {
   }
 }
 
-
 // This system advances the animation timeline based on playback speed
 void AnimationSystem(struct Systems* systems) {
   const uint32_t mask = COMPONENT_ANIMATION;
   EntityManager* em = &(systems->entityManager);
   float dt = systems->delta_time;
 
-  // Iterate through all entities with animation component
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & mask) == mask) {
       AnimationComponent* animComp = &em->animationComponents[i];
 
-      // Advance animation time: currentTime increases by deltaTime * playbackSpeed
       // playbackSpeed > 1.0 = faster, < 1.0 = slower, 1.0 = normal speed
       animComp->currentTime += dt * animComp->playbackSpeed;
     }
@@ -96,7 +94,6 @@ void RenderSystem(struct Systems* systems) {
   EntityManager* em = &(systems->entityManager);
   ResourceManager* rm = &systems->resourceManager;
 
-  // Iterate through all entities with transform and render components
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & mask) == mask) {
       RenderComponent* render = &em->renderComponents[i];

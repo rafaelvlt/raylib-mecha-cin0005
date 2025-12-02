@@ -8,7 +8,7 @@
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
 
-#define CONVERGENCE_POINT           100.0f
+#define CONVERGENCE_POINT           125.0f
 #define CONVERGENCE_START_RATE      8.0f
 #define CONVERGENCE_END_RATE        1.0f
 #define MISSILE_MIN_RANGE           100.0f
