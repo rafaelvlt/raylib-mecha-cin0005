@@ -17,8 +17,12 @@ void UpdateLoadoutScreen(struct Systems* systems, LoadoutData* data)
 
 void DrawLoadoutScreen(struct Systems* systems, LoadoutData* data)
 {
-    DrawText("Loadout", systems->configManager.screenResolution.x/2 - MeasureText("Loadout", 100)/2, systems->configManager.screenResolution.y/2, 100, WHITE);
-    DrawText("Press Enter to go to Menu", systems->configManager.screenResolution.x/2 - MeasureText("Press Enter to go to Menu", 30)/2, systems->configManager.screenResolution.y/2 + 100, 30, WHITE);
+    bool lang = systems->configManager.language;
+    const char* loadoutText = lang?"Loadout":"Equipamento";
+    const char* goMenuText = lang?"Press Enter to go to Menu":"Pressione ENTER para ir ao Menu";
+
+    DrawText(loadoutText, systems->configManager.screenResolution.x/2 - MeasureText(loadoutText, 100)/2, systems->configManager.screenResolution.y/2, 100, WHITE);
+    DrawText(goMenuText, systems->configManager.screenResolution.x/2 - MeasureText(goMenuText, 30)/2, systems->configManager.screenResolution.y/2 + 100, 30, WHITE);
 
 }
 

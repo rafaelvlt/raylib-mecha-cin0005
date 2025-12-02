@@ -20,17 +20,22 @@ void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuBut
 
 void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
+    if (systems->configManager.fullscreen != IsWindowFullscreen()) ToggleFullscreen();
+    SetWindowSize(systems->configManager.screenResolution.x, systems->configManager.screenResolution.y);
+    
+    bool lang = systems->configManager.language;
+
     //Menu Splitscreen loading from the resource manager.
     data->splitScreenMenuPtr = GetRenderTexture(&(systems->resourceManager), RENDERTEXTURE_ID_SPLITSCREEN_MENU);
     if (data->splitScreenMenuPtr == NULL)
     {
-        TraceLog(LOG_FATAL, "Failed to load Main Menu splitscreen menu.");
+        TraceLog(LOG_FATAL, lang?"Failed to load Main Menu splitscreen menu.":"Falha ao carregar a tela dividida do menu principal.");
         exit(1);
     }
     data->splitScreenMechaPtr = GetRenderTexture(&(systems->resourceManager), RENDERTEXTURE_ID_SPLITSCREEN_MECHA);
     if (data->splitScreenMenuPtr == NULL)
     {
-        TraceLog(LOG_FATAL, "Failed to load Main Menu splitscreen mecha.");
+        TraceLog(LOG_FATAL, lang?"Failed to load Main Menu splitscreen mecha.":"Falha ao carregar a tela dividida do mecha do menu principal.");
         exit(1);
     }
 
@@ -43,7 +48,7 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
     data->mechaModelPtr = GetModel(&(systems->resourceManager), MODEL_ID_MENU);
     if (data->mechaModelPtr == NULL)
     {
-        TraceLog(LOG_FATAL, "Failed to load Main Menu Mecha Model.");
+        TraceLog(LOG_FATAL, lang?"Failed to load Main Menu Mecha Model.":"Falha ao carregar o modelo do mecha do menu principal.");
         exit(1);
     }
 
@@ -61,7 +66,7 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
     // Menu Buttons variables initialization
     data->buttonsFont = GetFont(&(systems->resourceManager), FONT_ID_CAPTURE_IT);
     if (data->buttonsFont == NULL){
-        TraceLog(LOG_FATAL, "Failed to load Main Menu font.");
+        TraceLog(LOG_FATAL, lang?"Failed to load Main Menu font.":"Falha ao carregar a fonte do menu principal.");
         exit(1);
     }
     data->buttonPressed = BUTTON_NONE;
@@ -167,7 +172,6 @@ It was made this way to offset the mecha position to the right of the menu *
 
 void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
-    
 
     // Source Rect to be drawn over at the end 
     Rectangle splitScreenRect = { 0.0f, 0.0f, (float)data->splitScreenMechaPtr->texture.width, (float)-data->splitScreenMechaPtr->texture.height};
@@ -220,12 +224,13 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
         data->buttonRects[i + 1] = (Rectangle){contentAreaX, buttonY, contentAreaWidth, singleButtonHeight};
     }
     
+    const bool lang = systems->configManager.language;
     // Draw Buttons (Maybe change to draw in a better way)
-    DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], "START GAME", BUTTON_START_GAME);
-    DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], "LOADOUT", BUTTON_LOADOUT);
-    DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], "OPTIONS", BUTTON_OPTIONS);
-    DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], "CREDITS", BUTTON_CREDITS);
-    DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], "EXIT", BUTTON_EXIT);
+    DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMEÇAR JOGO":"START GAME", BUTTON_START_GAME);
+    DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], lang?"EQUIPAMENTOS":"LOADOUT", BUTTON_LOADOUT);
+    DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPÇÕES":"OPTIONS", BUTTON_OPTIONS);
+    DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], lang?"CREDITOS":"CREDITS", BUTTON_CREDITS);
+    DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], lang?"SAIR":"EXIT", BUTTON_EXIT);
     
     EndTextureMode();
 
