@@ -55,12 +55,17 @@ void AIControlSystem(struct Systems* systems) {
         }
       }
 
-      if (ai->state == 0) { // IDLE / PATROL
-        if (canSeePlayer) ai->state = 1; 
+      if (ai->state == 0) {
+         // IDLE / PATROL
+        if (canSeePlayer || (em->healthComponents[e].hasTakenDamage && dist <= ai->sightRadius)) ai->state = 1; 
+        if (em->healthComponents[e].currentHealth < em->healthComponents[e].maxHealth && dist <= ai->sightRadius) {
+          em->healthComponents[e].hasTakenDamage = true;
+        }
+        else em->healthComponents[e].hasTakenDamage = false;
       }
       else if (ai->state == 1) { // CHASE
         if (dist <= ai->attackRange) ai->state = 2; 
-        if (dist > ai->sightRadius * 1.5f) ai->state = 0;
+        if (dist > ai->sightRadius * 1.6f) ai->state = 0;
       }
       else if (ai->state == 2) { // ATTACK
         if (dist > ai->attackRange * 1.2f) ai->state = 1;

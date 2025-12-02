@@ -10,100 +10,179 @@
 #include "systems.h"
 #include "map_loader.h"
 
+#define TIME_DROP_DURATION    8.0f 
+#define TIME_BOOT_DURATION    7.0f  
+#define TIME_GAMEPLAY_START   (TIME_DROP_DURATION + TIME_BOOT_DURATION)
+
+#define BOOT_TIME_CROSSHAIR   1.5f
+#define BOOT_TIME_HUD         3.0f  
+#define BOOT_TIME_RADAR       4.5f 
+#define BOOT_TIME_MSG         6.0f  
+
+
 static void DrawLevel(struct Systems* systems, const Camera* camera);
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-    // 1. Reset ECS
-    InitEntityManager(&systems->entityManager);
+  // Reset ECS
+  InitEntityManager(&systems->entityManager);
 
-    // Camera Configuration
-    data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
-    data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
-    data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    data->camera.fovy = 60.0f;
-    data->camera.projection = CAMERA_PERSPECTIVE;
+  // Camera Configuration
+  data->camera.position = (Vector3){ 0.0f, 2.5f, 0.0f };
+  data->camera.target = (Vector3){ 0.0f, 2.5f, 1.0f };
+  data->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+  data->camera.fovy = 60.0f;
+  data->camera.projection = CAMERA_PERSPECTIVE;
 
-    // Map Loading
-    MapContext context;
-    context.mainCamera = &data->camera;
-    
-    // Loads everything from level1.map file
-    LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
-    DisableCursor(); 
+  // Map Loading
+  MapContext context;
+  context.mainCamera = &data->camera;
+
+  // Loads everything from level1.map file
+  LoadMapFromText(&systems->entityManager, &systems->resourceManager, "resources/maps/level1.map", context);
+  DisableCursor(); 
 
   data->levelFinished = false;
   data->finishTimer = 0.0f;
+
+  // Entry Sequence
+  data->dropTimer = 0.0f;
+  data->hasLanded = false;
+  data->canControl = false;
+  Sound* skySound = GetSound(&systems->resourceManager, SOUND_ID_SKYDROP);
+  if (skySound) {
+    float volume = systems->configManager.audioVolume;
+    StopSound(*skySound); 
+    SetSoundVolume(*skySound, volume); 
+    PlaySound(*skySound);
+    }
 }
 
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
-  systems->delta_time = GetFrameTime(); 
+  if (data->levelFinished) systems->delta_time *= 0.5;
 
-  // Run Gameplay Systems
-  PlayerControlSystem(systems);
-  AIControlSystem(systems);
-  LifetimeSystem(systems); 
-  MissileSystem(systems);
-  TrailSystem(systems);
-  MovementSystem(systems);  
-  AttachmentSystem(systems);
-  WeaponSystem(systems); 
-  CollisionSystem(systems);
-  HealthSystem(systems);
-  PlayerAudioSystem(systems);
+  // Startup Sequence
+  if (!data->canControl) {
+    data->dropTimer += systems->delta_time;
 
-  if (IsKeyPressed(KEY_ENTER)) 
-  {
-    EnableCursor();
-    RequestScreenChange(systems, SCREEN_MAIN_MENU);
+    // FASE 1: QUEDA (0s a 6s)
+    if (data->dropTimer < TIME_DROP_DURATION) {
+      StopMusicStream(*systems->audioManager.playingNow);
+      // Screen Shake
+      float intensity = data->dropTimer / TIME_DROP_DURATION;
+      data->camera.position.x = (GetRandomValue(-1,1)/100.0f) * intensity;
+
+    }
+
+    // MOMENTO DO IMPACTO (Apenas uma vez)
+    else if (!data->hasLanded) {
+      data->hasLanded = true;
+
+      PlaySound(systems->resourceManager.sounds[SOUND_ID_STARTUP_SEQUENCE]); 
+
+      data->camera.position.x = 0.0f; 
+
+      PlayerControlSystem(systems);
+    }
+
+    // FASE 2: BOOT (6s a 8.5s)
+    else if (data->dropTimer > TIME_GAMEPLAY_START) {
+      data->canControl = true; // Transição para Gameplay
+
+      Music* bgm = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
+      if (bgm) {
+        StopMusicStream(*bgm);
+        PlayMusicStream(*bgm);
+        SetMusicVolume(*bgm, systems->configManager.audioVolume);
+      }
+    }
+  }  
+
+  if (data->canControl){
+    PlayerControlSystem(systems);
+
+    if (IsKeyPressed(KEY_ENTER)) 
+    {
+      EnableCursor();
+      RequestScreenChange(systems, SCREEN_MAIN_MENU);
+    }
+
+     }
+  if (data->hasLanded){
+    // Run Gameplay Systems
+    AIControlSystem(systems);
+    LifetimeSystem(systems); 
+    MissileSystem(systems);
+    TrailSystem(systems);
+    MovementSystem(systems);  
+    AttachmentSystem(systems);
+    WeaponSystem(systems); 
+    CollisionSystem(systems);
+    HealthSystem(systems);
+    PlayerAudioSystem(systems);
   }
-
-  if (!data->levelFinished) {
-    EventManager* em = &systems->eventManager;
-    for (int i = 0; i < em->eventCounter; i++) {
-      Event event = em->eventQueue[i];
-      if (event.type == EVENT_ENTITY_DEATH){
-         TraceLog(LOG_INFO, "DEBUG MORTE: OwnerID: %d", event.data.deathEvent.owner);
-        if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE){
-          TraceLog(LOG_INFO, "DEBUG: ESTRUTURA DESTRUIDA DETECTADA!");
-          data->levelFinished = true;
-          data->finishTimer = 5.0f; 
+ if (!data->levelFinished) {
+      EventManager* em = &systems->eventManager;
+      for (int i = 0; i < em->eventCounter; i++) {
+        Event event = em->eventQueue[i];
+        if (event.type == EVENT_ENTITY_DEATH){
+          if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE){
+            data->levelFinished = true;
+            data->finishTimer = 5.0f; 
+          }
         }
       }
     }
-  }
-  if (data->levelFinished) {
-    data->finishTimer -= systems->delta_time;
-    
-    if (data->finishTimer <= 2.5f){
-      Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
-      SetSoundVolume(*endSfx, systems->configManager.audioVolume);
-      PlaySound(*endSfx);
+    if (data->levelFinished) {
+      data->finishTimer -= systems->delta_time;
+      
+      if (data->finishTimer <= 2.5f){
+        Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
+        SetSoundVolume(*endSfx, systems->configManager.audioVolume);
+        PlaySound(*endSfx);
+      }
+      if (data->finishTimer <= 0.0f) {
+        RequestScreenChange(systems, SCREEN_SECOND_LEVEL); 
+      }
     }
-    if (data->finishTimer <= 0.0f) {
-      RequestScreenChange(systems, SCREEN_SECOND_LEVEL); 
-    }
-  }
+
 
   ProcessGameEvents(systems);
 }
 
 void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
+  if (data->dropTimer < TIME_DROP_DURATION) {
+    ClearBackground(BLACK);
+    return;
+  }
+  float bootTime = data->dropTimer - TIME_DROP_DURATION;
+
   ClearBackground(SKYBLUE);
   BeginMode3D(data->camera);
   DrawLevel(systems, &data->camera);           
   RenderSystem(systems);  
   EffectSystem(systems, &data->camera);
-  Hud3DSystem(systems);
+  if (bootTime > BOOT_TIME_HUD) Hud3DSystem(systems);
   EndMode3D();
 
+  if (!data->canControl) {
+    float fadeDuration = 7.0f; 
+
+    if (bootTime < fadeDuration) {
+      // Alpha vai de 1.0 (Preto) a 0.0 (Transparente)
+      float alpha = 1.0f - (bootTime / fadeDuration);
+      DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, alpha));
+    }
+  }
+
   //Desenha o HUD e minimapa
-  DrawHUDSystem(systems);
-  DrawCrosshair(systems);
-  DrawMinimapSystem(systems, data);
+  if (bootTime > BOOT_TIME_CROSSHAIR) DrawCrosshair(systems);
+  if (bootTime > BOOT_TIME_HUD) DrawHUDSystem(systems);
+  if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems, data);
+  if (bootTime > BOOT_TIME_MSG) DrawLevelMessage(systems);
 
   DrawFPS(10, 10);
 }
@@ -114,9 +193,9 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 }
 
 static void DrawLevel(struct Systems* systems, const Camera* camera) {
-    Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
-    if (terrain) DrawModel(*terrain, (Vector3){0, -0.1f, 0}, 1.0f, WHITE);
+  Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
+  if (terrain) DrawModel(*terrain, (Vector3){0, -8.0f, 0}, 1.0f, WHITE);
 
-    DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
+  DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
 
 }

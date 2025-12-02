@@ -10,13 +10,15 @@
 
 int main(void) {
     // --- Window Initialization ---
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
 
     // Systems initialization(MUST BE IN THIS ORDER)
     struct Systems systems = {0};
     InitConfigManager(&systems);
+
+    InitWindow(systems.configManager.screenResolution.x, systems.configManager.screenResolution.y, GAME_TITLE);
+
     InitAudioManager(&systems);
-    InitResourceManager(&systems.resourceManager);
+    InitResourceManager(&systems);
     InitEventManager(&systems);
     InitStateManager(&systems, SCREEN_TITLE);
 
@@ -25,6 +27,7 @@ int main(void) {
     // --- Game Loop ---
     systems.shouldExit = false;
     while (!systems.shouldExit) {
+        systems.delta_time = GetFrameTime(); 
         systems.shouldExit = WindowShouldClose();
         // Update Phase
         UpdateStateManager(&systems);

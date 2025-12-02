@@ -133,7 +133,7 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
     if (data->buttonPressed == BUTTON_START_GAME)
     {
         data->buttonPressed = BUTTON_NONE;
-        RequestScreenChange(systems, SCREEN_FIRST_LEVEL);
+        RequestScreenChange(systems, SCREEN_DEBRIEFING);
     }
     if (data->buttonPressed == BUTTON_LOADOUT)
     {
@@ -230,12 +230,14 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     EndTextureMode();
 
     // -------- Draw both screens ----------
+    const int screenWidth = systems->configManager.screenResolution.x;
+    const int screenHeight = systems->configManager.screenResolution.y;
     ClearBackground(BLACK);
     DrawTextureRec(data->splitScreenMenuPtr->texture, splitScreenRect, (Vector2){0, 0}, WHITE);
-    DrawTextureRec(data->splitScreenMechaPtr->texture, splitScreenRect, (Vector2){SCREEN_WIDTH/2.0f, 0 }, WHITE);
+    DrawTextureRec(data->splitScreenMechaPtr->texture, splitScreenRect, (Vector2){screenWidth/2.0f, 0 }, WHITE);
     // ------- Title Specs + Draw ----------
     Vector2 titlePos;
-    titlePos.x = SCREEN_WIDTH/2 - MeasureText(GAME_TITLE, 60)/2;
+    titlePos.x = screenWidth/2 - MeasureText(GAME_TITLE, 60)/2;
     titlePos.y = 25;
     const float titleSpacing = 3.0f;
     const float titleFontSize = data->fontSize*1.8f;

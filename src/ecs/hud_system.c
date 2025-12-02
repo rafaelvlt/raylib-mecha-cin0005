@@ -29,6 +29,11 @@ void DrawHUDSystem(struct Systems* systems) {
       Color outlineColor = (Color){ 0, 255, 255, 255 };
       Color fillColor = (Color){ 0, 100, 200, 200 };
 
+      if (hp->currentHealth < hp->maxHealth * 0.6f) {
+        fillColor = (Color){ 200, 70, 0, 200 };
+        outlineColor = ORANGE;
+      }
+
       if (hp->currentHealth < hp->maxHealth * 0.3f) {
         fillColor = (Color){ 200, 0, 0, 200 };
         outlineColor = RED;
@@ -228,3 +233,33 @@ void Hud3DSystem(struct Systems* systems){
 }
 
 
+
+void DrawLevelMessage(struct Systems* systems) {
+  StateManager* state = &systems->stateManager;
+
+  int fontSize = 20;
+
+  int screenX = GetScreenWidth() / 2.0f;
+  int screenY =  MARGIN_TOP;
+
+  switch (state->currentScreen)  {
+  case SCREEN_FIRST_LEVEL:
+    DrawText("OBJECTIVE:", screenX - MeasureText("OBJECTIVE:", fontSize) / 2.0, 4.0 * screenY, fontSize, WHITE);
+    DrawText("Destroy the enemy structure", screenX - MeasureText("Destroy the enemy structure", fontSize) / 2.0, 5.5 * screenY, fontSize, WHITE);
+    break;
+  
+  default:
+    break;
+  }
+}
+
+// ALGUEM CONSERTA DPS
+void DrawDeathEntityMessage() {
+  
+  int screenX = GetScreenWidth() / 2.0f;
+  int screenY = GetScreenHeight();
+
+  DrawText("Inimigo destruído", screenX - MeasureText("Inimigo destruído", 20) / 2.0, screenY / 1.5, 20, RED);
+
+  
+}

@@ -5,6 +5,7 @@
 #include "ecs/types.h"
 #include "resource_manager.h"
 #include <string.h>
+#include "ecs/systems.h"
 
 
 // Take the address of the entity manager and fill all of it with zero's to takeout junk out of the database
@@ -38,7 +39,6 @@ void DestroyEntity(EntityManager* em, Entity entity) {
     em->componentMasks[entity] = COMPONENT_NONE;
     // Reduces numEntities if the one being removed is the highest ID
     if (entity == em->numEntities - 1) em->numEntities--;
-
   }
 }
 
