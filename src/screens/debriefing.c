@@ -132,7 +132,8 @@ void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
 
   // Hide Skip option during fade
   if (data->timer < TIME_FADE_START) {
-    Vector2 textPos = {20, systems->configManager.screenResolution.y - 40};
+    Vector2 resolution = GetScreenResolution(&systems->configManager);
+    Vector2 textPos = {20, resolution.y - 40};
     int textSpacing = 5;
     int textSize = 20;
     DrawTextEx(*GetFont(&systems->resourceManager, FONT_ID_CAPTURE_IT), "PRESS ENTER TO SKIP", textPos, textSize, textSpacing, WHITE);

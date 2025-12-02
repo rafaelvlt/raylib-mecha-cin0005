@@ -8,6 +8,7 @@
 #include "resource_manager.h"
 #include "state_manager.h"
 #include "systems.h"
+#include "utility.h"
 #include "map_loader.h"
 
 #define TIME_DROP_DURATION    8.0f 
@@ -20,7 +21,12 @@
 #define BOOT_TIME_MSG         6.0f  
 
 
+// Forward declarations
 static void DrawLevel(struct Systems* systems, const Camera* camera);
+static void ProcessStartupSequence(struct Systems* systems, FirstLevelData* data);
+static void ProcessGameplaySystems(struct Systems* systems);
+static void CheckLevelCompletion(struct Systems* systems, FirstLevelData* data);
+static void ProcessLevelFinish(struct Systems* systems, FirstLevelData* data);
 
 void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
@@ -51,104 +57,123 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   data->canControl = false;
   Sound* skySound = GetSound(&systems->resourceManager, SOUND_ID_SKYDROP);
   if (skySound) {
-    float volume = systems->configManager.audioVolume;
+    float volume = GetAudioVolume(&systems->configManager);
     StopSound(*skySound); 
     SetSoundVolume(*skySound, volume); 
     PlaySound(*skySound);
-    }
+  }
 }
 
 
-void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
-{
+// Processes startup sequence (drop and boot phases)
+static void ProcessStartupSequence(struct Systems* systems, FirstLevelData* data) {
+  if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+    data->dropTimer = TIME_GAMEPLAY_START + 0.1f;
+    data->hasLanded = true;
+    data->canControl = true;
+    data->camera.position.x = 0.0f;
+
+    Music* bgm = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
+    if (bgm) {
+      StopSound(*GetSound(&systems->resourceManager, SOUND_ID_SKYDROP));
+      StopMusicStream(*bgm);
+      PlayMusicStream(*bgm);
+      SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+    }
+    return;
+  }
+
+  data->dropTimer += systems->delta_time;
+
+  if (data->dropTimer < TIME_DROP_DURATION) {
+    StopMusicStream(*systems->audioManager.playingNow);
+    float intensity = data->dropTimer / TIME_DROP_DURATION;
+    data->camera.position.x = (GetRandomValue(-1,1)/100.0f) * intensity;
+  }
+  else if (!data->hasLanded) {
+    data->hasLanded = true;
+    PlaySound(systems->resourceManager.sounds[SOUND_ID_STARTUP_SEQUENCE]);
+    data->camera.position.x = 0.0f;
+    PlayerControlSystem(systems);
+  }
+  else if (data->dropTimer > TIME_GAMEPLAY_START) {
+    data->canControl = true;
+    Music* bgm = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
+    if (bgm) {
+      StopMusicStream(*bgm);
+      PlayMusicStream(*bgm);
+      SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+    }
+  }
+}
+
+// Runs all gameplay systems
+static void ProcessGameplaySystems(struct Systems* systems) {
+  AIControlSystem(systems);
+  AnimationSystem(systems);
+  LifetimeSystem(systems);
+  MissileSystem(systems);
+  TrailSystem(systems);
+  MovementSystem(systems);
+  AttachmentSystem(systems);
+  WeaponSystem(systems);
+  CollisionSystem(systems);
+  HealthSystem(systems);
+  PlayerAudioSystem(systems);
+}
+
+// Checks if level completion conditions are met
+static void CheckLevelCompletion(struct Systems* systems, FirstLevelData* data) {
+  if (data->levelFinished) return;
+
+  EventManager* em = &systems->eventManager;
+  for (int i = 0; i < em->eventCounter; i++) {
+    Event event = em->eventQueue[i];
+    if (event.type == EVENT_ENTITY_DEATH && event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) {
+      data->levelFinished = true;
+      data->finishTimer = 5.0f;
+    }
+  }
+}
+
+// Processes level finish sequence
+static void ProcessLevelFinish(struct Systems* systems, FirstLevelData* data) {
+  if (!data->levelFinished) return;
+
+  data->finishTimer -= systems->delta_time;
+
+  if (data->finishTimer <= 2.5f && data->finishTimer > 2.4f) {
+    Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
+    SetSoundVolume(*endSfx, GetAudioVolume(&systems->configManager));
+    PlaySound(*endSfx);
+  }
+
+  if (data->finishTimer <= 0.0f) {
+    RequestScreenChange(systems, SCREEN_SECOND_LEVEL);
+  }
+}
+
+void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data) {
   if (data->levelFinished) systems->delta_time *= 0.5;
 
-  // Startup Sequence
   if (!data->canControl) {
-    data->dropTimer += systems->delta_time;
+    ProcessStartupSequence(systems, data);
+  }
 
-    // FASE 1: QUEDA (0s a 6s)
-    if (data->dropTimer < TIME_DROP_DURATION) {
-      StopMusicStream(*systems->audioManager.playingNow);
-      // Screen Shake
-      float intensity = data->dropTimer / TIME_DROP_DURATION;
-      data->camera.position.x = (GetRandomValue(-1,1)/100.0f) * intensity;
-
-    }
-
-    // MOMENTO DO IMPACTO (Apenas uma vez)
-    else if (!data->hasLanded) {
-      data->hasLanded = true;
-
-      PlaySound(systems->resourceManager.sounds[SOUND_ID_STARTUP_SEQUENCE]); 
-
-      data->camera.position.x = 0.0f; 
-
-      PlayerControlSystem(systems);
-    }
-
-    // FASE 2: BOOT (6s a 8.5s)
-    else if (data->dropTimer > TIME_GAMEPLAY_START) {
-      data->canControl = true; // Transição para Gameplay
-
-      Music* bgm = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
-      if (bgm) {
-        StopMusicStream(*bgm);
-        PlayMusicStream(*bgm);
-        SetMusicVolume(*bgm, systems->configManager.audioVolume);
-      }
-    }
-  }  
-
-  if (data->canControl){
+  if (data->canControl) {
     PlayerControlSystem(systems);
-
-    if (IsKeyPressed(KEY_ENTER)) 
-    {
+    if (IsKeyPressed(KEY_ENTER)) {
       EnableCursor();
       RequestScreenChange(systems, SCREEN_MAIN_MENU);
     }
-
-     }
-  if (data->hasLanded){
-    // Run Gameplay Systems
-    AIControlSystem(systems);
-    LifetimeSystem(systems); 
-    MissileSystem(systems);
-    TrailSystem(systems);
-    MovementSystem(systems);  
-    AttachmentSystem(systems);
-    WeaponSystem(systems); 
-    CollisionSystem(systems);
-    HealthSystem(systems);
-    PlayerAudioSystem(systems);
   }
- if (!data->levelFinished) {
-      EventManager* em = &systems->eventManager;
-      for (int i = 0; i < em->eventCounter; i++) {
-        Event event = em->eventQueue[i];
-        if (event.type == EVENT_ENTITY_DEATH){
-          if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE){
-            data->levelFinished = true;
-            data->finishTimer = 5.0f; 
-          }
-        }
-      }
-    }
-    if (data->levelFinished) {
-      data->finishTimer -= systems->delta_time;
-      
-      if (data->finishTimer <= 2.5f){
-        Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
-        SetSoundVolume(*endSfx, systems->configManager.audioVolume);
-        PlaySound(*endSfx);
-      }
-      if (data->finishTimer <= 0.0f) {
-        RequestScreenChange(systems, SCREEN_SECOND_LEVEL); 
-      }
-    }
 
+  if (data->hasLanded) {
+    ProcessGameplaySystems(systems);
+  }
 
+  CheckLevelCompletion(systems, data);
+  ProcessLevelFinish(systems, data);
   ProcessGameEvents(systems);
 }
 
@@ -170,7 +195,12 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   if (!data->canControl) {
     float fadeDuration = 7.0f; 
-
+    // Show skip option during startup
+    if (bootTime < fadeDuration) {
+      Vector2 textPos = {20, GetScreenHeight() - 40};
+      DrawText("PRESS SPACE OR ENTER TO SKIP", textPos.x, textPos.y, 20, WHITE);
+    }
+    // Show skip option during startup
     if (bootTime < fadeDuration) {
       // Alpha vai de 1.0 (Preto) a 0.0 (Transparente)
       float alpha = 1.0f - (bootTime / fadeDuration);
@@ -184,6 +214,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems, data);
   if (bootTime > BOOT_TIME_MSG) DrawLevelMessage(systems);
 
+
   DrawFPS(10, 10);
 }
 
@@ -194,8 +225,7 @@ void DestroyFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 static void DrawLevel(struct Systems* systems, const Camera* camera) {
   Model* terrain = GetModel(&systems->resourceManager, MODEL_ID_TERRAIN);
-  if (terrain) DrawModel(*terrain, (Vector3){0, -8.0f, 0}, 1.0f, WHITE);
+  if (terrain) DrawModel(*terrain, (Vector3){0, 0.0f, 0}, 1.0f, WHITE);
 
-  DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, (Color){ 255, 200, 50, 255 });
-
+  DrawSphere((Vector3){ 300.0f, 300.0f, 0.0f }, 100.0f, SUN_COLOR);
 }
