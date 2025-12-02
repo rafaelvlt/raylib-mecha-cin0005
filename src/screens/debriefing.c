@@ -104,6 +104,9 @@ void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
 }
 
 void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
+  bool lang = systems->configManager.language;
+  const char* skipText = lang?"PRESS ENTER TO SKIP":"PRESSIONE ENTER PARA PULAR";
+
   ClearBackground(BLACK); 
 
   BeginMode3D(data->camera);
@@ -135,7 +138,7 @@ void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
     Vector2 textPos = {20, systems->configManager.screenResolution.y - 40};
     int textSpacing = 5;
     int textSize = 20;
-    DrawTextEx(*GetFont(&systems->resourceManager, FONT_ID_CAPTURE_IT), "PRESS ENTER TO SKIP", textPos, textSize, textSpacing, WHITE);
+    DrawTextEx(*GetFont(&systems->resourceManager, FONT_ID_CAPTURE_IT), skipText, textPos, textSize, textSpacing, WHITE);
   }
 }
 

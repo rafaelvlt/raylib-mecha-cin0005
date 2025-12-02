@@ -78,14 +78,15 @@ void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
     const float highlightX = (screenWidth - highlightWidth) / 2.0f;
 
     // Options Strings
-    const char* langTitleText = "Language";
+    const bool lang = systems->configManager.language;
+    const char* langTitleText = lang?"Idioma":"Language";
     const char* langOptionsText[2] = {"EN", "PT"};
-    const char* resTitleText = "Resolution:";
+    const char* resTitleText = lang?"Resolução:":"Resolution:";
     const char* resOptionsText[3] = {"1280x720", "1600x900", "1920x1080"};
-    const char* fullTitleText = "Fullscreen:";
-    const char* fullOptionsText[2] = {"OFF", "ON"};
-    const char* volumeText = "Master Volume ";
-    const char* backText = "Back to Menu";
+    const char* fullTitleText = lang?"Tela Cheia:":"Fullscreen:";
+    const char* fullOptionsText[2] = {lang?"DESLIGADO":"OFF", lang?"LIGADO":"ON"};
+    const char* volumeText = lang?"Volume Mestre ":"Master Volume ";
+    const char* backText = lang?"Voltar ao Menu":"Back to Menu";
 
     const char* langText = TextFormat("%s: %s", langTitleText, langOptionsText[data->selectedOptions[0]]);
     const char* resText = TextFormat("%s: %s", resTitleText, resOptionsText[data->selectedOptions[1]]);
