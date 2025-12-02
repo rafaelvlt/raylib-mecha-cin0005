@@ -34,7 +34,7 @@ void DestroyCurrentScreen(struct Systems* systems) {
       DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
-      InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      DestroySecondLevelScreen(systems, &stateManager->data.secondLevel);
       break;
     default:
       break;
