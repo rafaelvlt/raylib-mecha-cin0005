@@ -28,11 +28,11 @@ typedef struct{
 } WeaponFiredData;
 
 typedef struct {
-    Entity attacker;   
-    Entity victim;    
-    float damageAmount;
-    Vector3 impactPoint;
-    WeaponType type;
+  Entity attacker;   
+  Entity victim;    
+  float damageAmount;
+  Vector3 impactPoint;
+  WeaponType type;
 } ProjectileCollisionData;
 
 typedef struct{

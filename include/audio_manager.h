@@ -8,7 +8,7 @@ struct Systems;
 
 
 typedef struct{
-    Music* playingNow;
+  Music* playingNow;
 } AudioManager;
 
 void InitAudioManager(struct Systems* systems);

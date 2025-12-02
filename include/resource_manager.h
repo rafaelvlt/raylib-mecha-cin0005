@@ -82,6 +82,8 @@ typedef enum{
   TEXTURE_ID_CROSSHAIR_SPRITE,
   TEXTURE_ID_SAND,
   TEXTURE_ID_BASE_HQ,
+  TEXTURE_ID_CIN,
+  TEXTURE_ID_RAYLIB,
   TEXTURE_ID_COUNT 
 } AssetTextureID;
 
@@ -100,6 +102,10 @@ typedef struct ResourceManager {
     Sound sounds[SOUND_ID_COUNT];
     Texture textures[TEXTURE_ID_COUNT];
     RenderTexture renderTextures[RENDERTEXTURE_ID_COUNT];
+    
+    // Model animations per model ID
+    ModelAnimation* modelAnimations[MODEL_ID_COUNT];
+    int modelAnimCounts[MODEL_ID_COUNT];
 } ResourceManager;
 
 void InitResourceManager(struct Systems* systems);

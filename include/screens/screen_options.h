@@ -5,18 +5,18 @@
 struct Systems;
 
 typedef enum options {
-    OPTION_LANGUAGE = 0,
-    OPTION_SCREEN_RESOLUTION,
-    OPTION_FULLSCREEN,
-    OPTION_AUDIO_VOLUME,
-    OPTION_BACK_TO_MENU,
-    OPTION_LINE_COUNT
+  OPTION_LANGUAGE = 0,
+  OPTION_SCREEN_RESOLUTION,
+  OPTION_FULLSCREEN,
+  OPTION_AUDIO_VOLUME,
+  OPTION_BACK_TO_MENU,
+  OPTION_LINE_COUNT
 } Option;
 
 typedef struct OptionsData {
-    int selectedOption[2]; // [line, option]
-    int rangeOptions[OPTION_LINE_COUNT-1]; //number of options in each line
-    Font* optionsFont;
+  int selectedOption[2]; // [line, option]
+  int rangeOptions[OPTION_LINE_COUNT-1]; //number of options in each line
+  Font* optionsFont;
 } OptionsData;
 
 

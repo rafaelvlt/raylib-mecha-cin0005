@@ -11,22 +11,22 @@ struct Systems;
 
 // Enum for configuration IDs (add more as needed)
 typedef enum {
-    CONFIG_ID_AUDIO_VOLUME = 0,
-    CONFIG_ID_SCREEN_RESOLUTION,
-    CONFIG_ID_FULLSCREEN,
-    CONFIG_ID_COUNT
+  CONFIG_ID_AUDIO_VOLUME = 0,
+  CONFIG_ID_SCREEN_RESOLUTION,
+  CONFIG_ID_FULLSCREEN,
+  CONFIG_ID_COUNT
 } ConfigID;
 
 
 typedef enum Language {
-    LANGUAGE_EN = 0,
-    LANGUAGE_PT_BR
+  LANGUAGE_EN = 0,
+  LANGUAGE_PT_BR
 } Language;
 
 typedef enum ScreenResolution {
-    RESOLUTION_1280x720 = 0,
-    RESOLUTION_1600x900,
-    RESOLUTION_1920x1080
+  RESOLUTION_1280x720 = 0,
+  RESOLUTION_1600x900,
+  RESOLUTION_1920x1080
 } ScreenResolution;
 
 // Key Mappings, maybe will be set a option to configure all of them
@@ -36,7 +36,7 @@ typedef struct{
   KeyboardKey KeyMoveBackward;
   KeyboardKey KeyTurnLeft;
   KeyboardKey KeyTurnRight;
- 
+
   // Movement Helper Buttons
   KeyboardKey KeyCenterTorsoToLegs;
   KeyboardKey KeyCenterLegsToTorso;
@@ -57,13 +57,13 @@ typedef struct{
 
 // Struct to hold configuration values
 typedef struct {
-    Language language; //0 = EN, 1 = PT-BR
-    float audioVolume;
-    
-    InputSystem KeyMap;
-    //Screen
-    Vector2 screenResolution;
-    bool fullscreen;
+  Language language; //0 = EN, 1 = PT-BR
+  float audioVolume;
+
+  InputSystem KeyMap;
+  //Screen
+  Vector2 screenResolution;
+  bool fullscreen;
 } ConfigManager;
 
 void InitConfigManager(struct Systems* systems);

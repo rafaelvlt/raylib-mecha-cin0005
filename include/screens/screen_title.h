@@ -6,9 +6,9 @@
 struct Systems;
 
 typedef struct {
-    int framesCounter;
-    Font* titleFontPtr;
-    Music* titleMusicPtr;
+  int framesCounter;
+  Font* titleFontPtr;
+  Music* titleMusicPtr;
 } TitleData;
 
 void InitTitleScreen(struct Systems* systems, TitleData* data);

@@ -6,20 +6,20 @@
 #include "resource_manager.h"
 
 typedef struct {
-    Camera* mainCamera;
+  Camera* mainCamera;
 } MapContext;
 
 
 // Simple table for id -> name 
 typedef struct {
-    char name[64];
-    Entity id;
+  char name[64];
+  Entity id;
 } EntityMap;
 
 typedef struct {
-    Vector3 position;
-    float size;
-    float speedMultiplier;
+  Vector3 position;
+  float size;
+  float speedMultiplier;
 } CloudData;
 
 void LoadMapFromText(EntityManager* em, ResourceManager* rm, const char* filename, MapContext context);
