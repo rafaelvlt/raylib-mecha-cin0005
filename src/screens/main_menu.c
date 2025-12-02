@@ -20,6 +20,9 @@ void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuBut
 
 void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
+    if (systems->configManager.fullscreen != IsWindowFullscreen()) ToggleFullscreen();
+    SetWindowSize(systems->configManager.screenResolution.x, systems->configManager.screenResolution.y);
+    
     //Menu Splitscreen loading from the resource manager.
     data->splitScreenMenuPtr = GetRenderTexture(&(systems->resourceManager), RENDERTEXTURE_ID_SPLITSCREEN_MENU);
     if (data->splitScreenMenuPtr == NULL)
@@ -167,7 +170,6 @@ It was made this way to offset the mecha position to the right of the menu *
 
 void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
-    
 
     // Source Rect to be drawn over at the end 
     Rectangle splitScreenRect = { 0.0f, 0.0f, (float)data->splitScreenMechaPtr->texture.width, (float)-data->splitScreenMechaPtr->texture.height};
