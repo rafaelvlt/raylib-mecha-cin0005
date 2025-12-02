@@ -58,12 +58,13 @@ typedef struct{
 // Struct to hold configuration values
 typedef struct {
     Language language; //0 = EN, 1 = PT-BR
-    float audioVolume;
+    float audioVolume; //0.0 to 1.0
     
-    InputSystem KeyMap;
+    InputSystem KeyMap; 
     //Screen
-    Vector2 screenResolution;
-    bool fullscreen;
+    Vector2 screenResolution; //width x height
+    int screenResolutionIndex; //0 = 1280x720, 1 = 1600x900, 2 = 1920x1080
+    bool fullscreen; //true = fullscreen, false = windowed
 } ConfigManager;
 
 void InitConfigManager(struct Systems* systems);
