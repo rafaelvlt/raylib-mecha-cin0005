@@ -229,8 +229,8 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMEÇAR JOGO":"START GAME", BUTTON_START_GAME);
     DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], lang?"EQUIPAMENTOS":"LOADOUT", BUTTON_LOADOUT);
     DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPÇÕES":"OPTIONS", BUTTON_OPTIONS);
-    DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], lang?"CREDITOs":"CREDITS", BUTTON_CREDITS);
-    DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], "EXIT", BUTTON_EXIT);
+    DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], lang?"CREDITOS":"CREDITS", BUTTON_CREDITS);
+    DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], lang?"SAIR":"EXIT", BUTTON_EXIT);
     
     EndTextureMode();
 
