@@ -3,7 +3,6 @@
 #include "ecs/components.h"
 #include "resource_manager.h"
 #include "systems.h"
-#include "utility.h"
 #include "ecs/systems.h"
 
 // Movement
@@ -22,13 +21,14 @@
 // Lock
 #define MAX_LOCK_DISTANCE     1000.0f * 1000.0f
 // Animation
-#define MECH_HEIGHT     6.5f  
 #define BOB_FREQUENCY   1.5f
 #define BOB_AMPLITUDE   0.2f
 #define SWAY_SPEED      4.5f
 #define LEAN_TURN       -0.06f
 #define LEAN_MOUSE      0.0f
-#define LEAN_MOVE       0.02f  
+#define LEAN_MOVE       0.02f
+// Camera Height
+#define MECH_HEIGHT 20.0f
 
 // Input function
 static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* p, WeaponControlComponent* wc, float dt);
@@ -91,7 +91,7 @@ void PlayerAudioSystem(struct Systems* systems) {
 
         if (p->isMoving) {
           float stepVolume = 0.3f + (intensity * 0.3f); 
-          SetSoundVolume(sfxFootstep, stepVolume * systems->configManager.audioVolume);
+          SetSoundVolume(sfxFootstep, stepVolume * GetAudioVolume(&systems->configManager));
 
           // Randomized pitch for variance in sound
           float pitchVar = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
@@ -103,7 +103,7 @@ void PlayerAudioSystem(struct Systems* systems) {
 
       if (p->isZooming && !p->wasZooming) {
 
-        float vol = systems->configManager.audioVolume;
+        float vol = GetAudioVolume(&systems->configManager);
         SetSoundVolume(sfxZoom, vol);
         SetSoundPitch(sfxZoom, 1.0f + ((float)GetRandomValue(-5, 5)/100.0f));
 
@@ -117,7 +117,7 @@ void PlayerAudioSystem(struct Systems* systems) {
       if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer; else p->lastHeadTimer = p->headTimer;
       p->wasZooming = p->isZooming;
     }
-    
+
 
   }
 }
@@ -159,7 +159,7 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
       p->centeringTorsotoLegs = false;
     }
 
-    // QOL: If the player tries to move alot during the centering, cancels it
+    // If the player tries to move alot during the centering, cancels it
     if (fabs(mouseDelta.x) > 1.0f || fabs(mouseDelta.y) > 1.0f) {
       p->centeringTorsotoLegs = false;
     }
@@ -170,7 +170,13 @@ static void ProcessPlayerInput(struct Systems* systems, PlayerControlComponent* 
   // The logic is dealt by the physics function
 
   // Zoom
-  float targetFOV = IsMouseButtonDown(keys->KeyZoom) ? ZOOM_FOV : DEFAULT_FOV;
+  float targetFOV;
+  if (IsMouseButtonDown(keys->KeyZoom)) {
+    targetFOV = ZOOM_FOV;
+  }
+  else {
+    targetFOV = DEFAULT_FOV;
+  }
   p->isZooming = IsMouseButtonDown(keys->KeyZoom);
   p->camera->fovy = Lerp(p->camera->fovy, targetFOV, ZOOM_SPEED * dt);
 
@@ -226,7 +232,8 @@ static void UpdateCockpitCamera(PlayerControlComponent* p, TransformComponent* t
   if (p->isMoving) {
     p->headTimer += dt * BOB_FREQUENCY;
     p->walkLerp = Lerp(p->walkLerp, 1.0f, 5.0f * dt);
-  } else {
+  }
+  else {
     p->walkLerp = Lerp(p->walkLerp, 0.0f, 5.0f * dt);
     if (p->walkLerp < 0.01f) p->headTimer = 0.0f;
   }
@@ -313,7 +320,8 @@ static void UpdateTargetLock(struct Systems* systems, PlayerControlComponent* p,
     // Locks into new target if he's found
     if (bestTarget != MAX_ENTITIES) {
       wc->lockedTarget = bestTarget;
-    } else {
+    }
+    else {
       wc->lockedTarget = MAX_ENTITIES;
     }
   }

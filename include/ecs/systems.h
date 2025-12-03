@@ -11,6 +11,7 @@ void MovementSystem(struct Systems* systems);
 
 // Draw every visible Entity
 void RenderSystem(struct Systems* systems);
+void AnimationSystem(struct Systems* systems);
 void EffectSystem(struct Systems* systems, Camera* camera);
 
 //Draw HUD

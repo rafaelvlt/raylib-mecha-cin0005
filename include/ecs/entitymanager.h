@@ -9,6 +9,7 @@ typedef struct  {
   TransformComponent      transformComponents[MAX_ENTITIES];
   PhysicsComponent        physicsComponents[MAX_ENTITIES];
   RenderComponent         renderComponents[MAX_ENTITIES];
+  AnimationComponent      animationComponents[MAX_ENTITIES];
   AttachmentComponent     attachmentComponents[MAX_ENTITIES];
   PlayerControlComponent  playerControlComponents[MAX_ENTITIES];
   HealthComponent         healthComponents[MAX_ENTITIES];
@@ -21,7 +22,7 @@ typedef struct  {
   CollisionComponent      collisionComponents[MAX_ENTITIES];
   EffectComponent         effectComponents[MAX_ENTITIES];
   HomingComponent         homingComponents[MAX_ENTITIES];
-  
+
   // Bitmask for every Entity
   uint32_t                componentMasks[MAX_ENTITIES];
   // Number of entities active/created
@@ -53,6 +54,8 @@ void AddCollisionComponent(EntityManager* entityManager, Entity entity, Bounding
 
 void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* model, Color tint);
 
+void AddAnimationComponent(EntityManager* entityManager, Entity entity, AssetModelID modelId, int startAnim, float playbackSpeed, bool loop);
+
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot);
 
 void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera);
@@ -74,10 +77,10 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
 void AddCockpitHUDComponent(EntityManager* entityManager, Entity entity, float maxHeat, float heatPerShot, float cooldown);
 
 void AddEffectSheet(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, 
-                     AssetTextureID texID, int cols, int rows, bool looping);
+                    AssetTextureID texID, int cols, int rows, bool looping);
 
 void AddEffectArray(EntityManager* em, Entity entity, float startSize, float endSize, Color color, float duration, 
-                     AssetTextureID id, int count, bool looping);
+                    AssetTextureID id, int count, bool looping);
 
 void AddHomingComponent(EntityManager* em, Entity entity, Entity target, float turnSpeed, float speed, float armingTime);
 
