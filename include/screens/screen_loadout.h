@@ -5,7 +5,7 @@
 struct Systems;
 
 typedef struct {
-  //TBD
+    //TBD
 } LoadoutData;
 
 void InitLoadoutScreen(struct Systems* systems, LoadoutData* data);

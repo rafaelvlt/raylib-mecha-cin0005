@@ -214,7 +214,6 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems, data);
   if (bootTime > BOOT_TIME_MSG) DrawLevelMessage(systems);
 
-
   DrawFPS(10, 10);
 }
 
