@@ -2,19 +2,23 @@
 #include "systems.h"
 #include "utility.h"
 
-
-
 //Auxiliar function just to draw all the menu buttons, doesn't do any logic
 void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuButton current){
-    Color textColor = (data->buttonHovered == current) ? data->buttonHoverColor : data->buttonNormalColor;
-    Font font = *data->buttonsFont;
-    Vector2 textSize = MeasureTextEx(*data->buttonsFont, text, data->fontSize, data->fontSpacing);
-    Vector2 textPosition = {
-        box.x + (box.width - textSize.x) / 2,
-        box.y + (box.height - textSize.y) / 2
-    };
+  Color textColor;
+  if (data->buttonHovered == current) {
+    textColor = data->buttonHoverColor;
+  }
+  else {
+    textColor = data->buttonNormalColor;
+  }
+  Font font = *data->buttonsFont;
+  Vector2 textSize = MeasureTextEx(*data->buttonsFont, text, data->fontSize, data->fontSpacing);
+  Vector2 textPosition = {
+    box.x + (box.width - textSize.x) / 2,
+    box.y + (box.height - textSize.y) / 2
+  };
 
-    DrawTextEx(font, text, textPosition, data->fontSize, data->fontSpacing, textColor);
+  DrawTextEx(font, text, textPosition, data->fontSize, data->fontSpacing, textColor);
 
 }
 

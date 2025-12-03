@@ -4,15 +4,14 @@
 
 void InitLoadoutScreen(struct Systems* systems, LoadoutData* data)
 {
-    
 }
 
 void UpdateLoadoutScreen(struct Systems* systems, LoadoutData* data)
 {
-    if (IsKeyPressed(KEY_ENTER))
-    {
-         RequestScreenChange(systems, SCREEN_MAIN_MENU);
-    }
+  if (IsKeyPressed(KEY_ENTER))
+  {
+    RequestScreenChange(systems, SCREEN_MAIN_MENU);
+  }
 }
 
 void DrawLoadoutScreen(struct Systems* systems, LoadoutData* data)

@@ -66,8 +66,7 @@ static void SetDefaultConfig(struct Systems* systems){
   systems->configManager.KeyMap.KeyWeaponGroups[3] = KEY_FOUR;  // 52
   systems->configManager.KeyMap.KeyWeaponGroups[4] = KEY_FIVE;  // 53
   systems->configManager.KeyMap.KeyShowMap = KEY_M; // 77
-  systems->configManager.KeyMap.KeyPause   = KEY_P; // 80
-  
+  systems->configManager.KeyMap.KeyPause   = KEY_ENTER;
   SaveConfigFile(systems);
 }
 
