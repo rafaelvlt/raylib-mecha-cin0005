@@ -3,7 +3,7 @@
 
 #include <raylib.h>
 
-#define GAME_TITLE "MECHA GAME"
+#define GAME_TITLE "NETUNO PROJECT"
 
 // Colors
 #define GREENISH_BLACK      (Color){ 0, 25, 0, 255 }
