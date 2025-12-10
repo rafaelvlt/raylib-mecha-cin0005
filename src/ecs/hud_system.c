@@ -6,26 +6,32 @@
 #include "systems.h"
 #include "utility.h"
 #include <stdio.h>
+#include "ecs/components.h"
 
 // HUD Visuals
 #define BAR_WIDTH 400.0f
 #define BAR_HEIGHT 25.0f
+#define SQUARE_SIDE 75.0f
+#define SPACE_BTW_SQUARES 15.0f
 #define MARGIN_TOP 15.0f
+#define COOLDOWN_BAR_HEIGHT 5.0f // Nova constante para a altura da barra de cooldown
 #define TARGET_MARKER_HEIGHT_OFFSET 2.0f
 
 // Helper Functions
-static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit);
+static void DrawBar(float x, float y, float width, float height, float current, float max, Color fillColor, Color outlineColor, Color background, const char* label, const char* unit);
 static void DrawLBracket(Vector3 corner, Vector3 rightEnd, Vector3 upEnd, Color color, float lineThickness, Vector3 camUp, Vector3 camRight, float groundLevel);
 static Vector3 FindPlayerPosition(EntityManager* em, float* outYaw, Camera* camera);
 static void DrawMinimapBackground(int mapCenterX, int mapCenterY, int mapSize, int mapX, int mapY);
 static void DrawMinimapEntities(EntityManager* em, Entity player, Vector3 playerPos, float cosYaw, float sinYaw, float scaleFactor, int mapCenterX, int mapCenterY, int mapSize);
+static void DrawWeaponBox(int x, int y, int width, int height, Color fill, Color border, const char* text, float currentCooldown, float maxCooldown);
+
 
 // Target lock helper functions
 static void CalculateCameraBasis(Camera* camera, Vector3* outForward, Vector3* outRight, Vector3* outUp);
 static Vector3 ClampToGround(Vector3 pos, float minHeight);
 static void DrawCornerBracket(Vector3 center, Vector3 rightDir, Vector3 upDir, float rightScale, float upScale, float bracketLength, Color color, float lineThickness, Vector3 camUp, Vector3 camRight, float groundLevel, float minHeight);
 
-// Draws HP bar, currently
+// Draws HP bar
 void DrawHUDSystem(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_HEALTH;
@@ -50,41 +56,40 @@ void DrawHUDSystem(struct Systems* systems) {
         outlineColor = RED;
       }
 
-      DrawBar(x_center, y_pos, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, "HP", "%");
+      DrawBar(x_center, y_pos, BAR_WIDTH, BAR_HEIGHT, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, Fade(BLACK, 0.6f), "HP", "%");
     }
   }
 }
 
-// Helper to draw a progress bar with Tech style corners
-static void DrawBar(float x, float y, float current, float max, Color fillColor, Color outlineColor, const char* label, const char* unit) {
+// Helper to draw a progress bar
+static void DrawBar(float x, float y, float width, float height, float current, float max, Color fillColor, Color outlineColor, Color background, const char* label, const char* unit) {
   if (max <= 0.0f) max = 1.0f;
   float percentage = current / max;
   if (percentage < 0.0f) percentage = 0.0f;
   if (percentage > 1.0f) percentage = 1.0f;
-
-  float fillWidth = BAR_WIDTH * percentage;
+  float fillWidth = width * percentage;
   // Size of the decorative corner
   const float cornerSize = 12.0f;
   // Line thickness for the outline
   const float thickness = 2.0f;
 
   // Draw background and fill bar
-  DrawRectangle(x, y, BAR_WIDTH, BAR_HEIGHT, Fade(BLACK, 0.6f));
-  DrawRectangle(x, y, fillWidth, BAR_HEIGHT, fillColor);
+  DrawRectangle(x, y, width, height, background);
+  DrawRectangle(x, y, fillWidth, height, fillColor);
 
   // Draw decorative corner brackets: top and bottom horizontal lines (skip corners)
-  DrawLineEx((Vector2){x + cornerSize, y}, (Vector2){x + BAR_WIDTH - cornerSize, y}, thickness, outlineColor);
-  DrawLineEx((Vector2){x + cornerSize, y + BAR_HEIGHT}, (Vector2){x + BAR_WIDTH - cornerSize, y + BAR_HEIGHT}, thickness, outlineColor);
+  DrawLineEx((Vector2){x + cornerSize, y}, (Vector2){x + width - cornerSize, y}, thickness, outlineColor);
+  DrawLineEx((Vector2){x + cornerSize, y + height}, (Vector2){x + width - cornerSize, y + height}, thickness, outlineColor);
 
   // Left side: diagonal corner lines and vertical line
   DrawLineEx((Vector2){x, y + cornerSize}, (Vector2){x + cornerSize, y}, thickness, outlineColor);
-  DrawLineEx((Vector2){x, y + BAR_HEIGHT - cornerSize}, (Vector2){x + cornerSize, y + BAR_HEIGHT}, thickness, outlineColor);
-  DrawLineEx((Vector2){x, y + cornerSize}, (Vector2){x, y + BAR_HEIGHT - cornerSize}, thickness, outlineColor);
+  DrawLineEx((Vector2){x, y + height - cornerSize}, (Vector2){x + cornerSize, y + height}, thickness, outlineColor);
+  DrawLineEx((Vector2){x, y + cornerSize}, (Vector2){x, y + height - cornerSize}, thickness, outlineColor);
 
   // Right side: diagonal corner lines and vertical line
-  DrawLineEx((Vector2){x + BAR_WIDTH - cornerSize, y}, (Vector2){x + BAR_WIDTH, y + cornerSize}, thickness, outlineColor);
-  DrawLineEx((Vector2){x + BAR_WIDTH - cornerSize, y + BAR_HEIGHT}, (Vector2){x + BAR_WIDTH, y + BAR_HEIGHT - cornerSize}, thickness, outlineColor);
-  DrawLineEx((Vector2){x + BAR_WIDTH, y + cornerSize}, (Vector2){x + BAR_WIDTH, y + BAR_HEIGHT - cornerSize}, thickness, outlineColor);
+  DrawLineEx((Vector2){x + width - cornerSize, y}, (Vector2){x + width, y + cornerSize}, thickness, outlineColor);
+  DrawLineEx((Vector2){x + width - cornerSize, y + height}, (Vector2){x + width, y + height - cornerSize}, thickness, outlineColor);
+  DrawLineEx((Vector2){x + width, y + cornerSize}, (Vector2){x + width, y + height - cornerSize}, thickness, outlineColor);
 
   // Text label: convert percentage to 0-100 range and center it
   char text[64];
@@ -94,8 +99,8 @@ static void DrawBar(float x, float y, float current, float max, Color fillColor,
   int fontSize = 20;
   int textWidth = MeasureText(text, fontSize);
   // Draw text with shadow then white text on top
-  DrawText(text, x + (BAR_WIDTH / 2) - (textWidth / 2) + 1, y + (BAR_HEIGHT / 2) - (fontSize / 2) + 1, fontSize, BLACK);
-  DrawText(text, x + (BAR_WIDTH / 2) - (textWidth / 2), y + (BAR_HEIGHT / 2) - (fontSize / 2), fontSize, WHITE);
+  DrawText(text, x + (width / 2) - (textWidth / 2) + 1, y + (height / 2) - (fontSize / 2) + 1, fontSize, BLACK);
+  DrawText(text, x + (width / 2) - (textWidth / 2), y + (height / 2) - (fontSize / 2), fontSize, WHITE);
 }
 
 // Simple crosshair draw
@@ -167,8 +172,8 @@ static void DrawMinimapEntities(EntityManager* em, Entity player, Vector3 player
           DrawCircle(drawX, drawY, 4.0f, RED);
         }
 
-        // Objective structure (hardcoded position check for turret at Y=-15, Z=-500)
-        if (worldPos.y == -15.0f && worldPos.z == -500.0f) {
+        // Objective structure (hardcoded position check for turret at Y=-45, Z=-650)
+        if (worldPos.y == -45.0f && worldPos.z == -650.0f) {
           DrawCircle(drawX, drawY, 8.0f, ORANGE);
         }
       }
@@ -357,15 +362,102 @@ void DrawLevelMessage(struct Systems* systems) {
     DrawText("OBJECTIVE:", screenX - MeasureText("OBJECTIVE:", fontSize) / 2.0, 4.0 * screenY, fontSize, WHITE);
     DrawText("Destroy the enemy structure", screenX - MeasureText("Destroy the enemy structure", fontSize) / 2.0, 5.5 * screenY, fontSize, WHITE);
   }
+  if (state->currentScreen == SCREEN_SECOND_LEVEL) {
+    // Draw objective text centered, with title at 4x margin and description at 5.5x margin from top
+    DrawText("OBJECTIVE:", screenX - MeasureText("OBJECTIVE:", fontSize) / 2.0, 4.0 * screenY, fontSize, WHITE);
+    DrawText("Destroy the enemy mecha", screenX - MeasureText("Destroy the enemy mecha", fontSize) / 2.0, 5.5 * screenY, fontSize, RED);
+  }
 }
 
-// ALGUEM CONSERTA DPS
-void DrawDeathEntityMessage() {
+//  ===================
+//  WEAPONS GROUP BOX
+//  ===================
 
-  int screenX = GetScreenWidth() / 2.0f;
-  int screenY = GetScreenHeight();
+void DrawWeaponGroups(struct Systems* systems) {
+  EntityManager* em = &systems->entityManager;
+  WeaponControlComponent* wp_control = NULL;
+  Entity playerEntity = MAX_ENTITIES;
 
-  DrawText("Inimigo destruído", screenX - MeasureText("Inimigo destruído", 20) / 2.0, screenY / 1.5, 20, RED);
+  //Look for the player
+  uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_WEAPON_CONTROL;
+  for (Entity e = 0; e < em->numEntities; e++) {
+    if ((em->componentMasks[e] & neededMask) == neededMask) {
+      wp_control = &em->weaponControlComponents[e];
+      playerEntity = e;
+      break;
+      }
+    }
+  
+  if (wp_control == NULL) return;
 
+  //Calcula o tamanho total da area dos groups
+  float x_total = (float) MAX_WEAPONS_GROUPS * SQUARE_SIDE + (float) (MAX_WEAPONS_GROUPS - 1) * SPACE_BTW_SQUARES;
+  float x_inicial = ((float)GetScreenWidth() - x_total) / 2.0f;
+  float y_pos = ((float)GetScreenHeight() - (SQUARE_SIDE + MARGIN_TOP));
 
+  float current_x = x_inicial;
+    char label[4];
+
+  for (int i = 0; i < MAX_WEAPONS_GROUPS; i++) {
+    Color fillColor = HUD_BLUE_FILL;
+    Color borderColor = WHITE;
+    Color backgroundcolor;
+
+    float currentCooldown = 0.0f;
+    float maxCooldown = 0.0f;
+
+    // Tenta encontrar a arma ativa no grupo
+    Entity weaponEntity = MAX_ENTITIES;
+    for (int j = 0; j < MAX_WEAPONS_EQUIP; j++) {
+        if (wp_control->weaponsGroupMap[j] == i && wp_control->activeGroup[i]) {
+            weaponEntity = wp_control->weaponsSlots[j];
+            if (weaponEntity != MAX_ENTITIES && (em->componentMasks[weaponEntity] & COMPONENT_WEAPON)) {
+                WeaponComponent* wc = &em->weaponComponents[weaponEntity];
+                currentCooldown = wc->cooldownTimer;
+                maxCooldown = wc->firingRate;
+                break; // Assume uma arma por grupo para o cooldown
+            }
+        }
+    }
+
+    //Se estiver ativo, o grupo fica verde
+    if (wp_control->activeGroup[i]) {
+      borderColor = HUD_GREEN_FILL;
+    }
+
+    //Cores bonitinhas para o cooldown
+    if (currentCooldown > 0.85 * maxCooldown) {
+      fillColor = HUD_RED_FILL;
+      backgroundcolor = HUD_GRAY_FILL;
+    }
+    else if (currentCooldown > 0.7 * maxCooldown) {
+      fillColor = HUD_ORANGE_FILL;
+      backgroundcolor = HUD_GRAY_FILL;
+    }
+    else if (currentCooldown > 0.55 * maxCooldown) {
+      fillColor = HUD_YELLOW_FILL;
+      backgroundcolor = HUD_GRAY_FILL;
+    }
+    else if (currentCooldown > 0.30 * maxCooldown) {
+      fillColor = HUD_GREEN_FILL;
+      backgroundcolor = HUD_GRAY_FILL;
+    }
+    else if (currentCooldown > 0.0 * maxCooldown) {
+      fillColor = HUD_CYAN_FILL;
+      backgroundcolor = HUD_GRAY_FILL;
+    }
+    else backgroundcolor = HUD_BLUE_FILL;
+    
+    
+    
+    
+
+    snprintf(label, 4, "W%d", i + 1);
+    
+    DrawBar(current_x, y_pos, SQUARE_SIDE, SQUARE_SIDE, currentCooldown, maxCooldown, fillColor, borderColor, backgroundcolor, label, "");
+    //Dá espaço para o proximo group
+    current_x += SQUARE_SIDE + SPACE_BTW_SQUARES;
+  }
 }
+
+

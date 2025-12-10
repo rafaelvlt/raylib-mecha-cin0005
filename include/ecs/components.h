@@ -140,7 +140,7 @@ typedef struct{
 } LifetimeComponent;
 
 // Detect which weapon to use and fire with for both player and A.I
-typedef struct {
+typedef struct WeaponControlComponent{
   // Control Proprieties 
   bool triggerPulled;
   Vector3 aimDirection;

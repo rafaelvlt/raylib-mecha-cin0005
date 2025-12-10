@@ -20,6 +20,7 @@ void DrawCrosshair(struct Systems* systems);
 void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
 void Hud3DSystem(struct Systems* systems);
 void DrawLevelMessage(struct Systems* systems);
+void DrawWeaponGroups(struct Systems* systems);
 
 // Effects helper, should be in updates
 void TrailSystem(struct Systems* systems);
