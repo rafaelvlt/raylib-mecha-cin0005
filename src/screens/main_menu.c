@@ -230,9 +230,9 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     
     const bool lang = systems->configManager.language;
     // Draw Buttons (Maybe change to draw in a better way)
-    DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMEÇAR JOGO":"START GAME", BUTTON_START_GAME);
+    DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMECAR JOGO":"START GAME", BUTTON_START_GAME);
     DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], lang?"EQUIPAMENTOS":"LOADOUT", BUTTON_LOADOUT);
-    DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPÇÕES":"OPTIONS", BUTTON_OPTIONS);
+    DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPCOES":"OPTIONS", BUTTON_OPTIONS);
     DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], lang?"CREDITOS":"CREDITS", BUTTON_CREDITS);
     DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], lang?"SAIR":"EXIT", BUTTON_EXIT);
     

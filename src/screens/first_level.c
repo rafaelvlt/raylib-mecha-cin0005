@@ -19,6 +19,7 @@
 #define BOOT_TIME_HUD         3.0f  
 #define BOOT_TIME_RADAR       4.5f 
 #define BOOT_TIME_MSG         6.0f  
+#define BOOT_TIME_GROUPS      2.0f
 
 
 // Forward declarations
@@ -213,6 +214,8 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   if (bootTime > BOOT_TIME_HUD) DrawHUDSystem(systems);
   if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems, data);
   if (bootTime > BOOT_TIME_MSG) DrawLevelMessage(systems);
+  if (bootTime > BOOT_TIME_GROUPS) DrawWeaponGroups(systems);
+  
 
   DrawFPS(10, 10);
 }

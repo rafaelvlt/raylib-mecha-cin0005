@@ -44,7 +44,7 @@ static void LoadModels(ResourceManager* rm) {
 
 
   rm->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
-  rm->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(8.0f, 8.0f, 8.0f);
+  rm->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(24.0f, 24.0f, 24.0f);
 
   // Environment Models
   rm->models[MODEL_ID_HANGAR_ENV] = LoadModel("resources/models/environment/hangar.glb");

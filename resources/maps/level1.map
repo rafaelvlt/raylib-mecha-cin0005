@@ -68,13 +68,13 @@ LINK_WEAPON player 3 p_missile_R 1 0
 # ESTRUTURA: TORRE GIGANTE (OBJETIVO)
 # ==========================================
 ENTITY turret_struct
-TRANSFORM 0.0 -15.0 -500.0
-HEALTH 250.0
+TRANSFORM 0.0 -45.0 -650.0
+HEALTH 1000.0
 # RENDER: modelId r g b a - ID do modelo e cor RGBA (0-255)
 RENDER 4 255 255 255 255
 # COLLISION: minX minY minZ maxX maxY maxZ isStatic isTrigger
-#   Colisão Grande (50m x 100m x 50m)
-COLLISION -25.0 0.0 -25.0 25.0 100.0 25.0 1 1
+#   Colisão Grande (130m x 540m x 180m)
+COLLISION -440.0 0.0 -90.0 100.0 130.0 90.0 1 0
 
 
 # ==========================================
