@@ -8,15 +8,17 @@ typedef enum options {
     OPTION_LANGUAGE = 0,
     OPTION_SCREEN_RESOLUTION,
     OPTION_FULLSCREEN,
-    OPTION_AUDIO_VOLUME,
+    OPTION_MUSIC_VOLUME,
+    OPTION_SOUND_VOLUME,
     OPTION_BACK_TO_MENU,
     OPTION_LINE_COUNT
 } Option;
 
 typedef struct OptionsData {
     int selectedOption; // line
-    int selectedOptions[4]; // options index
+    int selectedOptions[OPTION_LINE_COUNT-1]; // options index
     int rangeOptions[OPTION_LINE_COUNT-1]; //number of options in each line
+    int timer[5]; //contador para verificar se está pressionado
     Font* optionsFont;
 } OptionsData;
 

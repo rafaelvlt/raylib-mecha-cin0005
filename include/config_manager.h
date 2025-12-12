@@ -58,7 +58,8 @@ typedef struct{
 // Struct to hold configuration values
 typedef struct {
     Language language; //0 = EN, 1 = PT-BR
-    float audioVolume; //0.0 to 1.0
+    float musicVolume; //0.0 to 1.0
+    float soundVolume; //0.0 to 1.0
     
     InputSystem KeyMap; 
     //Screen
@@ -71,7 +72,8 @@ void InitConfigManager(struct Systems* systems);
 void UpdateConfigManager(struct Systems* systems);
 void ShutdownConfigManager();
 
-float GetAudioVolume(ConfigManager* configManager);
+float GetMusicVolume(ConfigManager* configManager);
+float GetSoundVolume(ConfigManager* configManager);
 
 // Input System;
 

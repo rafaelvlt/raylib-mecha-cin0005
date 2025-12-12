@@ -113,7 +113,7 @@ void WeaponSystem(struct Systems* systems) {
 static bool ValidateMissileFire(EntityManager* em, WeaponControlComponent* wc, Entity mecha, struct Systems* systems) {
   if (wc->lockedTarget >= MAX_ENTITIES) {
     Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED);
-    float finalVolume = GetAudioVolume(&systems->configManager);
+    float finalVolume = GetSoundVolume(&systems->configManager);
     SetSoundVolume(failSound, finalVolume);
     float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
     SetSoundPitch(failSound, pitch);
@@ -128,7 +128,7 @@ static bool ValidateMissileFire(EntityManager* em, WeaponControlComponent* wc, E
 
   if (distSq < minRangeSq) {
     Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED);
-    float finalVolume = GetAudioVolume(&systems->configManager);
+    float finalVolume = GetSoundVolume(&systems->configManager);
     SetSoundVolume(failSound, finalVolume);
     float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
     SetSoundPitch(failSound, pitch);

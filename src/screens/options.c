@@ -13,30 +13,35 @@ void InitOptionsScreen(struct Systems* systems, OptionsData* data)
 {
     data->optionsFont = GetFont(&(systems->resourceManager), FONT_ID_CAPTURE_IT);
     data->selectedOption = 0; // line
-    data->selectedOptions[0] = systems->configManager.language; //language
-    data->selectedOptions[1] = systems->configManager.screenResolutionIndex; //resolution
-    data->selectedOptions[2] = systems->configManager.fullscreen; //fullscreen
-    data->selectedOptions[3] = (int)(systems->configManager.audioVolume * 100); //audio volume
+    data->selectedOptions[OPTION_LANGUAGE] = systems->configManager.language; //language
+    data->selectedOptions[OPTION_SCREEN_RESOLUTION] = systems->configManager.screenResolutionIndex; //resolution
+    data->selectedOptions[OPTION_FULLSCREEN] = systems->configManager.fullscreen; //fullscreen
+    data->selectedOptions[OPTION_MUSIC_VOLUME] = (int)(systems->configManager.musicVolume * 100); //music volume
+    data->selectedOptions[OPTION_SOUND_VOLUME] = (int)(systems->configManager.soundVolume * 100); //sound volume
+    for(int i = 0; i < 4; i++) data->timer[i] = 0; //zera todos os timers
+
     
     //number of options in each line
-    data->rangeOptions[0] = 2; // EN, PT-BR
-    data->rangeOptions[1] = 3; // 1280x720, 1600x900, 1920x1080
-    data->rangeOptions[2] = 2; // OFF, ON
-    data->rangeOptions[3] = 100; // 0 to 100
-    data->rangeOptions[4] = 1; // Back to menu
+    data->rangeOptions[OPTION_LANGUAGE] = 2; // EN, PT-BR
+    data->rangeOptions[OPTION_SCREEN_RESOLUTION] = 3; // 1280x720, 1600x900, 1920x1080
+    data->rangeOptions[OPTION_FULLSCREEN] = 2; // OFF, ON
+    data->rangeOptions[OPTION_MUSIC_VOLUME] = 100; // 0 to 100
+    data->rangeOptions[OPTION_SOUND_VOLUME] = 100; // 0 to 100
+    data->rangeOptions[OPTION_BACK_TO_MENU] = 1; // Back to menu
 }
 
 void optionSelect(struct Systems* systems, OptionsData* data){
-    systems->configManager.language = data->selectedOptions[0];
-    systems->configManager.screenResolutionIndex = data->selectedOptions[1];
+    systems->configManager.language = data->selectedOptions[OPTION_LANGUAGE];
+    systems->configManager.screenResolutionIndex = data->selectedOptions[OPTION_SCREEN_RESOLUTION];
     Vector2 resolutions[] = {
         {1280, 720},
         {1600, 900},
         {1920, 1080}
     };
-    systems->configManager.screenResolution = resolutions[data->selectedOptions[1]];
-    systems->configManager.fullscreen = data->selectedOptions[2];
-    systems->configManager.audioVolume = data->selectedOptions[3] / 100.0f;
+    systems->configManager.screenResolution = resolutions[data->selectedOptions[OPTION_SCREEN_RESOLUTION]];
+    systems->configManager.fullscreen = data->selectedOptions[OPTION_FULLSCREEN];
+    systems->configManager.musicVolume = data->selectedOptions[OPTION_MUSIC_VOLUME] / 100.0f;
+    systems->configManager.soundVolume = data->selectedOptions[OPTION_SOUND_VOLUME] / 100.0f;
 
     if (data->selectedOption == OPTION_BACK_TO_MENU) RequestScreenChange(systems, SCREEN_MAIN_MENU);
     
@@ -44,34 +49,30 @@ void optionSelect(struct Systems* systems, OptionsData* data){
 
 void UpdateOptionsScreen(struct Systems* systems, OptionsData* data)
 {
-    if (IsKeyPressed(KEY_UP)) if (data->selectedOption > 0) data->selectedOption--;
-        
-    if (IsKeyPressed(KEY_DOWN))  if (data->selectedOption < OPTION_LINE_COUNT -1) data->selectedOption++;
-    
-    if (data->selectedOption == 3){ 
-        if (IsKeyDown(KEY_LEFT)){
-            if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
-        }
+    if ((!data->timer[0]-- & IsKeyDown(KEY_UP)) | IsKeyPressed(KEY_UP)) {
+        if (data->selectedOption > 0) data->selectedOption--;
+        data->timer[0] =6;
     }
-    else{
-        if (IsKeyPressed(KEY_LEFT)){ 
-            if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
-        }
+        
+    if ((!data->timer[1]-- & IsKeyDown(KEY_DOWN)) | IsKeyPressed(KEY_DOWN) ) {
+        if (data->selectedOption < OPTION_LINE_COUNT -1) data->selectedOption++;
+        data->timer[1] = 6;
     }
 
-    if (data->selectedOption == 3){
-        if (IsKeyDown(KEY_RIGHT)){ 
-            if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
-        }
+    if ((!data->timer[2]-- & IsKeyDown(KEY_ENTER)) | IsKeyPressed(KEY_ENTER)) {
+        optionSelect(systems, data);
+        data->timer[2] = 6;
     }
-    else{
-        if (IsKeyPressed(KEY_RIGHT)){
-            if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
-        }
+
+    if ((!data->timer[3]-- & IsKeyDown(KEY_LEFT)) | IsKeyPressed(KEY_LEFT) ){
+        if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
+        data->timer[3] = 6;
     }
-    if (IsKeyPressed(KEY_ENTER)) optionSelect(systems, data);
-        
-    
+
+    if ((!data->timer[4]-- & IsKeyDown(KEY_RIGHT)) | IsKeyPressed(KEY_RIGHT)) {
+        if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
+        data->timer[4] = 6;
+    }
 }
 
 void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
@@ -88,7 +89,6 @@ void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
     const float titleY = screenHeight * 0.1f;
     const float optionsStartY = screenHeight * 0.35f;
     const float lineHeight = optionFontSize * 1.5f;
-    const float volumeTextY = optionsStartY + (lineHeight * 3);
 
     //Highlight
     const float highlightWidth = screenWidth * 0.6f;
@@ -102,18 +102,22 @@ void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
     const char* resOptionsText[3] = {"1280x720", "1600x900", "1920x1080"};
     const char* fullTitleText = lang?"Tela Cheia:":"Fullscreen:";
     const char* fullOptionsText[2] = {lang?"DESLIGADO":"OFF", lang?"LIGADO":"ON"};
-    const char* volumeText = lang?"Volume Mestre ":"Master Volume ";
+    const char* musicVolumeText = lang?"Volume Musica ":"Music Volume ";
+    const char* audioVolumeText = lang?"Volume Audio ":"Audio Volume ";
     const char* backText = lang?"Voltar ao Menu":"Back to Menu";
 
-    const char* langText = TextFormat("%s: %s", langTitleText, langOptionsText[data->selectedOptions[0]]);
-    const char* resText = TextFormat("%s: %s", resTitleText, resOptionsText[data->selectedOptions[1]]);
-    const char* fullText = TextFormat("%s: %s", fullTitleText, fullOptionsText[data->selectedOptions[2]]);
+    const char* langText = TextFormat("%s: %s", langTitleText, langOptionsText[data->selectedOptions[OPTION_LANGUAGE]]);
+    const char* resText = TextFormat("%s: %s", resTitleText, resOptionsText[data->selectedOptions[OPTION_SCREEN_RESOLUTION]]);
+    const char* fullText = TextFormat("%s: %s", fullTitleText, fullOptionsText[data->selectedOptions[OPTION_FULLSCREEN]]);
 
-    // Slider
+    // Sliders
     const float sliderWidth = highlightWidth * 0.5f;
-    const float sliderY = volumeTextY + optionFontSize/2;
-    const Vector2 sliderStart = { (screenWidth - sliderWidth + (MeasureText(volumeText, (int)optionFontSize))) / 2.0f, sliderY };
-    const Vector2 sliderEnd = { sliderStart.x + sliderWidth, sliderY };
+    const float musicSliderY = optionsStartY + (lineHeight * 3) + optionFontSize/2;
+    const float soundSliderY = optionsStartY + (lineHeight * 4) + optionFontSize/2;
+    //const Vector2 sliderStart = { (screenWidth - sliderWidth + (MeasureText(musicVolumeText, (int)optionFontSize))) / 2.0f, musicSliderY };
+    //const Vector2 sliderEnd = { sliderStart.x + sliderWidth, musicSliderY };
+    const float sliderStartX = (screenWidth - sliderWidth + (MeasureText(musicVolumeText, (int)optionFontSize))) / 2.0f;
+    const float sliderEndX = sliderStartX + sliderWidth;
 
     // ---------------- Draw -------------------
 
@@ -125,12 +129,15 @@ void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
     DrawText(langText, screenWidth/2 - MeasureText(langText, (int)optionFontSize)/2, (int)(optionsStartY + (lineHeight * 0)), (int)optionFontSize, WHITE);
     DrawText(resText, screenWidth/2 - MeasureText(resText, (int)optionFontSize)/2, (int)(optionsStartY + (lineHeight * 1)), (int)optionFontSize, WHITE);
     DrawText(fullText, screenWidth/2 - MeasureText(fullText, (int)optionFontSize)/2, (int)(optionsStartY + (lineHeight * 2)), (int)optionFontSize, WHITE);
-    DrawText(volumeText, screenWidth/2 - (MeasureText(volumeText, (int)optionFontSize) + sliderWidth)/2, (int)(optionsStartY + (lineHeight * 3)), (int)optionFontSize, WHITE);
-    DrawText(backText, screenWidth/2 - MeasureText(backText, (int)optionFontSize)/2, (int)(optionsStartY + (lineHeight * 4)), (int)optionFontSize, WHITE);
+    DrawText(musicVolumeText, screenWidth/2 - (MeasureText(musicVolumeText, (int)optionFontSize) + sliderWidth)/2, (int)(optionsStartY + (lineHeight * 3)), (int)optionFontSize, WHITE);
+    DrawText(audioVolumeText, screenWidth/2 - (MeasureText(audioVolumeText, (int)optionFontSize) + sliderWidth)/2, (int)(optionsStartY + (lineHeight * 4)), (int)optionFontSize, WHITE);
+    DrawText(backText, screenWidth/2 - MeasureText(backText, (int)optionFontSize)/2, (int)(optionsStartY + (lineHeight * 5)), (int)optionFontSize, WHITE);
 
-    // Volume Slider
-    DrawLineEx(sliderStart, sliderEnd, 5, DARKGRAY);
-    DrawCircleV((Vector2){sliderStart.x + (data->selectedOptions[3] * sliderWidth)/100.0f, sliderY}, 15.0f, WHITE);
+    // Volume Sliders
+    DrawLineEx((Vector2){sliderStartX, musicSliderY}, (Vector2) {sliderEndX, musicSliderY}, 5, DARKGRAY);
+    DrawCircleV((Vector2){sliderStartX + (data->selectedOptions[OPTION_MUSIC_VOLUME] * sliderWidth)/100.0f, musicSliderY}, 15.0f, WHITE);
+    DrawLineEx((Vector2){sliderStartX, soundSliderY}, (Vector2) {sliderEndX, soundSliderY}, 5, DARKGRAY);
+    DrawCircleV((Vector2){sliderStartX + (data->selectedOptions[OPTION_SOUND_VOLUME] * sliderWidth)/100.0f, soundSliderY}, 15.0f, WHITE);
 
 
     // Selected option highlight
