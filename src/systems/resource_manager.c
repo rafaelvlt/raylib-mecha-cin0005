@@ -46,9 +46,9 @@ static void LoadModels(ResourceManager* rm) {
   rm->models[MODEL_ID_ENEMY_FIGHTER].transform = MatrixMultiply(MatrixScale(0.35f, 0.35f, 0.35f), MatrixRotateY(PI));
   rm->modelAnimations[MODEL_ID_ENEMY_FIGHTER] = LoadModelAnimations("resources/models/enemies/enemy_fighter.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_FIGHTER]);
 
-  rm->models[MODEL_ID_ENEMY_BOSS] = LoadModel("resources/models/enemies/enemy_scout.glb");
-  rm->models[MODEL_ID_ENEMY_BOSS].transform = MatrixMultiply(MatrixScale(0.40f, 0.40f, 0.40f), MatrixRotateY(PI));
-  rm->modelAnimations[MODEL_ID_ENEMY_BOSS] = LoadModelAnimations("resources/models/enemies/enemy_boss.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_BOSS]);
+  rm->models[MODEL_ID_ENEMY_BOSS] = LoadModel("resources/models/enemies/enemy_boss.glb");
+  rm->models[MODEL_ID_ENEMY_BOSS].transform = MatrixMultiply(MatrixScale(0.40f, 0.40f, 0.40f), MatrixRotateY(0.0f));
+  rm->modelAnimations[MODEL_ID_ENEMY_BOSS] = LoadModelAnimations("resources/models/enemies/enemy_boss.glb", &rm->modelAnimCounts[MODEL_ID_ENEMY_BOSS]);
 
   rm->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
   rm->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(24.0f, 24.0f, 24.0f);
@@ -117,6 +117,7 @@ static void LoadSounds(ResourceManager* rm) {
 static void LoadMusic(ResourceManager* rm) {
   rm->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
   rm->musics[MUSIC_ID_FIRST_LEVEL] = LoadMusicStream("resources/musics/first_level_music.mp3");
+  rm->musics[MUSIC_ID_SECOND_LEVEL] = LoadMusicStream("resources/musics/second_level_music.mp3");
   rm->musics[MUSIC_ID_DEBRIEFING] = LoadMusicStream("resources/musics/debriefing.mp3");
 }
 
