@@ -18,6 +18,7 @@ typedef struct OptionsData {
     int selectedOption; // line
     int selectedOptions[OPTION_LINE_COUNT-1]; // options index
     int rangeOptions[OPTION_LINE_COUNT-1]; //number of options in each line
+    int timer[5]; //contador para verificar se está pressionado
     Font* optionsFont;
 } OptionsData;
 

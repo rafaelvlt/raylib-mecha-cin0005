@@ -18,6 +18,7 @@ void InitOptionsScreen(struct Systems* systems, OptionsData* data)
     data->selectedOptions[OPTION_FULLSCREEN] = systems->configManager.fullscreen; //fullscreen
     data->selectedOptions[OPTION_MUSIC_VOLUME] = (int)(systems->configManager.musicVolume * 100); //music volume
     data->selectedOptions[OPTION_SOUND_VOLUME] = (int)(systems->configManager.soundVolume * 100); //sound volume
+    for(int i = 0; i < 4; i++) data->timer[i] = 0; //zera todos os timers
 
     
     //number of options in each line
@@ -48,17 +49,30 @@ void optionSelect(struct Systems* systems, OptionsData* data){
 
 void UpdateOptionsScreen(struct Systems* systems, OptionsData* data)
 {
-    if (IsKeyPressed(KEY_UP)) if (data->selectedOption > 0) data->selectedOption--;
+    if ((!data->timer[0]-- & IsKeyDown(KEY_UP)) | IsKeyPressed(KEY_UP)) {
+        if (data->selectedOption > 0) data->selectedOption--;
+        data->timer[0] =6;
+    }
         
-    if (IsKeyPressed(KEY_DOWN))  if (data->selectedOption < OPTION_LINE_COUNT -1) data->selectedOption++;
-    
-    if (IsKeyPressed(KEY_LEFT)) if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
-    
-    if (IsKeyPressed(KEY_RIGHT)) if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
-    
-    if (IsKeyPressed(KEY_ENTER)) optionSelect(systems, data);
-        
-    
+    if ((!data->timer[1]-- & IsKeyDown(KEY_DOWN)) | IsKeyPressed(KEY_DOWN) ) {
+        if (data->selectedOption < OPTION_LINE_COUNT -1) data->selectedOption++;
+        data->timer[1] = 6;
+    }
+
+    if ((!data->timer[2]-- & IsKeyDown(KEY_ENTER)) | IsKeyPressed(KEY_ENTER)) {
+        optionSelect(systems, data);
+        data->timer[2] = 6;
+    }
+
+    if ((!data->timer[3]-- & IsKeyDown(KEY_LEFT)) | IsKeyPressed(KEY_LEFT) ){
+        if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
+        data->timer[3] = 6;
+    }
+
+    if ((!data->timer[4]-- & IsKeyDown(KEY_RIGHT)) | IsKeyPressed(KEY_RIGHT)) {
+        if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
+        data->timer[4] = 6;
+    }
 }
 
 void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
