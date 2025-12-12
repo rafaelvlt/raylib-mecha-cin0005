@@ -76,7 +76,7 @@ HEALTH 500.0
 RENDER 4 255 255 255 255
 # COLLISION: minX minY minZ maxX maxY maxZ isStatic isTrigger
 #   Colisão Grande (130m x 540m x 180m)
-COLLISION -440.0 0.0 -90.0 100.0 130.0 90.0 1 0
+COLLISION -440.0 0.0 -90.0 100.0 130.0 90.0 1 1
 
 
 # ==========================================

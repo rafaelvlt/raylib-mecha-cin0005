@@ -262,7 +262,6 @@ void DrawMinimapSystem(struct Systems* systems) {
   // Get player position and camera yaw for rotation calculations
   float playerYaw = 0.0f;
   Vector3 playerPos = FindPlayerPosition(em, &playerYaw, currentCamera);
-  if (Vector3LengthSqr(playerPos) < 0.001f) return;
 
   // Find player entity ID
   Entity player = MAX_ENTITIES;

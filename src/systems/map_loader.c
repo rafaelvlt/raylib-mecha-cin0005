@@ -19,66 +19,74 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
   Entity currentEntity = MAX_ENTITIES;
 
   while (fgets(line, sizeof(line), file)) {
-    if (strlen(line) >= 2 && line[0] != '#') {
-      sscanf(line, "%s", command);
+    if (strlen(line) < 2 || line[0] == '#') continue;
 
-      if (strcmp(command, "ENTITY") == 0) {
-        char uid[64];
-        sscanf(line, "%*s %s", uid);
-        currentEntity = CreateEntity(em);
-        if (*mapCount < MAX_ENTITIES) {
-          strcpy(idMap[*mapCount].name, uid);
-          idMap[*mapCount].id = currentEntity;
-          (*mapCount)++;
+    sscanf(line, "%s", command);
+
+    if (strcmp(command, "ENTITY") == 0) {
+      char uid[64];
+      sscanf(line, "%*s %s", uid);
+      currentEntity = CreateEntity(em);
+      if (*mapCount < MAX_ENTITIES) {
+        strcpy(idMap[*mapCount].name, uid);
+        idMap[*mapCount].id = currentEntity;
+        (*mapCount)++;
+      }
+    }
+    else if (currentEntity != MAX_ENTITIES) {
+      if (strcmp(command, "TRANSFORM") == 0) {
+        Vector3 pos;
+        char yawStr[64] = {0};
+        int count = sscanf(line, "%*s %f %f %f %s", &pos.x, &pos.y, &pos.z, yawStr);
+        AddTransformComponent(em, currentEntity, pos);
+        if (count == 4 && (em->componentMasks[currentEntity] & COMPONENT_TRANSFORM)) {
+          float yaw = (strcmp(yawStr, "PI") == 0) ? PI : strtof(yawStr, NULL);
+          em->transformComponents[currentEntity].orientation = QuaternionFromAxisAngle((Vector3){0, 1, 0}, yaw);
         }
       }
-      else if (currentEntity != MAX_ENTITIES) {
-        if (strcmp(command, "TRANSFORM") == 0) {
-          Vector3 pos;
-          float yaw = 0.0f;
-          // TRANSFORM x y z [yaw] - yaw is optional rotation in radians (can use "PI" for 3.14159)
-          char yawStr[64] = {0};
-          int count = sscanf(line, "%*s %f %f %f %s", &pos.x, &pos.y, &pos.z, yawStr);
-          AddTransformComponent(em, currentEntity, pos);
-          if (count == 4 && em->componentMasks[currentEntity] & COMPONENT_TRANSFORM) {
-            if (strcmp(yawStr, "PI") == 0) {
-              yaw = PI;
+      else if (strcmp(command, "PHYSICS") == 0) {
+        Vector3 vel; float drag;
+        sscanf(line, "%*s %f %f %f %f", &vel.x, &vel.y, &vel.z, &drag);
+        AddPhysicsComponent(em, currentEntity, vel, drag);
+      }
+      else if (strcmp(command, "RENDER") == 0) {
+        int modelIdVal, r, g, b, a;
+        sscanf(line, "%*s %d %d %d %d %d", &modelIdVal, &r, &g, &b, &a);
+        AssetModelID modelId = (AssetModelID)modelIdVal;
+        
+        if (modelId >= 0 && modelId < MODEL_ID_COUNT) {
+            Model* m = GetModel(rm, modelId);
+            if (m && m->meshCount > 0) {
+                AddRenderComponent(em, currentEntity, m, (Color){r,g,b,a});
+                
+                if (modelId == MODEL_ID_ENEMY_SCOUT || 
+                    modelId == MODEL_ID_ENEMY_FIGHTER || 
+                    modelId == MODEL_ID_ENEMY_BOSS) {
+                    
+                    if (rm->modelAnimCounts[modelId] > 0) {
+                        AddAnimationComponent(em, currentEntity, modelId, 0, 48.0f, true);
+                    } else {
+                        printf("WARNING: No animations found for Model ID %d\n", modelId);
+                    }
+                }
+            } else {
+                printf("ERROR: Model ID %d invalid or empty mesh.\n", modelId);
             }
-            else {
-              yaw = strtof(yawStr, NULL);
-            }
-            em->transformComponents[currentEntity].orientation = QuaternionFromAxisAngle((Vector3){0, 1, 0}, yaw);
-          }
         }
-        else if (strcmp(command, "PHYSICS") == 0) {
-          Vector3 vel; float drag;
-          sscanf(line, "%*s %f %f %f %f", &vel.x, &vel.y, &vel.z, &drag);
-          AddPhysicsComponent(em, currentEntity, vel, drag);
-        }
-        else if (strcmp(command, "RENDER") == 0) {
-          int modelIdVal, r, g, b, a;
-          sscanf(line, "%*s %d %d %d %d %d", &modelIdVal, &r, &g, &b, &a);
-          AssetModelID modelId = (AssetModelID)modelIdVal;
-          Model* m = GetModel(rm, modelId);
-          if (m) {
-            AddRenderComponent(em, currentEntity, m, (Color){r,g,b,a});
-            if (modelId == MODEL_ID_ENEMY_SCOUT || modelId == MODEL_ID_ENEMY_FIGHTER || modelId == MODEL_ID_ENEMY_BOSS) {
-              AddAnimationComponent(em, currentEntity, modelId, 0, 48.0f, true);
-            }
-          }
-        }
-        else if (strcmp(command, "COLLISION") == 0) {
+      }
+      // ... (Resto igual: COLLISION, PLAYER_CONTROL, HUD, HEALTH, AI_CONTROL, AI_PATROL, WEAPON)
+      else if (strcmp(command, "COLLISION") == 0) {
           Vector3 min, max; int isStat, isTrig;
           sscanf(line, "%*s %f %f %f %f %f %f %d %d", &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &isStat, &isTrig);
           AddCollisionComponent(em, currentEntity, (BoundingBox){min, max}, isStat, isTrig);
-        }
-        else if (strcmp(command, "PLAYER_CONTROL") == 0) {
+      }
+      else if (strcmp(command, "PLAYER_CONTROL") == 0) {
           if (context.mainCamera != NULL) {
             AddPlayerControlComponent(em, currentEntity, context.mainCamera);
             AddWeaponControlComponent(em, currentEntity, AIM_MODE_CAMERA);
           }
-        }
-        else if (strcmp(command, "HUD") == 0) {
+      }
+      else if (strcmp(command, "HUD") == 0) {
           float maxH, heatS, cool;
           sscanf(line, "%*s %f %f %f", &maxH, &heatS, &cool);
           AddCockpitHUDComponent(em, currentEntity, maxH, heatS, cool);
@@ -92,15 +100,14 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
           float hp;
           sscanf(line, "%*s %f", &hp);
           AddHealthComponent(em, currentEntity, hp);
-        }
-        else if (strcmp(command, "AI_CONTROL") == 0) {
+      }
+      else if (strcmp(command, "AI_CONTROL") == 0) {
           float sight, range;
           sscanf(line, "%*s %f %f", &sight, &range);
           AddAIControlComponent(em, currentEntity, sight, range, NULL, 0);
           AddWeaponControlComponent(em, currentEntity, AIM_MODE_PHYSICAL);
-          // Orientation will be set via TRANSFORM command in level1.map if needed
-        }
-        else if (strcmp(command, "AI_PATROL") == 0) {
+      }
+      else if (strcmp(command, "AI_PATROL") == 0) {
           int count;
           char* ptr = line + strlen("AI_PATROL");
           count = (int)strtof(ptr, &ptr);
@@ -116,14 +123,13 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
               em->aiControlComponents[currentEntity].numPatrolPoints = count;
             }
           }
-        }
-        else if (strcmp(command, "WEAPON") == 0) {
+      }
+      else if (strcmp(command, "WEAPON") == 0) {
           char typeStr[64];
           float rate, speed, dmg, range, heat, bRate;
           int bTotal;
           sscanf(line, "%*s %s %f %f %f %f %f %d %f", typeStr, &rate, &speed, &dmg, &range, &heat, &bTotal, &bRate);
           AddWeaponComponent(em, currentEntity, ParseWeaponType(typeStr), rate, speed, dmg, range, heat, bTotal, bRate);
-        }
       }
     }
   }

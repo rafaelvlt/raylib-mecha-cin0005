@@ -198,7 +198,18 @@ static Vector3 CalculateProjectileDirection(EntityManager* em, WeaponControlComp
     Vector3 aimPoint = Vector3Add(pc->camera->position, Vector3Scale(wc->aimDirection, CONVERGENCE_POINT));
     return Vector3Normalize(Vector3Subtract(aimPoint, spawnPos));
   }
-  else return wc->aimDirection;
+  else {
+    if (wc->lockedTarget != MAX_ENTITIES) {
+        Vector3 targetPos = em->transformComponents[wc->lockedTarget].position;
+
+        targetPos.y += 10.0;
+        Vector3 trueDirection = Vector3Subtract(targetPos, spawnPos);
+        
+        return Vector3Normalize(trueDirection);
+    }
+    
+    return wc->aimDirection;
+  }
 }
 
 // Processes weapon fire event and spawns projectile

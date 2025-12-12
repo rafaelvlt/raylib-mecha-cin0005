@@ -131,7 +131,7 @@ static void CheckLevelCompletion(struct Systems* systems, FirstLevelData* data) 
   EventManager* em = &systems->eventManager;
   for (int i = 0; i < em->eventCounter; i++) {
     Event event = em->eventQueue[i];
-    if (event.type == EVENT_ENTITY_DEATH && event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) {
+    if (event.type == EVENT_ENTITY_DEATH && event.data.deathEvent.type == ENTITY_OBJECTIVE) {
       data->levelFinished = true;
       data->finishTimer = 5.0f;
     }
