@@ -27,7 +27,7 @@ void AudioManagerOnEvent(struct Systems* systems, Event event) {
     PlaySpatialGunfightSound(systems, event);
   }
   if (event.type == EVENT_ENTITY_DEATH){
-    if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) PlayTargetDestroyed(systems);
+    if (event.data.deathEvent.type == ENTITY_OBJECTIVE) PlayTargetDestroyed(systems);
     else PlayEnemyDeath(systems);
   }
 }
@@ -40,6 +40,9 @@ void UpdateAudioManager(struct Systems* systems){
   }
   else if (systems->stateManager.currentScreen == SCREEN_FIRST_LEVEL) {
     targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
+  }
+  else if( systems->stateManager.currentScreen == SCREEN_SECOND_LEVEL) {
+    targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_SECOND_LEVEL);
   }
 
   Music* currentMusic = systems->audioManager.playingNow;
