@@ -72,7 +72,8 @@ void InitConfigManager(struct Systems* systems);
 void UpdateConfigManager(struct Systems* systems);
 void ShutdownConfigManager();
 
-float GetAudioVolume(ConfigManager* configManager);
+float GetMusicVolume(ConfigManager* configManager);
+float GetSoundVolume(ConfigManager* configManager);
 
 // Input System;
 

@@ -25,8 +25,12 @@ void ShutdownConfigManager() {
   // No dynamic memory to free for now
 }
 
-float GetAudioVolume(ConfigManager* configManager) {
+float GetMusicVolume(ConfigManager* configManager) {
   return configManager->musicVolume;
+}
+
+float GetSoundVolume(ConfigManager* configManager){
+  return configManager->soundVolume;
 }
 
 Vector2 GetScreenResolution(ConfigManager* configManager) {
@@ -49,7 +53,7 @@ static void SetDefaultConfig(struct Systems* systems){
 
   // [AUDIO]
   systems->configManager.musicVolume = 0.50f;
-  systems->configManager.soundVolume = 0.50f; 
+  systems->configManager.soundVolume = 0.50f;
 
   // [PLAYER INPUT]
   systems->configManager.KeyMap.KeyMoveForward  = KEY_W; // 87

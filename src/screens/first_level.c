@@ -58,7 +58,7 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   data->canControl = false;
   Sound* skySound = GetSound(&systems->resourceManager, SOUND_ID_SKYDROP);
   if (skySound) {
-    float volume = GetAudioVolume(&systems->configManager);
+    float soundVolume = GetSoundVolume(&systems->configManager);
     StopSound(*skySound); 
     SetSoundVolume(*skySound, soundVolume); 
     PlaySound(*skySound);
