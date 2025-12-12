@@ -42,7 +42,7 @@ void ProjectileSystem(struct Systems* systems);
 void MissileSystem(struct Systems* systems);
 void HealthSystem(struct Systems* systems);
 void InitHeatSystem(struct Systems* systems);
-void HeatSystemUpdate(struct Systems* systems);
+void HeatSystem(struct Systems* systems);
 void HeatSystemOnEvent(struct Systems* systems, Event event);
 
 // Função de utilidade para adicionar calor que pode ser chamada por outros sistemas (e.g., WeaponSystem)
