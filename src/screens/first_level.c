@@ -51,9 +51,9 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   data->canControl = false;
   Sound* skySound = GetSound(&systems->resourceManager, SOUND_ID_SKYDROP);
   if (skySound) {
-    float volume = systems->configManager.audioVolume;
+    float soundVolume = systems->configManager.soundVolume;
     StopSound(*skySound); 
-    SetSoundVolume(*skySound, volume); 
+    SetSoundVolume(*skySound, soundVolume); 
     PlaySound(*skySound);
     }
 }
@@ -61,6 +61,8 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
 void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 {
+  float soundVolume = systems->configManager.soundVolume;
+
   if (data->levelFinished) systems->delta_time *= 0.5;
 
   // Startup Sequence
@@ -79,8 +81,9 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     // MOMENTO DO IMPACTO (Apenas uma vez)
     else if (!data->hasLanded) {
       data->hasLanded = true;
-
-      PlaySound(systems->resourceManager.sounds[SOUND_ID_STARTUP_SEQUENCE]); 
+      Sound sound = systems->resourceManager.sounds[SOUND_ID_STARTUP_SEQUENCE];
+      SetSoundVolume(sound, soundVolume);
+      PlaySound(sound); 
 
       data->camera.position.x = 0.0f; 
 
@@ -95,7 +98,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
       if (bgm) {
         StopMusicStream(*bgm);
         PlayMusicStream(*bgm);
-        SetMusicVolume(*bgm, systems->configManager.audioVolume);
+        SetMusicVolume(*bgm, systems->configManager.musicVolume);
       }
     }
   }  
@@ -140,7 +143,7 @@ void UpdateFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
       
       if (data->finishTimer <= 2.5f){
         Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
-        SetSoundVolume(*endSfx, systems->configManager.audioVolume);
+        SetSoundVolume(*endSfx, soundVolume);
         PlaySound(*endSfx);
       }
       if (data->finishTimer <= 0.0f) {

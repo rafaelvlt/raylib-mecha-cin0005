@@ -52,7 +52,7 @@ void UpdateAudioManager(struct Systems* systems){
   }
 
   if (systems->audioManager.playingNow != NULL){
-    float volume = systems->configManager.audioVolume;
+    float volume = systems->configManager.musicVolume;
     SetMusicVolume(*systems->audioManager.playingNow, volume);
     UpdateMusicStream(*systems->audioManager.playingNow);
   }
@@ -103,7 +103,7 @@ static void PlaySpatialGunfightSound(struct Systems* systems, Event event) {
   Sound sfx = *sfxPtr;
 
   // Sfx editing depends on distance, listener, etc
-  float finalVolume = systems->configManager.audioVolume;
+  float finalVolume = systems->configManager.soundVolume;
   float finalPan = 0.5f;
   const float HEARING_DISTANCE = 200.0f;
   
@@ -153,13 +153,13 @@ static void PlaySpatialGunfightSound(struct Systems* systems, Event event) {
 
 static void PlayEnemyDeath(struct Systems* systems){
   Sound* deathSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_MECH_DESTROYED);
-  SetSoundVolume(*deathSfx, systems->configManager.audioVolume);
+  SetSoundVolume(*deathSfx, systems->configManager.soundVolume);
   PlaySound(*deathSfx);
 }
 
 
 static void PlayTargetDestroyed(struct Systems* systems){
   Sound* destroyedSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_TARGET_DESTROYED);
-  SetSoundVolume(*destroyedSfx, systems->configManager.audioVolume);
+  SetSoundVolume(*destroyedSfx, systems->configManager.soundVolume);
   PlaySound(*destroyedSfx);
 }

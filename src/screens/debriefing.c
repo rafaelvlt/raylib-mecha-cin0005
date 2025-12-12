@@ -42,6 +42,8 @@ void InitDebriefingScreen(struct Systems* systems, DebriefingData* data) {
 }
 
 void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
+  float soundVolume = systems->configManager.soundVolume;
+  
   //Timers
   float dt = systems->delta_time;
   float tNow = data->timer;
@@ -80,7 +82,7 @@ void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
     if (prevBob > -0.95f && currentBob <= -0.95f) { 
       Sound* step = GetSound(&systems->resourceManager, SOUND_ID_HUMAN_FOOTSTEP); 
       SetSoundPitch(*step, 0.9f + ((float)GetRandomValue(-5, 5) / 100.0f)); 
-      SetSoundVolume(*step, STEP_VOL); 
+      SetSoundVolume(*step, STEP_VOL * soundVolume); 
       PlaySound(*step);
     }
   }

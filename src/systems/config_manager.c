@@ -26,7 +26,7 @@ void ShutdownConfigManager() {
 }
 
 float GetAudioVolume(ConfigManager* configManager) {
-  return configManager->audioVolume;
+  return configManager->musicVolume;
 }
 
 Vector2 GetScreenResolution(ConfigManager* configManager) {
@@ -48,7 +48,8 @@ static void SetDefaultConfig(struct Systems* systems){
   systems->configManager.fullscreen = false; // 0
 
   // [AUDIO]
-  systems->configManager.audioVolume = 0.50f;
+  systems->configManager.musicVolume = 0.50f;
+  systems->configManager.soundVolume = 0.50f; 
 
   // [PLAYER INPUT]
   systems->configManager.KeyMap.KeyMoveForward  = KEY_W; // 87
@@ -85,7 +86,7 @@ static void SaveConfigFile(struct Systems* systems){
     fprintf(file, "FULLSCREEN=%d\n", systems->configManager.fullscreen ? 1 : 0);
     
     fprintf(file, "\n[AUDIO]\n");
-    fprintf(file, "VOLUME=%.2f\n", systems->configManager.audioVolume);
+    fprintf(file, "VOLUME=%.2f\n", systems->configManager.musicVolume);
 
     fprintf(file, "\n[PLAYER INPUT]\n");
     fprintf(file, "KEY_MOVE_FORWARD=%d\n", systems->configManager.KeyMap.KeyMoveForward);
@@ -133,7 +134,7 @@ static void LoadConfigFile(struct Systems* systems){
       if(sscanf(buff, "%[^=]=%s", key, value) == 2){
         if (strcmp(key, "WIDTH") == 0) systems->configManager.screenResolution.x = atoi(value);
         else if(strcmp(key, "HEIGHT") == 0) systems->configManager.screenResolution.y = atoi(value);
-        else if(strcmp(key, "VOLUME") == 0) systems->configManager.audioVolume = atof(value);
+        else if(strcmp(key, "VOLUME") == 0) systems->configManager.musicVolume = atof(value);
         else if(strcmp(key, "FULLSCREEN") == 0) systems->configManager.fullscreen = atoi(value);
 
           //Input

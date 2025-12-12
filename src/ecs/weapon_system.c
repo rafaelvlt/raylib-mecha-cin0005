@@ -49,7 +49,7 @@ void WeaponSystem(struct Systems* systems){
             if (weapon->type == WEAPON_MISSILE_LAUNCHER) {
               if (wc->aimMode == AIM_MODE_CAMERA) {
                 Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED); 
-                float finalVolume = systems->configManager.audioVolume;
+                float finalVolume = systems->configManager.musicVolume;
                 SetSoundVolume(failSound, finalVolume);
                 float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
                 SetSoundPitch(failSound, pitch);
