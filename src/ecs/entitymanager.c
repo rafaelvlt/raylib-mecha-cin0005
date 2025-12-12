@@ -158,6 +158,24 @@ void AddHealthComponent(EntityManager* entityManager, Entity entity, float healt
   entityManager->componentMasks[entity] |= COMPONENT_HEALTH;
 }
 
+
+void AddHeatComponent(EntityManager* entityManager, Entity entity, float maxHeat, float dissipationRate, float penaltyDuration) {
+    HeatComponent* hc = &entityManager->heatComponents[entity];
+
+    hc->maxHeat = maxHeat;
+    hc->currentHeat = 0.0f;
+    hc->dissipationRate = dissipationRate;
+    hc->heatPenaltyDuration = penaltyDuration;
+    
+    // Zera timers/flags
+    hc->penaltyTimer = 0.0f;
+    hc->isOverheated = false;
+
+    entityManager->componentMasks[entity] |= COMPONENT_HEAT;
+}
+
+
+
 void AddWeaponComponent(EntityManager* em, Entity entity, WeaponType type, 
                         float fireRate, float projSpeed, float damage, float range, float heat, 
                         int burstTotal, float burstRate)

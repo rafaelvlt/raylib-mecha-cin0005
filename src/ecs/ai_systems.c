@@ -366,6 +366,7 @@ static void BehaviorChase(AIControlComponent* ai, TransformComponent* trans, Phy
   }
 }
 
+  
 static void BehaviorAttack(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, AnimationComponent* anim, Vector3 targetPos, float dt) {
   Vector3 toPlayer = Vector3Subtract(targetPos, trans->position);
   toPlayer.y = 0;

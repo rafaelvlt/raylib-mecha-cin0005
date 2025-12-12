@@ -167,6 +167,8 @@ void DrawStateManager(struct Systems* systems) {
       break;
     case SCREEN_SECOND_LEVEL:
       DrawSecondLevelScreen(systems, &stateManager->data.secondLevel);
+    case SCREEN_DEATH:
+      DrawDeathScreen(&stateManager->data.death);
     default:
       break;
   }

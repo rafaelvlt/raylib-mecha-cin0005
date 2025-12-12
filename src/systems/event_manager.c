@@ -31,6 +31,7 @@ void ProcessGameEvents(struct Systems* systems) {
     Event event = ev->eventQueue[i];
     AudioManagerOnEvent(systems, event); 
     EffectSystemOnEvent(systems, event);
+    HeatSystemOnEvent(systems, event); 
   }
 }
 
