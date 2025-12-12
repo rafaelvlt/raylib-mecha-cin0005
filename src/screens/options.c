@@ -113,7 +113,7 @@ void DrawOptionsScreen(struct Systems* systems, OptionsData* data)
 
     // Volume Slider
     DrawLineEx(sliderStart, sliderEnd, 5, DARKGRAY);
-    DrawCircleV((Vector2){sliderStart.x + (data->selectedOptions[4] * sliderWidth)/100.0f, sliderY}, 15.0f, WHITE);
+    DrawCircleV((Vector2){sliderStart.x + (data->selectedOptions[3] * sliderWidth)/100.0f, sliderY}, 15.0f, WHITE);
 
 
     // Selected option highlight

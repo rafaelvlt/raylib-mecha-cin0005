@@ -95,7 +95,7 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
     float scaleX = (systems->configManager.screenResolution.x  / 2.0f) / data->splitScreenMenuPtr->texture.width;
     float scaleY = (systems->configManager.screenResolution.y)         / data->splitScreenMenuPtr->texture.height;
 
-    // 🔥 Converter mouse para o espaço da textura
+    // Converter mouse para o espaço da textura
     data->mousePos.x = m.x / scaleX;
     data->mousePos.y = m.y / scaleY;
 
