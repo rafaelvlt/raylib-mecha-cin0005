@@ -7,6 +7,11 @@
 #include "ecs/systems.h"
 #include "raymath.h" 
 
+// Helper functions
+static Quaternion GetAITorsoRotation(AIControlComponent* ai);
+static bool IsLoopingAnimation(int animIndex);
+static void ApplyEntityAnimation(EntityManager* em, ResourceManager* rm, Entity entity, RenderComponent* render, AnimationComponent* animComp);
+
 // Query all components with Transform and Physics Components, make them move based on their data
 void MovementSystem(struct Systems* systems) {
   const uint32_t mask = COMPONENT_TRANSFORM | COMPONENT_PHYSICS;
@@ -121,6 +126,24 @@ void RenderSystem(struct Systems* systems) {
   } 
 }
 
+// Torso rotation for weapons
+static Quaternion GetAITorsoRotation(AIControlComponent* ai) {
+    float angle = 0.0f;
+
+    if (ai->torsoState == TORSO_LOOKING_L || ai->torsoState == TORSO_TWISTING_L) {
+        angle = 90.0f * DEG2RAD;
+    } 
+    else if (ai->torsoState == TORSO_LOOKING_R || ai->torsoState == TORSO_TWISTING_R) {
+        angle = -90.0f * DEG2RAD;
+    }
+    
+    if (fabsf(angle) > 0.001f) {
+        return QuaternionFromAxisAngle((Vector3){0, 1, 0}, angle);
+    }
+    
+    return QuaternionIdentity();
+}
+
 void AttachmentSystem(struct Systems* systems){
   const uint32_t mask = COMPONENT_ATTACHMENT | COMPONENT_TRANSFORM;
   EntityManager* em = &systems->entityManager;
@@ -130,23 +153,30 @@ void AttachmentSystem(struct Systems* systems){
       AttachmentComponent* child = &em->attachmentComponents[i];
       TransformComponent* childTrans = &em->transformComponents[i];      
 
-      if (em->componentMasks[child->parent] == COMPONENT_NONE){
+      if (child->parent >= MAX_ENTITIES || em->componentMasks[child->parent] == COMPONENT_NONE){
         DestroyEntity(em, i);
-        return;
+        continue;
       }
 
       TransformComponent* parentTrans = &em->transformComponents[child->parent];      
 
-      // Defines the transform component based on the parent      
-      childTrans->orientation = QuaternionMultiply(parentTrans->orientation, child->offsetRotation);
+      Quaternion effectiveParentRot = parentTrans->orientation;
 
-      Vector3 rotatedOffset = Vector3RotateByQuaternion(child->offsetPosition, parentTrans->orientation);
+      if (em->componentMasks[child->parent] & COMPONENT_AI_CONTROL) {
+          AIControlComponent* ai = &em->aiControlComponents[child->parent];
+          Quaternion torsoRot = GetAITorsoRotation(ai);
+          
+          effectiveParentRot = QuaternionMultiply(effectiveParentRot, torsoRot);
+      }
+
+      childTrans->orientation = QuaternionMultiply(effectiveParentRot, child->offsetRotation);
+
+      Vector3 rotatedOffset = Vector3RotateByQuaternion(child->offsetPosition, effectiveParentRot);
 
       childTrans->position = Vector3Add(parentTrans->position, rotatedOffset); 
     }
   }
 }
-
 
 
 

@@ -146,7 +146,7 @@ void EffectSystemOnEvent(struct Systems* systems, Event event){
     }
   }
   if (event.type == EVENT_ENTITY_DEATH){
-    if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) SpawnWinExplosion(systems, event.data.deathEvent.pos);
+    if (event.data.deathEvent.type == ENTITY_OBJECTIVE) SpawnWinExplosion(systems, event.data.deathEvent.pos);
     else SpawnDeathExplosion(systems, event.data.deathEvent.pos);
   }
 }

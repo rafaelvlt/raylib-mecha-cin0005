@@ -46,7 +46,7 @@ void HealthSystem(struct Systems* systems) {
           deathData.deathEvent.killer = attacker;
           deathData.deathEvent.pos = em->transformComponents[victim].position;
           if ((em->componentMasks[victim] & COMPONENT_COLLISION) == COMPONENT_COLLISION){
-            if (em->collisionComponents[victim].isTrigger) deathData.deathEvent.type = ENTITY_TURRET_STRUCTURE;
+            if (em->collisionComponents[victim].isTrigger) deathData.deathEvent.type = ENTITY_OBJECTIVE;
           }
           PushEvent(systems, EVENT_ENTITY_DEATH, deathData);
 
