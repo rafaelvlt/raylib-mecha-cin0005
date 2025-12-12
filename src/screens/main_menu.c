@@ -21,8 +21,14 @@ void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuBut
 void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
     if (systems->configManager.fullscreen != IsWindowFullscreen()) ToggleFullscreen();
+    const int monitor = GetCurrentMonitor();
+    const int monitorWidth = GetMonitorWidth(monitor);
+    const int monitorHeigth = GetMonitorHeight(monitor);
+    if (monitorWidth < systems->configManager.screenResolution.x) systems->configManager.screenResolution.x = monitorWidth;
+    if (monitorHeigth < systems->configManager.screenResolution.y) systems->configManager.screenResolution.y = monitorHeigth;
+    if (!IsWindowFullscreen()) SetWindowPosition((monitorWidth - systems->configManager.screenResolution.x) / 2, (monitorHeigth - systems->configManager.screenResolution.y) / 2);
     SetWindowSize(systems->configManager.screenResolution.x, systems->configManager.screenResolution.y);
-    
+
     bool lang = systems->configManager.language;
 
     //Menu Splitscreen loading from the resource manager.
@@ -189,14 +195,17 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     EndTextureMode();
     
     //------- 2D GUI Screeb ----------
+    const int screenWidthMenu = data->splitScreenMenuPtr->texture.width;
+    const int screenHeightMenu = data->splitScreenMenuPtr->texture.height;
+    
     BeginTextureMode(*(data->splitScreenMenuPtr));
     ClearBackground(BLACK);
-    
+
     // ------- Menu Panel Specs ----------
-    const float panelMarginTop = GetScreenHeight() * 0.25f; 
-    const float panelWidth = GetScreenWidth() * 0.28f;     
-    const float panelHeight = GetScreenHeight() * 0.60f;  
-    const float panelX = GetScreenWidth() * 0.05f;        
+    const float panelMarginTop = screenHeightMenu * 0.25f; 
+    const float panelWidth = screenWidthMenu * 0.40f;     
+    const float panelHeight = screenHeightMenu * 0.60f;  
+    const float panelX = screenWidthMenu * 0.05f;        
     const float panelY = panelMarginTop;
 
     // ------- Draw Menu Panel ----------
@@ -237,10 +246,16 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     // -------- Draw both screens ----------
     const int screenWidth = systems->configManager.screenResolution.x;
     const int screenHeight = systems->configManager.screenResolution.y;
+    const Rectangle splitScreenMenuRectDest = { 0.0f, 0.0f, (float) screenWidth/2, (float)screenHeight};
+    const Rectangle splitScreenMechaRectDest = { screenWidth/2, 0.0f, (float) screenWidth/2, (float)screenHeight};
+    
+
     ClearBackground(BLACK);
-    DrawTextureRec(data->splitScreenMenuPtr->texture, splitScreenRect, (Vector2){0, 0}, WHITE);
-    DrawTextureRec(data->splitScreenMechaPtr->texture, splitScreenRect, (Vector2){screenWidth/2.0f, 0 }, WHITE);
-    // ------- Title Specs + Draw ----------
+    //DrawTextureRec(data->splitScreenMenuPtr->texture, splitScreenRect, (Vector2){0, 0}, WHITE);
+    //DrawTextureRec(data->splitScreenMechaPtr->texture, splitScreenRect, (Vector2){screenWidth/2.0f, 0 }, WHITE);
+    DrawTexturePro(data->splitScreenMenuPtr->texture, splitScreenRect, splitScreenMenuRectDest,(Vector2){0, 0},0, WHITE);
+    DrawTexturePro(data->splitScreenMechaPtr->texture, splitScreenRect, splitScreenMechaRectDest,(Vector2){0, 0 },0, WHITE);
+// ------- Title Specs + Draw ----------
     Vector2 titlePos;
     titlePos.x = screenWidth/2 - MeasureText(GAME_TITLE, 60)/2;
     titlePos.y = 25;
