@@ -45,7 +45,6 @@ static void SpawnLaserPulseExplosion(struct Systems* systems, Vector3 position) 
 
   Entity effect = CreateEntity(em);
   if (effect == MAX_ENTITIES) return;
-
   AddTransformComponent(em, effect, position);
 
   AddEffectSheet(
@@ -155,7 +154,6 @@ void EffectSystemOnEvent(struct Systems* systems, Event event){
 void EffectSystem(struct Systems* systems, Camera* camera){
   EntityManager* em = &systems->entityManager;
   ResourceManager* rm = &systems->resourceManager;
-
   BeginBlendMode(BLEND_ALPHA);
   for (Entity i = 0; i < em->numEntities; i++) {
     uint32_t mask = COMPONENT_EFFECT | COMPONENT_TRANSFORM | COMPONENT_LIFETIME;
@@ -165,7 +163,6 @@ void EffectSystem(struct Systems* systems, Camera* camera){
       EffectComponent* fx = &em->effectComponents[i];
       LifetimeComponent* life = &em->lifetimeComponents[i];
       TransformComponent* trans = &em->transformComponents[i];
-
       int currentFrame = 0;
       float timeAlive = life->lifetime - life->currentTime;
       if (fx->loop){
@@ -183,7 +180,6 @@ void EffectSystem(struct Systems* systems, Camera* camera){
       }
       // Size scaling
       float currentSize = Lerp(fx->startSize, fx->endSize, timeAlive);
-
       // Switch case for each type of resource sprite(spritesheet, multiple file, static)
       switch (fx->type) {
 
@@ -247,7 +243,6 @@ void TrailSystem(struct Systems* systems) {
 
         Vector3 forward = Vector3RotateByQuaternion((Vector3){0,0,-1}, trans->orientation);
         Vector3 tailPos = Vector3Subtract(trans->position, Vector3Scale(forward, 1.0f)); 
-
         // Chance of trail spawning
         if (GetRandomValue(0, 100) < TRAIL_SPAWN_CHANCE) {
           Entity smoke = CreateEntity(em);

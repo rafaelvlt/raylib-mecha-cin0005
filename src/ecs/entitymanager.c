@@ -311,8 +311,6 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
   Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT);
 
     if (enemyModel != NULL) {
-        // NOTE: Model transform (scale + rotation) is already set in resource_manager.c
-        // Do NOT overwrite it here, as it would lose the rotation fix!
 
         Entity scout = CreateEntity(entityManager);
 
@@ -350,8 +348,7 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
   Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT); // Using same model for placeholder
 
     if (enemyModel != NULL) {
-        // NOTE: Model transform (scale + rotation) is already set in resource_manager.c
-        // Do NOT overwrite it here, as it would lose the rotation fix!
+        
 
         Entity combatent = CreateEntity(entityManager);
 

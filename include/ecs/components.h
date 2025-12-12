@@ -146,7 +146,6 @@ typedef struct WeaponControlComponent{
   Vector3 aimDirection;
   AimMode aimMode;
   Entity lockedTarget;
-
   //Weapon Group
   Entity weaponsSlots[MAX_WEAPONS_EQUIP];
   int weaponsGroupMap[MAX_WEAPONS_EQUIP];

@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <stdio.h>
 #include "ecs/components.h"
 #include "ecs/entitymanager.h"
 #include "ecs/systems.h"
@@ -50,6 +51,7 @@ void HealthSystem(struct Systems* systems) {
           PushEvent(systems, EVENT_ENTITY_DEATH, deathData);
 
           DestroyEntity(em, victim);
+          TraceLog(LOG_INFO, "KILL: Entity %d destroyed.", victim);
         }
       }
     }

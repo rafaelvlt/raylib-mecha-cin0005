@@ -3,6 +3,7 @@
 #include "ecs/components.h"
 #include "resource_manager.h"
 #include "systems.h"
+#include "utility.h"
 #include "ecs/systems.h"
 
 // Movement
@@ -117,7 +118,6 @@ void PlayerAudioSystem(struct Systems* systems) {
       if (p->headTimer < p->lastHeadTimer) p->lastHeadTimer = p->headTimer; else p->lastHeadTimer = p->headTimer;
       p->wasZooming = p->isZooming;
     }
-
 
   }
 }

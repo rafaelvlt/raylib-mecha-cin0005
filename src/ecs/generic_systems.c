@@ -19,7 +19,6 @@ void MovementSystem(struct Systems* systems) {
       // Gets the a pointer to the components from the Manager 
       TransformComponent* transform = &(em->transformComponents[i]);
       PhysicsComponent* physics = &(em->physicsComponents[i]);
-
       // Vf = Vi + a*dt
       physics->velocity = Vector3Add(physics->velocity, Vector3Scale(physics->acceleration, deltaTime));
 

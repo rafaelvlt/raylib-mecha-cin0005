@@ -22,7 +22,6 @@ typedef struct  {
   CollisionComponent      collisionComponents[MAX_ENTITIES];
   EffectComponent         effectComponents[MAX_ENTITIES];
   HomingComponent         homingComponents[MAX_ENTITIES];
-
   // Bitmask for every Entity
   uint32_t                componentMasks[MAX_ENTITIES];
   // Number of entities active/created
