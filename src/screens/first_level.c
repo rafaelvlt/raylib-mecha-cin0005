@@ -211,10 +211,12 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   //Desenha o HUD e minimapa
   if (bootTime > BOOT_TIME_CROSSHAIR) DrawCrosshair(systems);
-  if (bootTime > BOOT_TIME_HUD) DrawHUDSystem(systems);
-  if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems, data);
+  if (bootTime > BOOT_TIME_HUD) DrawHPBar(systems);
+  if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems);
   if (bootTime > BOOT_TIME_MSG) DrawLevelMessage(systems);
   if (bootTime > BOOT_TIME_GROUPS) DrawWeaponGroups(systems);
+  if (bootTime > BOOT_TIME_GROUPS) DrawHeatBar(systems);
+
   
 
   DrawFPS(10, 10);
