@@ -5,7 +5,12 @@
 struct Systems;
 
 typedef struct {
-  //TBD
+  Camera3D camera;
+  bool levelFinished;
+  float finishTimer;
+  float dropTimer;
+  bool hasLanded;
+  bool canControl;
 } SecondLevelData;
 
 void InitSecondLevelScreen(struct Systems* systems, SecondLevelData* data);
