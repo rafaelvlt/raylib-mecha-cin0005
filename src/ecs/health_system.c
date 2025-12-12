@@ -39,21 +39,35 @@ void HealthSystem(struct Systems* systems) {
         
         hp->hasTakenDamage = true;
         hp->currentHealth -= damage;
+        bool isPlayer = (em->componentMasks[victim] & COMPONENT_COCKPIT_HUD) == COMPONENT_COCKPIT_HUD;
+
 
         if (hp->currentHealth <= 0) {
+            
+            // --- VERIFICAÇÃO DE MORTE DO JOGADOR ---
+            // Se a vítima for a entidade do jogador, sinalizamos a transição para a tela de morte.
+            if (isPlayer) {
+                TraceLog(LOG_WARNING, "PLAYER DEATH: Jogador %d destruído. Sinalizando tela de morte.", victim);
+                RequestScreenChange(systems, SCREEN_DEATH);
+            }
+          
+          
           EventData deathData;
           deathData.deathEvent.owner = victim;
           deathData.deathEvent.killer = attacker;
           deathData.deathEvent.pos = em->transformComponents[victim].position;
-          if ((em->componentMasks[victim] & COMPONENT_COLLISION) == COMPONENT_COLLISION){
+          if ((em->componentMasks[victim] & COMPONENT_COLLISION) == COMPONENT_COLLISION) {
             if (em->collisionComponents[victim].isTrigger) deathData.deathEvent.type = ENTITY_TURRET_STRUCTURE;
           }
           PushEvent(systems, EVENT_ENTITY_DEATH, deathData);
-
-          DestroyEntity(em, victim);
-          TraceLog(LOG_INFO, "KILL: Entity %d destroyed.", victim);
+          
+          if (!isPlayer) {
+            DestroyEntity(em, victim);
+            TraceLog(LOG_INFO, "KILL: Entity %d destroyed.", victim);
+          }
         }
       }
     }
   }
 }
+

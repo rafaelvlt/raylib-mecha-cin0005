@@ -12,6 +12,7 @@ struct Systems;
 #include "screens/screen_credits.h"
 #include "screens/screen_first_level.h"
 #include "screens/screen_second_level.h"
+#include "screens/screen_death.h"
 
 
 // Enum for all Game States
@@ -25,6 +26,7 @@ typedef enum GameScreen {
   SCREEN_DEBRIEFING,
   SCREEN_FIRST_LEVEL,
   SCREEN_SECOND_LEVEL,
+  SCREEN_DEATH
 } GameScreen;
 
 
@@ -40,6 +42,7 @@ typedef union {
   DebriefingData debriefing;
   FirstLevelData firstLevel;
   SecondLevelData secondLevel;
+  DeathData death;
 } ScreenData;
 
 // The state manager hold the union to the screen data, the current state and the next state for switches

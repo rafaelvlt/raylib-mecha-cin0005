@@ -22,6 +22,7 @@ typedef struct  {
   CollisionComponent      collisionComponents[MAX_ENTITIES];
   EffectComponent         effectComponents[MAX_ENTITIES];
   HomingComponent         homingComponents[MAX_ENTITIES];
+  HeatComponent           heatComponents[MAX_ENTITIES];
   // Bitmask for every Entity
   uint32_t                componentMasks[MAX_ENTITIES];
   // Number of entities active/created
@@ -60,6 +61,8 @@ void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity 
 void AddPlayerControlComponent(EntityManager* entityManager, Entity entity, Camera *camera);
 
 void AddHealthComponent(EntityManager* entityManager, Entity entity, float health);
+
+void AddHeatComponent(EntityManager* entityManager, Entity entity, float maxHeat, float dissipationRate, float penaltyDuration);
 
 void AddWeaponComponent(EntityManager* em, Entity entity, WeaponType type, 
                         float fireRate, float projSpeed, float damage, float range, float heat, 

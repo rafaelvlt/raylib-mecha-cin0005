@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include "map_loader.h"
 
+#define DEFAULT_PENALTY_DURATION 2.0f
+
+
 // Forward declarations
 static Entity FindId(EntityMap* map, int count, const char* name);
 static WeaponType ParseWeaponType(const char* str);
@@ -79,6 +82,11 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
           float maxH, heatS, cool;
           sscanf(line, "%*s %f %f %f", &maxH, &heatS, &cool);
           AddCockpitHUDComponent(em, currentEntity, maxH, heatS, cool);
+        }
+        else if (strcmp(command, "HEAT") == 0) {
+          float maxHeat, heatCool, penaltyTime;
+          sscanf(line, "%*s %f %f %f", &maxHeat, &heatCool, &penaltyTime);
+          AddHeatComponent(em, currentEntity, maxHeat, heatCool, penaltyTime);
         }
         else if (strcmp(command, "HEALTH") == 0) {
           float hp;

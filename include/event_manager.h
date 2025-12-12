@@ -3,7 +3,6 @@
 
 #include <raylib.h>
 #include "ecs/components.h"
-#include "ecs/systems.h"
 #include "ecs/types.h"
 #include "state_manager.h"
 

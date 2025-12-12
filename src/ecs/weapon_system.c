@@ -35,8 +35,18 @@ static Entity SpawnMissileProjectile(struct Systems* systems, Vector3 position, 
 static void ProcessWeapon(EntityManager* em, struct Systems* systems, Entity mecha, Entity weaponID, int weaponIndex, float dt) {
   WeaponControlComponent* wc = &em->weaponControlComponents[mecha];
   WeaponComponent* weapon = &em->weaponComponents[weaponID];
+  HeatComponent* hc = &em->heatComponents[mecha];
 
   UpdateWeaponCooldowns(weapon, dt);
+
+  // Se estiver superaquecida, impede o disparo e zera os contadores de burst.
+  if ((em->componentMasks[mecha] & COMPONENT_HEAT) && hc->isOverheated) {
+      if (hc->isOverheated) {
+          // Impede o processamento e disparo da arma se superaquecido.
+          return; 
+      }
+  }
+
 
   int group = wc->weaponsGroupMap[weaponIndex];
 

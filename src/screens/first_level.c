@@ -121,6 +121,7 @@ static void ProcessGameplaySystems(struct Systems* systems) {
   CollisionSystem(systems);
   HealthSystem(systems);
   PlayerAudioSystem(systems);
+  HeatSystemUpdate(systems);
 }
 
 // Checks if level completion conditions are met
