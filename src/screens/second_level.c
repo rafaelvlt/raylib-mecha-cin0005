@@ -64,7 +64,7 @@ void InitSecondLevelScreen(struct Systems* systems, SecondLevelData* data)
         StopMusicStream(*systems->audioManager.playingNow);
     }
     PlayMusicStream(*bgm);
-    SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+    SetMusicVolume(*bgm, GetMusicVolume(&systems->configManager));
     systems->audioManager.playingNow = bgm; 
   }
   
@@ -123,7 +123,7 @@ static void ProcessLevelFinish(struct Systems* systems, SecondLevelData* data) {
   // Play Success Sound
   if (data->finishTimer <= 2.5f && data->finishTimer > 2.4f) {
     Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
-    SetSoundVolume(*endSfx, GetAudioVolume(&systems->configManager));
+    SetSoundVolume(*endSfx, GetSoundVolume(&systems->configManager));
     PlaySound(*endSfx);
   }
 
