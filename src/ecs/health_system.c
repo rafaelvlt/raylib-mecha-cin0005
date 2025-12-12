@@ -26,14 +26,21 @@ void HealthSystem(struct Systems* systems) {
         (em->componentMasks[victim] & COMPONENT_HEALTH) == COMPONENT_HEALTH) {
 
         HealthComponent* hp = &em->healthComponents[victim];
-
+        
+        // Calculate damage direction (normalized vector from attacker to victim)
+        if (attacker < MAX_ENTITIES && 
+            (em->componentMasks[attacker] & COMPONENT_TRANSFORM) == COMPONENT_TRANSFORM &&
+            (em->componentMasks[victim] & COMPONENT_TRANSFORM) == COMPONENT_TRANSFORM) {
+          Vector3 attackerPos = em->transformComponents[attacker].position;
+          Vector3 victimPos = em->transformComponents[victim].position;
+          hp->lastDamageDirection = Vector3Normalize(Vector3Subtract(victimPos, attackerPos));
+          hp->damageReactionTimer = 1.0f;
+        }
+        
+        hp->hasTakenDamage = true;
         hp->currentHealth -= damage;
 
-        TraceLog(LOG_INFO, "DMG: Entity %d took %.1f dmg. HP: %.1f/%0.1f", 
-                 victim, damage, hp->currentHealth, hp->maxHealth);
-
         if (hp->currentHealth <= 0) {
-
           EventData deathData;
           deathData.deathEvent.owner = victim;
           deathData.deathEvent.killer = attacker;

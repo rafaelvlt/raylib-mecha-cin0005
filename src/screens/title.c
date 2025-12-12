@@ -4,6 +4,8 @@
 
 void InitTitleScreen(struct Systems* systems, TitleData* data)
 {
+    bool lang = systems->configManager.language;
+
     DisableCursor();
     data->framesCounter = 0;
     data->titleFontPtr = GetFont(&(systems->resourceManager), FONT_ID_CAPTURE_IT);
@@ -11,13 +13,13 @@ void InitTitleScreen(struct Systems* systems, TitleData* data)
      
     if (data->titleFontPtr == NULL)
     {
-        TraceLog(LOG_FATAL, "Failed to load title font");
+        TraceLog(LOG_FATAL, lang?"Falha ao carregar a fonte do título.":"Failed to load title font");
         exit(1);
     }
     data->titleMusicPtr = GetMusic(&(systems->resourceManager), MUSIC_ID_MENU);
     if (data->titleMusicPtr == NULL)
     {
-        TraceLog(LOG_FATAL, "Failed to load title music");
+        TraceLog(LOG_FATAL, lang?"Falha ao carregar a música do título.":"Failed to load title music");
         exit(1);
     }
 

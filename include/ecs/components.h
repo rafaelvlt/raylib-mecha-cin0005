@@ -42,6 +42,15 @@ typedef struct  {
   bool isVisible;
 } RenderComponent;
 
+// Skeletal animation state for a model
+typedef struct {
+  AssetModelID modelId;    
+  int currentAnim;         
+  float currentTime;       
+  float playbackSpeed;     
+  bool loop;              
+} AnimationComponent;
+
 // Used by multi-model objects to know where to attach themselves (i.e mech with multiple parts)
 typedef struct {
   Entity parent;
@@ -86,6 +95,10 @@ typedef struct {
 typedef struct  {
   float currentHealth;
   float maxHealth;
+  bool hasTakenDamage;
+  // Animation Detection
+  Vector3 lastDamageDirection; 
+  float damageReactionTimer;  
 }  HealthComponent;
 
 // Used for stats about a weapon
@@ -127,13 +140,12 @@ typedef struct{
 } LifetimeComponent;
 
 // Detect which weapon to use and fire with for both player and A.I
-typedef struct {
+typedef struct WeaponControlComponent{
   // Control Proprieties 
   bool triggerPulled;
   Vector3 aimDirection;
   AimMode aimMode;
   Entity lockedTarget;
-  
   //Weapon Group
   Entity weaponsSlots[MAX_WEAPONS_EQUIP];
   int weaponsGroupMap[MAX_WEAPONS_EQUIP];
@@ -141,16 +153,15 @@ typedef struct {
 } WeaponControlComponent;
 
 
-// Used by the enemies
 typedef struct  {
   Entity target;
   float sightRadius;
   float sightAngle;
   float attackRange;
   float timeSinceLastAction;
-  int state; // probably change to a enum later, 0 = patrol 1 = chase 2 = attack;
-  Vector3* patrolPoints; // null for fighters
-  int numPatrolPoints; // 0 for fighters
+  AIState state;
+  Vector3* patrolPoints;
+  int numPatrolPoints;
   int currentPatrolIndex;
 } AIControlComponent;
 
@@ -219,6 +230,7 @@ typedef enum {
   COMPONENT_COLLISION = 1 << 12,
   COMPONENT_EFFECT = 1 << 13,
   COMPONENT_HOMING = 1 << 14,
+  COMPONENT_ANIMATION = 1 << 15,
 } ComponentMask;
 
 #endif //components.h

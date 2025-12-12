@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+#include "state_manager.h"
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 #include <raylib.h>
 #include "systems.h"
 
@@ -26,11 +30,21 @@ void DestroyCurrentScreen(struct Systems* systems) {
     case SCREEN_CREDITS:
       DestroyCreditsScreen(systems, &stateManager->data.credits);
       break;
+<<<<<<< HEAD
+=======
+    case SCREEN_DEBRIEFING:
+      DestroyDebriefingScreen(systems, &stateManager->data.debriefing);
+      break;
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
     case SCREEN_FIRST_LEVEL:
       DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
+<<<<<<< HEAD
       InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
+=======
+      DestroySecondLevelScreen(systems, &stateManager->data.secondLevel);
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
       break;
     default:
       break;
@@ -64,6 +78,12 @@ void SwitchScreen(struct Systems* systems) {
     case SCREEN_CREDITS:
       InitCreditsScreen(systems, &stateManager->data.credits);
       break;
+<<<<<<< HEAD
+=======
+    case SCREEN_DEBRIEFING:
+      InitDebriefingScreen(systems, &stateManager->data.debriefing);
+      break;
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
     case SCREEN_FIRST_LEVEL:
       InitFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
@@ -78,7 +98,11 @@ void SwitchScreen(struct Systems* systems) {
 void InitStateManager(struct Systems* systems, GameScreen initialScreen) {
   // Cleans current screen
   systems->stateManager.currentScreen = SCREEN_NONE;
+<<<<<<< HEAD
   // change to the initial
+=======
+  // Change to the initial
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
   systems->stateManager.nextScreen = initialScreen;
 
   SwitchScreen(systems);
@@ -106,15 +130,29 @@ void UpdateStateManager(struct Systems* systems) {
     case SCREEN_CREDITS:
       UpdateCreditsScreen(systems, &sm->data.credits);
       break;
+<<<<<<< HEAD
+=======
+    case SCREEN_DEBRIEFING:
+      UpdateDebriefingScreen(systems, &sm->data.debriefing);
+      break;
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
     case SCREEN_FIRST_LEVEL:
       UpdateFirstLevelScreen(systems, &sm->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
       UpdateSecondLevelScreen(systems, &sm->data.secondLevel);
+<<<<<<< HEAD
     default:
       break;
   }
   
+=======
+      break;
+    default:
+      break;
+  }
+
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
   // Checks event queue for a screenChange request
   for (int i = 0; i < ev->eventCounter; i++) {
     if (ev->eventQueue[i].type == EVENT_SCREEN_CHANGE) {
@@ -148,6 +186,12 @@ void DrawStateManager(struct Systems* systems) {
     case SCREEN_CREDITS:
       DrawCreditsScreen(systems, &stateManager->data.credits);
       break;
+<<<<<<< HEAD
+=======
+    case SCREEN_DEBRIEFING:
+      DrawDebriefingScreen(systems, &stateManager->data.debriefing);
+      break;
+>>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
     case SCREEN_FIRST_LEVEL:
       DrawFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;

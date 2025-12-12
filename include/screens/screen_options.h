@@ -14,7 +14,8 @@ typedef enum options {
 } Option;
 
 typedef struct OptionsData {
-    int selectedOption[2]; // [line, option]
+    int selectedOption; // line
+    int selectedOptions[4]; // options index
     int rangeOptions[OPTION_LINE_COUNT-1]; //number of options in each line
     Font* optionsFont;
 } OptionsData;

@@ -5,6 +5,7 @@
 #include "ecs/types.h"
 #include "resource_manager.h"
 #include <string.h>
+#include "ecs/systems.h"
 
 
 // Take the address of the entity manager and fill all of it with zero's to takeout junk out of the database
@@ -38,7 +39,6 @@ void DestroyEntity(EntityManager* em, Entity entity) {
     em->componentMasks[entity] = COMPONENT_NONE;
     // Reduces numEntities if the one being removed is the highest ID
     if (entity == em->numEntities - 1) em->numEntities--;
-
   }
 }
 
@@ -90,6 +90,18 @@ void AddRenderComponent(EntityManager* entityManager, Entity entity, Model* mode
   entityManager->componentMasks[entity] |= COMPONENT_RENDER;
 }
 
+void AddAnimationComponent(EntityManager* entityManager, Entity entity, AssetModelID modelId, int startAnim, float playbackSpeed, bool loop) {
+  AnimationComponent* anim = &entityManager->animationComponents[entity];
+
+  anim->modelId = modelId;
+  anim->currentAnim = startAnim;
+  anim->currentTime = 0.0f;
+  anim->playbackSpeed = playbackSpeed;
+  anim->loop = loop;
+
+  entityManager->componentMasks[entity] |= COMPONENT_ANIMATION;
+}
+
 void AddAttachmentComponent(EntityManager* entityManager, Entity entity, Entity parent, Vector3 offsetPos, Quaternion offsetRot) {
   AttachmentComponent* attachment = &entityManager->attachmentComponents[entity];
 
@@ -139,6 +151,9 @@ void AddHealthComponent(EntityManager* entityManager, Entity entity, float healt
 
   hp->currentHealth = health;
   hp->maxHealth = health;
+  hp->hasTakenDamage = false;
+  hp->lastDamageDirection = (Vector3){0, 0, 0};
+  hp->damageReactionTimer = 0.0f;
 
   entityManager->componentMasks[entity] |= COMPONENT_HEALTH;
 }
@@ -222,7 +237,7 @@ void AddAIControlComponent(EntityManager* entityManager, Entity entity, float si
   ai->sightRadius = sight;
   ai->attackRange = range;
   ai->timeSinceLastAction = 0.0f;
-  ai->state = 0;
+  ai->state = AI_STATE_PATROL;
   ai->patrolPoints = patrolPoints;
   ai->numPatrolPoints = numPatrolPoints;
   ai->currentPatrolIndex = 0;
@@ -296,8 +311,6 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
   Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT);
 
     if (enemyModel != NULL) {
-        // Apply scale fix to the shared model
-        enemyModel->transform = MatrixScale(0.5f, 0.5f, 0.5f);
 
         Entity scout = CreateEntity(entityManager);
 
@@ -311,9 +324,12 @@ void createEnemyScout(ResourceManager* resourceManager,EntityManager* entityMana
         AddAIControlComponent(entityManager, scout, 50.0f, 10.0f, scoutPoints, numPoints);
 
         AddRenderComponent(entityManager, scout, enemyModel, WHITE);
+        // Animations: 0 = 0IdlePose, 1 = LLooking, 2 = LTwistwalk, 3 = RLooking, 4 = Rtwistwalk, 5 = walk
+        AddAnimationComponent(entityManager, scout, MODEL_ID_ENEMY_SCOUT, 0, 48.0f, true);
 
         Entity weaponLeft = CreateEntity(entityManager); // Scout weapon
-        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+        // Adjusted for 0.3 scale: original was 3.0, 2.0 -> scaled down proportionally
+        Vector3 offsetS = { 0.0f, 2.0f, 1.5f };
 
         AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
         AddAttachmentComponent(entityManager, weaponLeft, scout, offsetS, QuaternionIdentity());
@@ -332,8 +348,7 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
   Model* enemyModel = GetModel(resourceManager, MODEL_ID_ENEMY_SCOUT); // Using same model for placeholder
 
     if (enemyModel != NULL) {
-        // Apply scale fix to the shared model
-        enemyModel->transform = MatrixScale(1.0f, 1.0f, 1.0f);
+        
 
         Entity combatent = CreateEntity(entityManager);
 
@@ -347,10 +362,13 @@ void createEnemyCombatent(ResourceManager* resourceManager, EntityManager* entit
         AddAIControlComponent(entityManager, combatent, 150.0f, 100.0f, NULL, 0); // No patrol points for combatent
 
         AddRenderComponent(entityManager, combatent, enemyModel, WHITE);
+        // Start combatent also in idle; can be switched to other clips based on AI
+        AddAnimationComponent(entityManager, combatent, MODEL_ID_ENEMY_SCOUT, 0, 48.0f, true);
 
         
         Entity weaponLeft = CreateEntity(entityManager); // combatent weapon
-        Vector3 offsetS = { 0.0f, 3.0f, 2.0f };
+        // Adjusted for 0.3 scale: original was 3.0, 2.0 -> scaled down proportionally
+        Vector3 offsetS = { 0.0f, 2.0f, 1.5f };
 
         AddTransformComponent(entityManager, weaponLeft, Vector3Zero());
         AddAttachmentComponent(entityManager, weaponLeft, combatent, offsetS, QuaternionIdentity());

@@ -30,6 +30,9 @@ typedef enum {
     MODEL_ID_TERRAIN,
     MODEL_ID_BASE_HQ,
     MODEL_ID_BASE_DOOR,
+    MODEL_ID_DEBRIEFING,
+    MODEL_ID_HANGAR_ENV,
+    MODEL_ID_PLAYER,
     MODEL_ID_COUNT
 } AssetModelID;
 
@@ -43,6 +46,8 @@ typedef enum {
 typedef enum {
     MUSIC_ID_MENU = 0,
     MUSIC_ID_FIRST_LEVEL,
+    MUSIC_ID_SECOND_LEVEL,
+    MUSIC_ID_DEBRIEFING,
     MUSIC_ID_COUNT
 } AssetMusicID;
 
@@ -58,6 +63,10 @@ typedef enum {
   SOUND_ID_ENEMY_MECH_DESTROYED,
   SOUND_ID_ENEMY_TARGET_DESTROYED,
   SOUND_ID_MISSION_SUCCESS,
+  SOUND_ID_HUMAN_FOOTSTEP,
+  SOUND_ID_DEBRIEFING,
+  SOUND_ID_STARTUP_SEQUENCE,
+  SOUND_ID_SKYDROP,
   SOUND_ID_COUNT
 } AssetSoundID;
 
@@ -73,6 +82,8 @@ typedef enum{
   TEXTURE_ID_CROSSHAIR_SPRITE,
   TEXTURE_ID_SAND,
   TEXTURE_ID_BASE_HQ,
+  TEXTURE_ID_CIN,
+  TEXTURE_ID_RAYLIB,
   TEXTURE_ID_COUNT 
 } AssetTextureID;
 
@@ -91,9 +102,13 @@ typedef struct ResourceManager {
     Sound sounds[SOUND_ID_COUNT];
     Texture textures[TEXTURE_ID_COUNT];
     RenderTexture renderTextures[RENDERTEXTURE_ID_COUNT];
+    
+    // Model animations per model ID
+    ModelAnimation* modelAnimations[MODEL_ID_COUNT];
+    int modelAnimCounts[MODEL_ID_COUNT];
 } ResourceManager;
 
-void InitResourceManager(ResourceManager* resourceManager) ;
+void InitResourceManager(struct Systems* systems);
 void ShutdownResourceManager(ResourceManager* resourceManager) ;
 
 Model* GetModel(ResourceManager* resourceManager, AssetModelID id);

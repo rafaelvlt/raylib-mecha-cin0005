@@ -9,41 +9,45 @@
 #include "ecs/systems.h"
 
 int main(void) {
-    // --- Window Initialization ---
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
+  // --- Window Initialization ---
 
-    // Systems initialization(MUST BE IN THIS ORDER)
-    struct Systems systems = {0};
-    InitConfigManager(&systems);
-    InitAudioManager(&systems);
-    InitResourceManager(&systems.resourceManager);
-    InitEventManager(&systems);
-    InitStateManager(&systems, SCREEN_TITLE);
+  // Systems initialization(MUST BE IN THIS ORDER)
+  struct Systems systems = {0};
+  InitConfigManager(&systems);
 
-    SetTargetFPS(60);
+  Vector2 resolution = GetScreenResolution(&systems.configManager);
+  InitWindow((int)resolution.x, (int)resolution.y, GAME_TITLE);
 
-    // --- Game Loop ---
-    systems.shouldExit = false;
-    while (!systems.shouldExit) {
-        systems.shouldExit = WindowShouldClose();
-        // Update Phase
-        UpdateStateManager(&systems);
-        UpdateAudioManager(&systems);
-        // Drawing Phase
-        BeginDrawing();
-            ClearBackground(BLACK);
-            DrawStateManager(&systems);
-        EndDrawing();
-        
-        ClearEventManager(&systems.eventManager);
-    }
+  InitAudioManager(&systems);
+  InitResourceManager(&systems);
+  InitEventManager(&systems);
+  InitStateManager(&systems, SCREEN_TITLE);
 
-    //Shutdown struct Systems
-    ShutdownAudioManager();
-    ShutdownStateManager(&systems);
-    ClearEntityManager(&systems.entityManager);
-    ShutdownResourceManager(&systems.resourceManager);
+  SetTargetFPS(60);
 
-    CloseWindow();
-    return 0;
+  // --- Game Loop ---
+  systems.shouldExit = false;
+  while (!systems.shouldExit) {
+    systems.delta_time = GetFrameTime(); 
+    systems.shouldExit = WindowShouldClose();
+    // Update Phase
+    UpdateStateManager(&systems);
+    UpdateAudioManager(&systems);
+    // Drawing Phase
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawStateManager(&systems);
+    EndDrawing();
+
+    ClearEventManager(&systems.eventManager);
+  }
+
+  //Shutdown struct Systems
+  ShutdownAudioManager();
+  ShutdownStateManager(&systems);
+  ClearEntityManager(&systems.entityManager);
+  ShutdownResourceManager(&systems.resourceManager);
+
+  CloseWindow();
+  return 0;
 }
