@@ -90,7 +90,15 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
     // This line makes the camera rotate around the mecha
     UpdateCamera(&(data->camera), CAMERA_ORBITAL);
 
-    data->mousePos = GetMousePosition();
+    //corrigir o mouse para mudanças de resolução
+    Vector2 m = GetMousePosition();
+    float scaleX = (systems->configManager.screenResolution.x  / 2.0f) / data->splitScreenMenuPtr->texture.width;
+    float scaleY = (systems->configManager.screenResolution.y)         / data->splitScreenMenuPtr->texture.height;
+
+    // 🔥 Converter mouse para o espaço da textura
+    data->mousePos.x = m.x / scaleX;
+    data->mousePos.y = m.y / scaleY;
+
     
     // Iterates over every button to see if the mouse is hovering it/pressing it
     for (int i = BUTTON_START_GAME; i < BUTTON_COUNT; i++)
