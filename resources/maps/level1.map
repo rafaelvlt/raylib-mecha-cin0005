@@ -2,15 +2,6 @@
 # JOGADOR (HERÓI)
 # ==========================================
 ENTITY player
-<<<<<<< HEAD
-TRANSFORM 0.0 0.0 0.0
-PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -2.0 -1.0 -2.0 2.0 9.0 2.0 0 0
-PLAYER_CONTROL
-HUD 100.0 2.0 10.0
-HEALTH 1000.0
-# WeaponControl: AimMode (1=Camera)
-=======
 # TRANSFORM: posX posY posZ [yaw] - Posição inicial e rotação opcional (yaw em radianos, pode usar "PI")
 TRANSFORM 0.0 0.0 0.0
 # PHYSICS: velX velY velZ drag - Velocidade inicial e coeficiente de arrasto (0.0-1.0)
@@ -23,7 +14,6 @@ HUD 100.0 2.0 10.0
 # HEALTH: maxHP - Pontos de vida máximos
 HEALTH 1000.0
 # WEAPON_CONTROL: aimMode - Modo de mira (1=Camera, 0=Physical)
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 WEAPON_CONTROL 1
 
 # --- ARMAS DO JOGADOR ---
@@ -31,10 +21,6 @@ WEAPON_CONTROL 1
 # Laser Esquerdo (Braço)
 ENTITY p_laser_L
 TRANSFORM 0 0 0
-<<<<<<< HEAD
-WEAPON WEAPON_PULSE_LASER 0.5 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT player -1.70 5.50 1.50
-=======
 # WEAPON: type rate speed damage range heat burstTotal burstRate
 #   type: WEAPON_PULSE_LASER ou WEAPON_MISSILE_LAUNCHER
 #   rate: Tempo entre disparos (segundos)
@@ -47,38 +33,23 @@ ATTACHMENT player -1.70 5.50 1.50
 WEAPON WEAPON_PULSE_LASER 0.8 250.0 5.0 500.0 2.0 2 0.1
 # ATTACHMENT: parentName offsetX offsetY offsetZ - Offset relativo ao parent (espaço local)
 ATTACHMENT player -1.5 17.0 1.5
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 
 # Laser Direito (Braço)
 ENTITY p_laser_R
 TRANSFORM 0 0 0
-<<<<<<< HEAD
-WEAPON WEAPON_PULSE_LASER 0.5 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT player 1.70 5.50 1.50
-=======
 WEAPON WEAPON_PULSE_LASER 0.8 250.0 5.0 500.0 2.0 2 0.1
 ATTACHMENT player 1.5 17.0 1.5
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 
 # Missil Esquerdo (Ombro)
 ENTITY p_missile_L
 TRANSFORM 0 0 0
 WEAPON WEAPON_MISSILE_LAUNCHER 5.0 60.0 2.5 1000.0 5.0 20 0.115
-<<<<<<< HEAD
-ATTACHMENT player -1.70 7.00 1.50
-=======
 ATTACHMENT player -1.5 21.0 1.5
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 
 # Missil Direito (Ombro)
 ENTITY p_missile_R
 TRANSFORM 0 0 0
 WEAPON WEAPON_MISSILE_LAUNCHER 5.0 60.0 2.5 1000.0 5.0 20 0.115
-<<<<<<< HEAD
-ATTACHMENT player 1.70 7.00 1.50
-
-# Vínculos (Loadout) - Isso ativa os grupos automaticamente
-=======
 ATTACHMENT player 1.5 21.0 1.5
 
 # LINK_WEAPON: owner slot weaponId group isActive - Vincula arma ao mecha
@@ -87,7 +58,6 @@ ATTACHMENT player 1.5 21.0 1.5
 #   weaponId: Nome da entidade da arma
 #   group: Grupo de armas (0-1)
 #   isActive: Se o grupo está ativo (1) ou não (0)
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 LINK_WEAPON player 0 p_laser_L 0 1
 LINK_WEAPON player 1 p_laser_R 0 1
 LINK_WEAPON player 2 p_missile_L 1 0
@@ -98,70 +68,6 @@ LINK_WEAPON player 3 p_missile_R 1 0
 # ESTRUTURA: TORRE GIGANTE (OBJETIVO)
 # ==========================================
 ENTITY turret_struct
-<<<<<<< HEAD
-TRANSFORM 0.0 -15.0 -500.0
-HEALTH 250.0
-# Render ID 4 (Torre)
-RENDER 4 255 255 255 255
-# Colisão Grande (50m x 100m x 50m)
-COLLISION -25.0 0.0 -25.0 25.0 100.0 25.0 1 1
-# OBJECTIVE 0 1 1 (Tipo 0, Primario, Ativo) - Se tiver o componente
-
-
-# ==========================================
-# INIMIGO 1: SCOUT (Patrulha Frontal)
-# ==========================================
-# Patrulha a entrada da área da torre (Z = -300)
-ENTITY scout1
-TRANSFORM 0.0 0.0 -300.0
-PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
-HEALTH 100.0
-RENDER 1 255 255 255 255 
-AI_CONTROL 200.0 100.0
-# Patrulha em linha horizontal: Esquerda <-> Direita
-AI_PATROL 2 -50 0 -300 50 0 -300
-
-ENTITY scout1_gun
-TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT scout1 0.0 3.0 2.0
-LINK_WEAPON scout1 0 scout1_gun 0 1
-
-
-# ==========================================
-# INIMIGO 2: SCOUT (Patrulha Flanco Direito)
-# ==========================================
-# Protege o lado da torre (Z = -400)
-ENTITY scout2
-TRANSFORM 100.0 0.0 -400.0
-PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
-HEALTH 100.0
-RENDER 1 255 255 255 255
-AI_CONTROL 200.0 125.0
-# Patrulha vertical: Frente <-> Trás no flanco
-AI_PATROL 2 100 0 -350 100 0 -550
-
-ENTITY scout2_gun
-TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT scout2 0.0 3.0 2.0
-LINK_WEAPON scout2 0 scout2_gun 0 1
-
-
-# ==========================================
-# INIMIGO 3: COMBATENT (Guarda da Porta)
-# ==========================================
-# Fica parado logo na frente da torre (-450)
-ENTITY combatent1
-TRANSFORM 0.0 0.0 -450.0
-PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
-HEALTH 150.0
-RENDER 1 255 255 255 255
-AI_CONTROL 125.0 75.0
-=======
 TRANSFORM 0.0 -45.0 -650.0
 HEALTH 1000.0
 # RENDER: modelId r g b a - ID do modelo e cor RGBA (0-255)
@@ -269,33 +175,16 @@ COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 150.0
 RENDER 1 255 255 255 255
 AI_CONTROL 150.0 75.0
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 
 ENTITY comb1_gun
 TRANSFORM 0 0 0
 # Atira mais rápido (0.2s)
 WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 500.0 2.0 2 0.1
-<<<<<<< HEAD
-ATTACHMENT combatent1 0.0 3.0 2.0
-=======
 ATTACHMENT combatent1 6.25 15.50 0.00
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 LINK_WEAPON combatent1 0 comb1_gun 0 1
 
 
 # ==========================================
-<<<<<<< HEAD
-# INIMIGO 4: COMBATENT (Reforço Traseiro)
-# ==========================================
-# Escondido atrás da torre (-550) ou lado esquerdo (-50)
-ENTITY combatent2
-TRANSFORM -50.0 0.0 -500.0
-PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -3.0 0.0 -6.0 3.0 4.0 12.5 0 0
-HEALTH 150.0
-RENDER 1 255 255 255 255
-AI_CONTROL 125.0 75.0
-=======
 # INIMIGO 6: COMBATENT (Reforço Traseiro)
 # ==========================================
 # Escondido atrás da torre (-550) ou lado esquerdo (-50)
@@ -306,32 +195,15 @@ COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 150.0
 RENDER 1 255 255 255 255
 AI_CONTROL 150.0 75.0
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 
 ENTITY comb2_gun
 TRANSFORM 0 0 0
 WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 500.0 2.0 2 0.1
-<<<<<<< HEAD
-ATTACHMENT combatent2 0.0 3.0 2.0
-=======
 ATTACHMENT combatent2 6.25 15.50 0.00
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 LINK_WEAPON combatent2 0 comb2_gun 0 1
 
 
 # ==========================================
-<<<<<<< HEAD
-# INIMIGO 5: COMBATENT (Reforço Traseiro)
-# ==========================================
-# Escondido atrás da torre (-550) ou lado esquerdo (-50)
-ENTITY combatent3
-TRANSFORM 50.0 0.0 -500.0
-PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -3.0 0.0 -3.0 3.0 12.0 3.0 0 0
-HEALTH 150.0
-RENDER 1 255 255 255 255
-AI_CONTROL 125.0 75.0
-=======
 # INIMIGO 7: COMBATENT (Reforço Traseiro)
 # ==========================================
 # Escondido atrás da torre (-550) ou lado esquerdo (-50)
@@ -342,14 +214,9 @@ COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 150.0
 RENDER 1 255 255 255 255
 AI_CONTROL 150.0 75.0
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 
 ENTITY comb3_gun
 TRANSFORM 0 0 0
 WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 500.0 2.0 2 0.1
-<<<<<<< HEAD
-ATTACHMENT combatent3 0.0 3.0 2.0
-=======
 ATTACHMENT combatent3 6.25 15.50 0.00
->>>>>>> e5f71c4fbed50bc18b1bb6381d1332ffd5198bee
 LINK_WEAPON combatent3 0 comb3_gun 0 1
