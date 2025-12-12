@@ -53,7 +53,7 @@ void UpdateAudioManager(struct Systems* systems){
 
   // Update current music stream
   if (systems->audioManager.playingNow != NULL){
-    float volume = GetAudioVolume(&systems->configManager);
+    float volume = GetMusicVolume(&systems->configManager);
     SetMusicVolume(*systems->audioManager.playingNow, volume);
     UpdateMusicStream(*systems->audioManager.playingNow);
   }
@@ -109,7 +109,7 @@ static void PlaySpatialGunfightSound(struct Systems* systems, Event event) {
   FindListenerPositionAndOrientation(systems, &listenerPos, &listenerRight);
 
   // Calculate spatial audio parameters (volume attenuation and panning)
-  float finalVolume = GetAudioVolume(&systems->configManager);
+  float finalVolume = GetSoundVolume(&systems->configManager);
   float finalPan = 0.5f;
   CalculateSpatialAudioParams(listenerPos, listenerRight, soundPos, finalVolume, &finalVolume, &finalPan);
 
@@ -127,14 +127,14 @@ static void PlaySpatialGunfightSound(struct Systems* systems, Event event) {
 
 static void PlayEnemyDeath(struct Systems* systems){
   Sound* deathSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_MECH_DESTROYED);
-  SetSoundVolume(*deathSfx, GetAudioVolume(&systems->configManager));
+  SetSoundVolume(*deathSfx, GetSoundVolume(&systems->configManager));
   PlaySound(*deathSfx);
 }
 
 
 static void PlayTargetDestroyed(struct Systems* systems){
   Sound* destroyedSfx = GetSound(&systems->resourceManager, SOUND_ID_ENEMY_TARGET_DESTROYED);
-  SetSoundVolume(*destroyedSfx, GetAudioVolume(&systems->configManager));
+  SetSoundVolume(*destroyedSfx, GetSoundVolume(&systems->configManager));
   PlaySound(*destroyedSfx);
 }
 
