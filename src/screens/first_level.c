@@ -79,7 +79,7 @@ static void ProcessStartupSequence(struct Systems* systems, FirstLevelData* data
       StopSound(*GetSound(&systems->resourceManager, SOUND_ID_SKYDROP));
       StopMusicStream(*bgm);
       PlayMusicStream(*bgm);
-      SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+      SetMusicVolume(*bgm, GetMusicVolume(&systems->configManager));
     }
     return;
   }
@@ -103,7 +103,7 @@ static void ProcessStartupSequence(struct Systems* systems, FirstLevelData* data
     if (bgm) {
       StopMusicStream(*bgm);
       PlayMusicStream(*bgm);
-      SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+      SetMusicVolume(*bgm, GetMusicVolume(&systems->configManager));
     }
   }
 }
@@ -145,7 +145,7 @@ static void ProcessLevelFinish(struct Systems* systems, FirstLevelData* data) {
 
   if (data->finishTimer <= 2.5f && data->finishTimer > 2.4f) {
     Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
-    SetSoundVolume(*endSfx, GetAudioVolume(&systems->configManager));
+    SetSoundVolume(*endSfx, GetSoundVolume(&systems->configManager));
     PlaySound(*endSfx);
   }
 
