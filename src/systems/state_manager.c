@@ -18,9 +18,6 @@ void DestroyCurrentScreen(struct Systems* systems) {
     case SCREEN_MAIN_MENU:
       DestroyMainMenuScreen(systems, &stateManager->data.mainMenu);
       break;
-    case SCREEN_LOADOUT:
-      DestroyLoadoutScreen(systems, &stateManager->data.loadout);
-      break;
     case SCREEN_OPTIONS:
       DestroyOptionsScreen(systems, &stateManager->data.options);
       break;
@@ -58,9 +55,6 @@ void SwitchScreen(struct Systems* systems) {
       break;
     case SCREEN_MAIN_MENU:
       InitMainMenuScreen(systems, &stateManager->data.mainMenu);
-      break;
-    case SCREEN_LOADOUT:
-      InitLoadoutScreen(systems, &stateManager->data.loadout);
       break;
     case SCREEN_OPTIONS:
       InitOptionsScreen(systems, &stateManager->data.options);
@@ -104,9 +98,6 @@ void UpdateStateManager(struct Systems* systems) {
     case SCREEN_MAIN_MENU:
       UpdateMainMenuScreen(systems, &sm->data.mainMenu);
       break;
-    case SCREEN_LOADOUT:
-      UpdateLoadoutScreen(systems, &sm->data.loadout);
-      break;
     case SCREEN_OPTIONS:
       UpdateOptionsScreen(systems, &sm->data.options);
       break;
@@ -149,9 +140,6 @@ void DrawStateManager(struct Systems* systems) {
       break;
     case SCREEN_MAIN_MENU:
       DrawMainMenuScreen(systems, &stateManager->data.mainMenu);
-      break;
-    case SCREEN_LOADOUT:
-      DrawLoadoutScreen(systems, &stateManager->data.loadout);
       break;
     case SCREEN_OPTIONS:
       DrawOptionsScreen(systems, &stateManager->data.options);

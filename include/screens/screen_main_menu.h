@@ -8,7 +8,6 @@ struct Systems;
 typedef enum MenuButton{
     BUTTON_NONE = 0,
     BUTTON_START_GAME,
-    BUTTON_LOADOUT,
     BUTTON_OPTIONS,
     BUTTON_CREDITS,
     BUTTON_EXIT,
