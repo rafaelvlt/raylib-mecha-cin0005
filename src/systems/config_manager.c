@@ -89,7 +89,8 @@ static void SaveConfigFile(struct Systems* systems){
     fprintf(file, "FULLSCREEN=%d\n", systems->configManager.fullscreen ? 1 : 0);
     
     fprintf(file, "\n[AUDIO]\n");
-    fprintf(file, "VOLUME=%.2f\n", systems->configManager.musicVolume);
+    fprintf(file, "MUSIC_VOLUME=%.2f\n", systems->configManager.musicVolume);
+    fprintf(file, "SOUND_VOLUME=%.2f\n", systems->configManager.soundVolume);
 
     fprintf(file, "\n[PLAYER INPUT]\n");
     fprintf(file, "KEY_MOVE_FORWARD=%d\n", systems->configManager.KeyMap.KeyMoveForward);
@@ -137,7 +138,8 @@ static void LoadConfigFile(struct Systems* systems){
       if(sscanf(buff, "%[^=]=%s", key, value) == 2){
         if (strcmp(key, "WIDTH") == 0) systems->configManager.screenResolution.x = atoi(value);
         else if(strcmp(key, "HEIGHT") == 0) systems->configManager.screenResolution.y = atoi(value);
-        else if(strcmp(key, "VOLUME") == 0) systems->configManager.musicVolume = atof(value);
+        else if(strcmp(key, "MUSIC_VOLUME") == 0) systems->configManager.musicVolume = atof(value);
+        else if(strcmp(key, "SOUND_VOLUME") == 0) systems->configManager.soundVolume = atof(value);
         else if(strcmp(key, "FULLSCREEN") == 0) systems->configManager.fullscreen = atoi(value);
 
           //Input
