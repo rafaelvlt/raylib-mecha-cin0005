@@ -31,6 +31,8 @@ typedef struct {
     RenderTexture* splitScreenMenuPtr;
     RenderTexture* splitScreenMechaPtr;
     Music* menuMusicPtr;
+    Texture2D cinLogo;
+    Texture2D raylibLogo;
 } MainMenuData;
 
 
