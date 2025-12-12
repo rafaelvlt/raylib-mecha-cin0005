@@ -12,8 +12,8 @@ typedef enum{
 typedef enum{
   WEAPON_TYPE_NONE = 0,
   WEAPON_PULSE_LASER,
-  WEAPON_LASER_BEAM,
   WEAPON_MISSILE_LAUNCHER,
+  WEAPON_LASER_BEAM,
   WEAPON_MACHINE_GUN,
   WEAPON_COUNTER
 } WeaponType;
@@ -28,5 +28,41 @@ typedef enum{
   FX_TYPE_ARRAY,
   FX_TYPE_STATIC,
 } EffectRenderType;
+
+typedef enum {
+  AI_STATE_PATROL = 0,
+  AI_STATE_CHASE = 1,
+  AI_STATE_ATTACK = 2
+} AIState;
+
+// Player/Mecha animation indices (order must match the .glb clips)
+typedef enum {
+  MECHA_ANIM_IDLE = 0,
+  MECHA_ANIM_IDLE_LOOKING_L,
+  MECHA_ANIM_IDLE_LOOKING_R,
+  MECHA_ANIM_IDLE_TWIST_C_TO_L,
+  MECHA_ANIM_IDLE_TWIST_C_TO_R,
+  MECHA_ANIM_IDLE_TWIST_L_TO_C,
+  MECHA_ANIM_IDLE_TWIST_R_TO_C,
+  MECHA_ANIM_WALK,
+  MECHA_ANIM_WALK_LOOKING_L,
+  MECHA_ANIM_WALK_LOOKING_R,
+  MECHA_ANIM_WALK_TWIST_C_TO_L,
+  MECHA_ANIM_WALK_TWIST_C_TO_R,
+  MECHA_ANIM_WALK_TWIST_L_TO_C,
+  MECHA_ANIM_WALK_TWIST_R_TO_C,
+  MECHA_ANIM_COUNT
+} MechaAnimationID;
+
+// --- ESTADOS INTERNOS DO TORSO ---
+typedef enum {
+    TORSO_CENTER = 0,
+    TORSO_TWISTING_L,   // Girando para Esq
+    TORSO_LOOKING_L,    // Mantendo Esq
+    TORSO_RETURNING_L,  // Voltando da Esq
+    TORSO_TWISTING_R,   // Girando para Dir
+    TORSO_LOOKING_R,    // Mantendo Dir
+    TORSO_RETURNING_R   // Voltando da Dir
+} TorsoState;
 
 #endif

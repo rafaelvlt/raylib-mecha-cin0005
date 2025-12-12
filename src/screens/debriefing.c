@@ -107,7 +107,7 @@ void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
 
 void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
   bool lang = systems->configManager.language;
-  const char* skipText = lang?"PRESS ENTER TO SKIP":"PRESSIONE ENTER PARA PULAR";
+  const char* skipText = lang?"PRESS SPACE TO SKIP":"PRESSIONE ESPACO PARA PULAR";
 
   ClearBackground(BLACK); 
 

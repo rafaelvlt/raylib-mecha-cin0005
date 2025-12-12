@@ -2,19 +2,23 @@
 #include "systems.h"
 #include "utility.h"
 
-
-
 //Auxiliar function just to draw all the menu buttons, doesn't do any logic
 void DrawMenuButton(MainMenuData* data, Rectangle box, const char* text, MenuButton current){
-    Color textColor = (data->buttonHovered == current) ? data->buttonHoverColor : data->buttonNormalColor;
-    Font font = *data->buttonsFont;
-    Vector2 textSize = MeasureTextEx(*data->buttonsFont, text, data->fontSize, data->fontSpacing);
-    Vector2 textPosition = {
-        box.x + (box.width - textSize.x) / 2,
-        box.y + (box.height - textSize.y) / 2
-    };
+  Color textColor;
+  if (data->buttonHovered == current) {
+    textColor = data->buttonHoverColor;
+  }
+  else {
+    textColor = data->buttonNormalColor;
+  }
+  Font font = *data->buttonsFont;
+  Vector2 textSize = MeasureTextEx(*data->buttonsFont, text, data->fontSize, data->fontSpacing);
+  Vector2 textPosition = {
+    box.x + (box.width - textSize.x) / 2,
+    box.y + (box.height - textSize.y) / 2
+  };
 
-    DrawTextEx(font, text, textPosition, data->fontSize, data->fontSpacing, textColor);
+  DrawTextEx(font, text, textPosition, data->fontSize, data->fontSpacing, textColor);
 
 }
 
@@ -243,9 +247,9 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     
     const bool lang = systems->configManager.language;
     // Draw Buttons (Maybe change to draw in a better way)
-    DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMEÇAR JOGO":"START GAME", BUTTON_START_GAME);
+    DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMECAR JOGO":"START GAME", BUTTON_START_GAME);
     DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], lang?"EQUIPAMENTOS":"LOADOUT", BUTTON_LOADOUT);
-    DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPÇÕES":"OPTIONS", BUTTON_OPTIONS);
+    DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPCOES":"OPTIONS", BUTTON_OPTIONS);
     DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], lang?"CREDITOS":"CREDITS", BUTTON_CREDITS);
     DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], lang?"SAIR":"EXIT", BUTTON_EXIT);
     
