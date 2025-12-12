@@ -210,7 +210,7 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
     }
   }
 
-  //Desenha o HUD e minimapa
+  // Desenha o HUD e minimapa
   if (bootTime > BOOT_TIME_CROSSHAIR) DrawCrosshair(systems);
   if (bootTime > BOOT_TIME_HUD) DrawHPBar(systems);
   if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems);

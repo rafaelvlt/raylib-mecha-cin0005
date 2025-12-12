@@ -169,6 +169,8 @@ typedef struct  {
   float attackRange;
   float timeSinceLastAction;
   AIState state;
+  TorsoState torsoState; 
+  float torsoTimer;
   Vector3* patrolPoints;
   int numPatrolPoints;
   int currentPatrolIndex;

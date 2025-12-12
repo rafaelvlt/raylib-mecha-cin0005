@@ -35,13 +35,34 @@ typedef enum {
   AI_STATE_ATTACK = 2
 } AIState;
 
+// Player/Mecha animation indices (order must match the .glb clips)
 typedef enum {
-  SCOUT_ANIM_IDLE = 0,            
-  SCOUT_ANIM_DAMAGE_RIGHT = 1,   
-  SCOUT_ANIM_DAMAGE_FRONT_RIGHT = 2,
-  SCOUT_ANIM_DAMAGE_LEFT = 3,      
-  SCOUT_ANIM_DAMAGE_FRONT_LEFT = 4,
-  SCOUT_ANIM_WALK = 5             
-} ScoutAnimationID;
+  MECHA_ANIM_IDLE = 0,
+  MECHA_ANIM_IDLE_LOOKING_L,
+  MECHA_ANIM_IDLE_LOOKING_R,
+  MECHA_ANIM_IDLE_TWIST_C_TO_L,
+  MECHA_ANIM_IDLE_TWIST_C_TO_R,
+  MECHA_ANIM_IDLE_TWIST_L_TO_C,
+  MECHA_ANIM_IDLE_TWIST_R_TO_C,
+  MECHA_ANIM_WALK,
+  MECHA_ANIM_WALK_LOOKING_L,
+  MECHA_ANIM_WALK_LOOKING_R,
+  MECHA_ANIM_WALK_TWIST_C_TO_L,
+  MECHA_ANIM_WALK_TWIST_C_TO_R,
+  MECHA_ANIM_WALK_TWIST_L_TO_C,
+  MECHA_ANIM_WALK_TWIST_R_TO_C,
+  MECHA_ANIM_COUNT
+} MechaAnimationID;
+
+// --- ESTADOS INTERNOS DO TORSO ---
+typedef enum {
+    TORSO_CENTER = 0,
+    TORSO_TWISTING_L,   // Girando para Esq
+    TORSO_LOOKING_L,    // Mantendo Esq
+    TORSO_RETURNING_L,  // Voltando da Esq
+    TORSO_TWISTING_R,   // Girando para Dir
+    TORSO_LOOKING_R,    // Mantendo Dir
+    TORSO_RETURNING_R   // Voltando da Dir
+} TorsoState;
 
 #endif

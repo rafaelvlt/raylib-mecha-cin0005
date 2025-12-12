@@ -489,8 +489,8 @@ void DrawWeaponGroups(struct Systems* systems) {
     if ((em->componentMasks[e] & neededMask) == neededMask) {
       wp_control = &em->weaponControlComponents[e];
       break;
-      }
     }
+  }
   
   if (wp_control == NULL) return;
 

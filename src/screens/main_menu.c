@@ -240,7 +240,6 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
 
     // -------- Draw both screens ----------
     const int screenWidth = systems->configManager.screenResolution.x;
-    const int screenHeight = systems->configManager.screenResolution.y;
     ClearBackground(BLACK);
     DrawTextureRec(data->splitScreenMenuPtr->texture, splitScreenRect, (Vector2){0, 0}, WHITE);
     DrawTextureRec(data->splitScreenMechaPtr->texture, splitScreenRect, (Vector2){screenWidth/2.0f, 0 }, WHITE);

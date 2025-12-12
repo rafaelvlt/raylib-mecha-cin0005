@@ -33,7 +33,16 @@ void MovementSystem(struct Systems* systems) {
   }
 }
 
-// This system advances the animation timeline based on playback speed
+// Used as a helper to not have jittering animation between transitions
+static bool IsLoopingAnimation(int animIndex) {
+    return (animIndex == MECHA_ANIM_IDLE || 
+            animIndex == MECHA_ANIM_WALK || 
+            animIndex == MECHA_ANIM_IDLE_LOOKING_L || 
+            animIndex == MECHA_ANIM_IDLE_LOOKING_R ||
+            animIndex == MECHA_ANIM_WALK_LOOKING_L || 
+            animIndex == MECHA_ANIM_WALK_LOOKING_R);
+}
+
 void AnimationSystem(struct Systems* systems) {
   const uint32_t mask = COMPONENT_ANIMATION;
   EntityManager* em = &(systems->entityManager);
@@ -42,52 +51,49 @@ void AnimationSystem(struct Systems* systems) {
   for (Entity i = 0; i < em->numEntities; i++) {
     if ((em->componentMasks[i] & mask) == mask) {
       AnimationComponent* animComp = &em->animationComponents[i];
-
-      // playbackSpeed > 1.0 = faster, < 1.0 = slower, 1.0 = normal speed
       animComp->currentTime += dt * animComp->playbackSpeed;
     }
   }
 }
 
-// Applies the current animation frame to a model based on animation component state
 static void ApplyEntityAnimation(EntityManager* em, ResourceManager* rm, Entity entity, RenderComponent* render, AnimationComponent* animComp) {
-  // Validating
+  // Checks for safety in animaton
   if (!render->model) return;
   
   AssetModelID modelId = animComp->modelId;
   if (modelId < 0 || modelId >= MODEL_ID_COUNT) return;
   
-  // Get animation array and count for this model
   ModelAnimation* animations = rm->modelAnimations[modelId];
   int animCount = rm->modelAnimCounts[modelId];
 
-  // Validate animation data exists and current animation index is valid
   if (!animations || animCount <= 0 || animComp->currentAnim < 0 || animComp->currentAnim >= animCount) return;
 
-  // Get the specific animation clip to play
   ModelAnimation anim = animations[animComp->currentAnim];
 
-  // Only apply if animation has frames and is valid for this model
   if (anim.frameCount > 0 && IsModelAnimationValid(*render->model, anim)) {
     float totalFrames = (float)anim.frameCount;
+    int frame = 0;
 
-    // fmodf handles float mod and positive wrapping, manual fix for negative values
-    float wrapped = fmodf(animComp->currentTime, totalFrames);
-    if (wrapped < 0.0f) wrapped += totalFrames;
+    // Anti-Jitter Logic
+    if (IsLoopingAnimation(animComp->currentAnim)) {
+        // Looping
+        float wrapped = fmodf(animComp->currentTime, totalFrames);
+        if (wrapped < 0.0f) wrapped += totalFrames;
+        frame = (int)wrapped;
+    } else {
+        // Non-Looping: locks on the final frame
+        if (animComp->currentTime >= totalFrames) frame = anim.frameCount - 1;
+        else frame = (int)animComp->currentTime;
+    }
 
-    // Convert time to frame index (truncate to integer)
-    int frame = (int)wrapped;
-
-    // Clamp frame to valid range
     if (frame < 0) frame = 0;
     if (frame >= anim.frameCount) frame = anim.frameCount - 1;
 
-    // Apply this frame to the model (updates bone transforms)
     UpdateModelAnimation(*render->model, anim, frame);
   }
 }
 
-// Renders all visible entities with transform and render components
+// Draws every entity, animated or not
 void RenderSystem(struct Systems* systems) {
   const uint32_t mask = COMPONENT_TRANSFORM | COMPONENT_RENDER;
   EntityManager* em = &(systems->entityManager);
@@ -97,17 +103,14 @@ void RenderSystem(struct Systems* systems) {
     if ((em->componentMasks[i] & mask) == mask) {
       RenderComponent* render = &em->renderComponents[i];
 
-      // Only render if entity is marked as visible
       if (render->isVisible) {
         TransformComponent* transform = &em->transformComponents[i];
 
-        // Apply animation if entity has animation component
         if ((em->componentMasks[i] & COMPONENT_ANIMATION) == COMPONENT_ANIMATION) {
           AnimationComponent* animComp = &em->animationComponents[i];
           ApplyEntityAnimation(em, rm, i, render, animComp);
         }
 
-        // Convert quaternion to axis-angle (required by RL)
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(transform->orientation, &axis, &angle);

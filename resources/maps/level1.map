@@ -82,143 +82,136 @@ COLLISION -440.0 0.0 -90.0 100.0 130.0 90.0 1 0
 # ==========================================
 # INIMIGO 3: SCOUT (Patrulha Flanco Direito)
 # ==========================================
-# Protege o lado da torre (Z = -400)
 ENTITY scout3
 TRANSFORM 100.0 0.0 -200.0
 PHYSICS 0.0 0.0 0.0 0.90
+# Hitbox Original (Pequena para Scale 0.25)
 COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 100.0
 RENDER 1 255 255 255 255
-# AI_CONTROL: sightRadius attackRange - Raio de detecção e alcance de ataque
-AI_CONTROL 200.0 100.0
-# AI_PATROL: count x1 y1 z1 x2 y2 z2 ... - Pontos de patrulha (count = número de pontos)
-#   Patrulha horizontal: Esquerda <-> Direita
+AI_CONTROL 200.0 150.0
 AI_PATROL 2 50.0 0.0 -200.0 150.0 0.0 -200.0
 
 ENTITY scout3_gun
 TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+# Weapon Range 600 (Garante que acerta)
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 600.0 2.0 2 0.1
 ATTACHMENT scout3 6.25 15.50 0.00
 LINK_WEAPON scout3 0 scout3_gun 0 1
 
 
 # ==========================================
-# INIMIGO 4: SCOUT (Patrulha Flanco Direito)
+# INIMIGO 4: SCOUT (Patrulha Flanco Esquerdo)
 # ==========================================
-# Protege o lado da torre (Z = -400)
 ENTITY scout4
 TRANSFORM -100.0 0.0 -300.0
 PHYSICS 0.0 0.0 0.0 0.90
 COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 100.0
 RENDER 1 255 255 255 255
-AI_CONTROL 200.0 100.0
-# Patrulha horizontal: Esquerda <-> Direita
+AI_CONTROL 200.0 150.0
 AI_PATROL 2 -150.0 0.0 -300.0 -50.0 0.0 -300.0
 
 ENTITY scout4_gun
 TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 600.0 2.0 2 0.1
 ATTACHMENT scout4 6.25 15.50 0.00
 LINK_WEAPON scout4 0 scout4_gun 0 1
 
 
 # ==========================================
-# INIMIGO 5: SCOUT (Patrulha Flanco Direito)
+# INIMIGO 5: SCOUT (Fundo Direito)
 # ==========================================
-# Protege o lado da torre (Z = -400)
 ENTITY scout5
 TRANSFORM 150.0 0.0 -500.0
 PHYSICS 0.0 0.0 0.0 0.90
 COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 100.0
 RENDER 1 255 255 255 255
-AI_CONTROL 200.0 100.0
-# Patrulha diagonal: Frente <-> Trás no flanco
+AI_CONTROL 200.0 150.0
 AI_PATROL 2 125.0 0.0 -475.0 75.0 0.0 -425.0
 
 ENTITY scout5_gun
 TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 600.0 2.0 2 0.1
 ATTACHMENT scout5 6.25 15.50 0.00
 LINK_WEAPON scout5 0 scout5_gun 0 1
 
 
 # ==========================================
-# INIMIGO 6: SCOUT (Patrulha Flanco Direito)
+# INIMIGO 6: SCOUT (Fundo Esquerdo)
 # ==========================================
-# Protege o lado da torre (Z = -400)
 ENTITY scout6
 TRANSFORM -150.0 0.0 -500.0
 PHYSICS 0.0 0.0 0.0 0.90
 COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
 HEALTH 100.0
 RENDER 1 255 255 255 255
-AI_CONTROL 200.0 100.0
-# Patrulha diagonal: Frente <-> Trás no flanco
+AI_CONTROL 200.0 150.0
 AI_PATROL 2 -125.0 0.0 -475.0 -75.0 0.0 -425.0
 
 ENTITY scout6_gun
 TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 500.0 2.0 2 0.1
+WEAPON WEAPON_PULSE_LASER 1.0 250.0 5.0 600.0 2.0 2 0.1
 ATTACHMENT scout6 6.25 15.50 0.00
 LINK_WEAPON scout6 0 scout6_gun 0 1
 
 
 # ==========================================
-# INIMIGO 5: COMBATENT (Guarda da Porta)
+# INIMIGO 7: FIGHTER (Guarda da Porta)
 # ==========================================
-# Fica parado logo na frente da torre (-450)
-ENTITY combatent1
-# TRANSFORM com yaw = PI (180 graus, olhando para trás)
+ENTITY fighter1
+# Rotação 0.0 para olhar para frente
 TRANSFORM 0.0 0.0 -450.0 PI
 PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
+# Hitbox Aumentada (1.6x maior que o Scout)
+COLLISION -11.0 0.0 -11.0 11.0 38.0 11.0 0 0
 HEALTH 150.0
-RENDER 1 255 255 255 255
-AI_CONTROL 150.0 75.0
+RENDER 12 255 255 255 255
+# AI: Visão 200, Ataque 150 (Mid Range)
+AI_CONTROL 150.0 125.0
 
-ENTITY comb1_gun
+ENTITY fighter1_gun
 TRANSFORM 0 0 0
-# Atira mais rápido (0.2s)
-WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT combatent1 6.25 15.50 0.00
-LINK_WEAPON combatent1 0 comb1_gun 0 1
+# Weapon Range 400
+WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 400.0 2.0 2 0.1
+ATTACHMENT fighter1 6.25 15.50 0.00
+LINK_WEAPON fighter1 0 fighter1_gun 0 1
 
 
 # ==========================================
-# INIMIGO 6: COMBATENT (Reforço Traseiro)
+# INIMIGO 8: FIGHTER (Reforço Esquerdo)
 # ==========================================
-# Escondido atrás da torre (-550) ou lado esquerdo (-50)
-ENTITY combatent2
+ENTITY fighter2
 TRANSFORM -50.0 0.0 -500.0 PI
 PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
+# Hitbox Aumentada
+COLLISION -11.0 0.0 -11.0 11.0 38.0 11.0 0 0
 HEALTH 150.0
-RENDER 1 255 255 255 255
-AI_CONTROL 150.0 75.0
+RENDER 12 255 255 255 255
+AI_CONTROL 150.0 125.0
 
-ENTITY comb2_gun
+ENTITY fighter2_gun
 TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT combatent2 6.25 15.50 0.00
-LINK_WEAPON combatent2 0 comb2_gun 0 1
+WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 400.0 2.0 2 0.1
+ATTACHMENT fighter2 6.25 15.50 0.00
+LINK_WEAPON fighter2 0 fighter2_gun 0 1
 
 
 # ==========================================
-# INIMIGO 7: COMBATENT (Reforço Traseiro)
+# INIMIGO 9: FIGHTER (Reforço Direito)
 # ==========================================
-# Escondido atrás da torre (-550) ou lado esquerdo (-50)
-ENTITY combatent3
+ENTITY fighter3
 TRANSFORM 50.0 0.0 -500.0 PI
 PHYSICS 0.0 0.0 0.0 0.90
-COLLISION -7.0 0.2 -7.0 7.0 23.9 7.0 0 0
+# Hitbox Aumentada
+COLLISION -11.0 0.0 -11.0 11.0 38.0 11.0 0 0
 HEALTH 150.0
-RENDER 1 255 255 255 255
-AI_CONTROL 150.0 75.0
+RENDER 12 255 255 255 255
+AI_CONTROL 150.0 125.0
 
-ENTITY comb3_gun
+ENTITY fighter3_gun
 TRANSFORM 0 0 0
-WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 500.0 2.0 2 0.1
-ATTACHMENT combatent3 6.25 15.50 0.00
-LINK_WEAPON combatent3 0 comb3_gun 0 1
+WEAPON WEAPON_PULSE_LASER 0.3 250.0 5.0 400.0 2.0 2 0.1
+ATTACHMENT fighter3 6.25 15.50 0.00
+LINK_WEAPON fighter3 0 fighter3_gun 0 1
