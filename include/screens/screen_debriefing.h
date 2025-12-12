@@ -5,10 +5,10 @@
 struct Systems;
 
 typedef struct {
-    Camera camera;
-    float timer;
-    float lastStepTime; 
-    bool audioStarted;
+  Camera camera;
+  float timer;
+  float lastStepTime; 
+  bool audioStarted;
 } DebriefingData;
 
 void InitDebriefingScreen(struct Systems* systems, DebriefingData* data);

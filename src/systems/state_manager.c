@@ -34,7 +34,7 @@ void DestroyCurrentScreen(struct Systems* systems) {
       DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
-      InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      DestroySecondLevelScreen(systems, &stateManager->data.secondLevel);
       break;
     default:
       break;
@@ -85,7 +85,7 @@ void SwitchScreen(struct Systems* systems) {
 void InitStateManager(struct Systems* systems, GameScreen initialScreen) {
   // Cleans current screen
   systems->stateManager.currentScreen = SCREEN_NONE;
-  // change to the initial
+  // Change to the initial
   systems->stateManager.nextScreen = initialScreen;
 
   SwitchScreen(systems);
@@ -125,7 +125,7 @@ void UpdateStateManager(struct Systems* systems) {
     default:
       break;
   }
-  
+
   // Checks event queue for a screenChange request
   for (int i = 0; i < ev->eventCounter; i++) {
     if (ev->eventQueue[i].type == EVENT_SCREEN_CHANGE) {

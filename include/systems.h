@@ -15,18 +15,18 @@
 
 // Holds all managers and global systems, is passed around alot as a pointer to have a "global" system that any function can acess
 struct Systems{
-    // Managers
-    EntityManager entityManager;
-    StateManager stateManager;
-    ResourceManager resourceManager;
-    AudioManager audioManager;
-    ConfigManager configManager;
-    EventManager eventManager;
-    //TBD Below
-    //LanguageSystem languageSystem;
+  // Managers
+  EntityManager entityManager;
+  StateManager stateManager;
+  ResourceManager resourceManager;
+  AudioManager audioManager;
+  ConfigManager configManager;
+  EventManager eventManager;
+  //TBD Below
+  //LanguageSystem languageSystem;
 
-    float delta_time;
-    bool shouldExit;
+  float delta_time;
+  bool shouldExit;
 };
 
 

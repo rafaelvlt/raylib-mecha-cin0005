@@ -11,14 +11,17 @@ void MovementSystem(struct Systems* systems);
 
 // Draw every visible Entity
 void RenderSystem(struct Systems* systems);
+void AnimationSystem(struct Systems* systems);
 void EffectSystem(struct Systems* systems, Camera* camera);
 
 //Draw HUD
-void DrawHUDSystem(struct Systems* systems);
+void DrawHPBar(struct Systems* systems);
+void DrawHeatBar(struct Systems* systems);
 void DrawCrosshair(struct Systems* systems);
-void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
+void DrawMinimapSystem(struct Systems* systems);
 void Hud3DSystem(struct Systems* systems);
 void DrawLevelMessage(struct Systems* systems);
+void DrawWeaponGroups(struct Systems* systems);
 
 // Effects helper, should be in updates
 void TrailSystem(struct Systems* systems);

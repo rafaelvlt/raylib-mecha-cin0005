@@ -27,11 +27,20 @@ void HealthSystem(struct Systems* systems) {
 
         HealthComponent* hp = &em->healthComponents[victim];
         
+        // Calculate damage direction (normalized vector from attacker to victim)
+        if (attacker < MAX_ENTITIES && 
+            (em->componentMasks[attacker] & COMPONENT_TRANSFORM) == COMPONENT_TRANSFORM &&
+            (em->componentMasks[victim] & COMPONENT_TRANSFORM) == COMPONENT_TRANSFORM) {
+          Vector3 attackerPos = em->transformComponents[attacker].position;
+          Vector3 victimPos = em->transformComponents[victim].position;
+          hp->lastDamageDirection = Vector3Normalize(Vector3Subtract(victimPos, attackerPos));
+          hp->damageReactionTimer = 1.0f;
+        }
+        
         hp->hasTakenDamage = true;
         hp->currentHealth -= damage;
 
         if (hp->currentHealth <= 0) {
-
           EventData deathData;
           deathData.deathEvent.owner = victim;
           deathData.deathEvent.killer = attacker;
@@ -42,6 +51,7 @@ void HealthSystem(struct Systems* systems) {
           PushEvent(systems, EVENT_ENTITY_DEATH, deathData);
 
           DestroyEntity(em, victim);
+          TraceLog(LOG_INFO, "KILL: Entity %d destroyed.", victim);
         }
       }
     }

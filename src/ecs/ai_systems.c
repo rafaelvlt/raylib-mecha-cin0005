@@ -1,193 +1,449 @@
+#include <raylib.h>
+#include <raymath.h>
+#include <math.h>
 #include "systems.h"
 #include "ecs/entitymanager.h"
-#include <raymath.h>
+#include "ecs/types.h"
+#include "resource_manager.h"
 
-#define AI_TURN_SPEED      1.5f  
-#define AI_MOVE_SPEED      12.5f 
-#define AI_FOV_THRESHOLD   0.8f
-#define AI_AIM_ERROR       0.1
+// Configuration Constants
+#define AI_TURN_SPEED                2.0f   
+#define AI_MOVE_SPEED                12.5f
+#define AI_FOV_THRESHOLD             0.5f   
+#define AI_FOV_EXTENDED              -0.2f 
+#define AI_AIM_ERROR                 0.1f
+#define AI_DAMAGE_FACING_THRESHOLD   0.7f
 
-static void AiMovementControl(TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float speed, float dt);
+// Alignment when reaching patrol point
+#define AI_ALIGN_START_TURN          0.6f 
+#define AI_ALIGN_STOP_TURN           0.95f
+#define AI_PATROL_LOOK_CANCEL        0.5f 
 
+#define AI_ORBIT_DISTANCE            90.0f
+
+//Helper functions Prototypes
+static Entity FindPlayer(EntityManager* em, Vector3* outPos);
+static bool IsAnimFinished(AnimationComponent* anim, ResourceManager* rm);
+static Vector3 GetTorsoForward(TransformComponent* trans, TorsoState torsoState);
+static bool CheckFOV(TransformComponent* trans, TorsoState torsoState, Vector3 targetPos, float sightRadius);
+static void ManageTorsoAnimation(AnimationComponent* anim, PhysicsComponent* phys, TorsoState* tState, float dt, ResourceManager* rm);
+static bool IsTorsoTransitioning(TorsoState state);
+
+// Behaviors for each state
+static void BehaviorPatrol(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, float dt);
+static void BehaviorChase(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float dt);
+static void BehaviorAttack(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float dt);
+
+
+// ----------------------------------------------------------------------------
+// Main System Loop
+// ----------------------------------------------------------------------------
 void AIControlSystem(struct Systems* systems) {
-  EntityManager* em = &systems->entityManager;
-  float dt = systems->delta_time;
+    EntityManager* em = &systems->entityManager;
+    ResourceManager* rm = &systems->resourceManager;
+    float dt = systems->delta_time;
 
-  Vector3 targetPos = {0};
-  bool playerFound = false;
-  Entity playerID = MAX_ENTITIES;
+    Vector3 playerPos;
+    Entity playerID = FindPlayer(em, &playerPos);
+    bool playerExists = (playerID != MAX_ENTITIES);
 
-  // Finds Player if they have the Player Control Component
-  for (int i = 0; i < em->numEntities && !playerFound; i++) {
-    if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
-      targetPos = em->transformComponents[i].position;
-      playerFound = true;
-    }
-  }
+    uint32_t mask = COMPONENT_AI_CONTROL | COMPONENT_TRANSFORM | COMPONENT_PHYSICS;
 
-  if (!playerFound) return; 
-  uint32_t aiMask = COMPONENT_AI_CONTROL | COMPONENT_TRANSFORM | COMPONENT_PHYSICS;
-  for (int e = 0; e < em->numEntities; e++) {
+    for (int e = 0; e < em->numEntities; e++) {
+        if ((em->componentMasks[e] & mask) != mask) continue;
 
-    if ((em->componentMasks[e] & aiMask) == aiMask) 
-    {
-      AIControlComponent* ai = &em->aiControlComponents[e];
-      TransformComponent* transform = &em->transformComponents[e];
-      PhysicsComponent* phys = &em->physicsComponents[e];
-
-      WeaponControlComponent* wc = &em->weaponControlComponents[e];
-      // Trigger reset
-      wc->triggerPulled = false;
-
-
-      float distSq = Vector3DistanceSqr(transform->position, targetPos);
-      float dist = sqrtf(distSq);
-
-      bool canSeePlayer = false;
-      if (dist <= ai->sightRadius) {
-        Vector3 toPlayer = Vector3Normalize(Vector3Subtract(targetPos, transform->position));
-        Vector3 forward = Vector3RotateByQuaternion((Vector3){0,0,1}, transform->orientation);
-
-        float dot = Vector3DotProduct(forward, toPlayer);
-
-        if (ai->state != 0 || dot > AI_FOV_THRESHOLD) {
-          canSeePlayer = true;
+        AIControlComponent* ai = &em->aiControlComponents[e];
+        TransformComponent* trans = &em->transformComponents[e];
+        PhysicsComponent* phys = &em->physicsComponents[e];
+        
+        AnimationComponent* anim = NULL;
+        if (em->componentMasks[e] & COMPONENT_ANIMATION) {
+            anim = &em->animationComponents[e];
         }
-      }
 
-      if (ai->state == 0) {
-         // IDLE / PATROL
-        if (canSeePlayer || (em->healthComponents[e].hasTakenDamage && dist <= ai->sightRadius)) ai->state = 1; 
-        if (em->healthComponents[e].currentHealth < em->healthComponents[e].maxHealth && dist <= ai->sightRadius) {
-          em->healthComponents[e].hasTakenDamage = true;
+        WeaponControlComponent* wc = NULL;
+        if (em->componentMasks[e] & COMPONENT_WEAPON_CONTROL) {
+            wc = &em->weaponControlComponents[e];
         }
-        else em->healthComponents[e].hasTakenDamage = false;
-      }
-      else if (ai->state == 1) { // CHASE
-        if (dist <= ai->attackRange) ai->state = 2; 
-        if (dist > ai->sightRadius * 1.6f) ai->state = 0;
-      }
-      else if (ai->state == 2) { // ATTACK
-        if (dist > ai->attackRange * 1.2f) ai->state = 1;
-      }
 
-      // Estado 0 = patrol, 1 = perseguindo, 2 = atacando
-      /*
-      if (dist >= ai->sightRadius) {
-        ai->state = 0; // patrol
-      }
-      if (dist < ai->sightRadius) {
-        ai->state = 1;  // perseguir
-      }
+        HealthComponent* health = NULL;
+        if (em->componentMasks[e] & COMPONENT_HEALTH) {
+            health = &em->healthComponents[e];
+        }
+        
+        if (wc) wc->triggerPulled = false;
 
-      if (dist < ai->attackRange) {
-        ai->state = 2; // atacar
-      }*/
-
-      /*Vector3 dirToTarget = Vector3Subtract(targetPos, transform->position);
-      Vector3 foward = {
-        2.0f * (transform->orientation.x * transform->orientation.z + transform->orientation.w * transform->orientation.y),
-        2.0f * (transform->orientation.y * transform->orientation.z - transform->orientation.w * transform->orientation.x),
-        1.0f - 2.0f * (transform->orientation.x * transform->orientation.x + transform->orientation.y * transform->orientation.y)
-      }; 
-      float angleToTarget = Vector3Angle(foward, Vector3Normalize(dirToTarget)) * (180.0f / PI); // Convert to degrees
-
-      //optional: simplificação da lógica acima
-      ai->state = ((dist<ai->attackRange)+(dist<ai->sightRadius));
-
-      if (angleToTarget > 90.0f && angleToTarget < 270.0f) {
-        ai->state = 0; // Volta para patrulha se o player sair do campo de visão
-      }*/
-
-
-      switch (ai->state){
-        case 0: // Patrol
-          // Implementar patrulha se houver pontos de patrulha
-          if (ai->numPatrolPoints > 0 && ai->patrolPoints != NULL) {
-            Vector3 patrolTarget = ai->patrolPoints[ai->currentPatrolIndex];
-            AiMovementControl(transform, phys, patrolTarget, AI_MOVE_SPEED * 0.5f, dt); // Patrulha devagar
-
-            //phys->velocity = Vector3Scale(dir, AI_MOVE_SPEED);
-
-            // Verifica se chegou perto o suficiente do ponto de patrulha
-            if (Vector3Distance(transform->position, patrolTarget) < 8.0f) {
-              // Move para o próximo ponto de patrulha
-              ai->currentPatrolIndex++;
-              if (ai->currentPatrolIndex >= ai->numPatrolPoints) {
-                ai->currentPatrolIndex = 0; // Loop back to the first patrol point
-              }
+        // Check visibility
+        float distToPlayer = 9999.0f;
+        bool canSeePlayer = false;
+        if (playerExists) {
+            distToPlayer = Vector3Distance(trans->position, playerPos);
+            if (distToPlayer <= ai->sightRadius) {
+                canSeePlayer = CheckFOV(trans, ai->torsoState, playerPos, ai->sightRadius);
             }
-          } else {
-            // Sem pontos de patrulha, permanece parado
-            phys->velocity = Vector3Zero();
-          }
-          wc->triggerPulled = false; // Não atira enquanto patrulha
-          break;
-        case 1: // Chase
-          // Lógica de perseguição já implementada abaixo
-          AiMovementControl(transform, phys, targetPos, AI_MOVE_SPEED, dt);
-          break;
-        case 2: // Attack
-          // Lógica de ataque já implementada abaixo
-          // Freia até parar
-          phys->velocity = Vector3Lerp(phys->velocity, Vector3Zero(), dt * 5.0f);
+        }
 
-          // Rotação
-          Vector3 toPlayer = Vector3Subtract(targetPos, transform->position);
-          Vector3 currentFwd = Vector3RotateByQuaternion((Vector3){0,0, 1}, transform->orientation);
-          Vector3 newDir = Vector3Lerp(currentFwd, Vector3Normalize(toPlayer), AI_TURN_SPEED * dt);
-          transform->orientation = QuaternionFromVector3ToVector3((Vector3){0,0,1}, Vector3Normalize(newDir));
+        // React to damage
+        if (health && health->hasTakenDamage) {
+            ai->state = AI_STATE_CHASE; 
+            health->hasTakenDamage = false; 
+        }
 
-          // Attack Logic
-          Vector3 error = { 
-            (float)GetRandomValue(-5,5)/100.0f * AI_AIM_ERROR, 
-            (float)GetRandomValue(-5,5)/100.0f * AI_AIM_ERROR, 
-            (float)GetRandomValue(-5,5)/100.0f * AI_AIM_ERROR 
-          };
+        // Run behavior based on current state
+        switch (ai->state) {
+            case AI_STATE_PATROL:
+                if (canSeePlayer) ai->state = AI_STATE_CHASE;
+                BehaviorPatrol(ai, trans, phys, dt);
+                break;
 
-          wc->aimDirection = Vector3Normalize(Vector3Add(toPlayer, error));
-          wc->triggerPulled = true;
-          wc->lockedTarget= playerID;
-          break;
-        default:
-          // Idle - Garante que ele pare se o player fugir
-          phys->velocity = Vector3Zero();
-          break;
-      }
+            case AI_STATE_CHASE:
+                if (!canSeePlayer && distToPlayer > ai->sightRadius * 1.5f) {
+                    ai->state = AI_STATE_PATROL;
+                } else if (distToPlayer <= ai->attackRange) {
+                    ai->state = AI_STATE_ATTACK;
+                } else {
+                    BehaviorChase(ai, trans, phys, playerPos, dt);
+                }
+                break;
+
+            case AI_STATE_ATTACK:
+                if (distToPlayer > ai->attackRange * 1.2f) {
+                    ai->state = AI_STATE_CHASE;
+                } else {
+                    BehaviorAttack(ai, trans, phys, playerPos, dt);
+                    
+                    if (wc) {
+                        // Apply random error to aim
+                        float err = 0.01f * AI_AIM_ERROR;
+                        Vector3 error = {
+                            (float)GetRandomValue(-5, 5) * err,
+                            (float)GetRandomValue(-5, 5) * err,
+                            (float)GetRandomValue(-5, 5) * err
+                        };
+
+                        Vector3 torsoFwd = GetTorsoForward(trans, ai->torsoState);
+                        Vector3 toPlayer = Vector3Normalize(Vector3Subtract(playerPos, trans->position));
+                        
+                        // Only shoot if torso is aligned with target
+                        if (Vector3DotProduct(torsoFwd, toPlayer) > 0.8f) {
+                            wc->triggerPulled = true;
+                        }
+                        
+                        wc->aimDirection = Vector3Normalize(Vector3Add(Vector3Subtract(playerPos, trans->position), error));
+                        wc->lockedTarget = playerID;
+                    }
+                }
+                break;
+        }
+
+        // Update animation logic
+        if (anim) {
+            ManageTorsoAnimation(anim, phys, &ai->torsoState, dt, rm);
+        }
     }
-  }
 }
 
+// ----------------------------------------------------------------------------
+// AI Behaviors
+// ----------------------------------------------------------------------------
 
+// Moves between patrol points and occasionally looks around
+static void BehaviorPatrol(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, float dt) {
+    if (ai->numPatrolPoints <= 0 || !ai->patrolPoints) { 
+        phys->velocity = Vector3Zero(); 
+        return; 
+    }
 
-static void AiMovementControl(TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float speed, float dt) {
-  Vector3 myPos = trans->position;
-  Vector3 toTarget = Vector3Subtract(targetPos, myPos);
-  toTarget.y = 0;
+    Vector3 target = ai->patrolPoints[ai->currentPatrolIndex];
+    Vector3 toTarget = Vector3Subtract(target, trans->position);
+    toTarget.y = 0; 
+    float distSq = Vector3LengthSqr(toTarget);
 
-  if (Vector3LengthSqr(toTarget) < 4.0f) {
-    phys->velocity = Vector3Zero();
-    return;
-  }
+    // Check if reached destination
+    if (distSq < 25.0f) { 
+        ai->currentPatrolIndex = (ai->currentPatrolIndex + 1) % ai->numPatrolPoints;
+        phys->velocity = Vector3Zero();
+        return;
+    }
 
-  Vector3 desiredDir = Vector3Normalize(toTarget);
-  if (Vector3LengthSqr(desiredDir) < 0.001f) return;
+    Vector3 desiredDir = Vector3Normalize(toTarget);
+    Vector3 currentForward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
+    float alignment = Vector3DotProduct(currentForward, desiredDir);
+    
+    // Determine stabilization threshold based on movement
+    float threshold;
+    if (Vector3LengthSqr(phys->velocity) > 0.1f) {
+        threshold = AI_ALIGN_START_TURN;
+    } else {
+        threshold = AI_ALIGN_STOP_TURN;
+    }
 
-  Vector3 currentForward = Vector3RotateByQuaternion((Vector3){0, 0, 1}, trans->orientation);
+    if (alignment < threshold) {
+        // Stop and turn
+        phys->velocity = Vector3Zero();
+        Vector3 newDir = Vector3Lerp(currentForward, desiredDir, AI_TURN_SPEED * dt);
+        
+        if (Vector3LengthSqr(newDir) > 0.001f) {
+            trans->orientation = QuaternionFromVector3ToVector3((Vector3){0,0,-1}, Vector3Normalize(newDir));
+        }
+        
+        // Cancel looking sideways if the turn is too sharp
+        if (alignment < AI_PATROL_LOOK_CANCEL && !IsTorsoTransitioning(ai->torsoState)) {
+            if (ai->torsoState == TORSO_LOOKING_L) ai->torsoState = TORSO_RETURNING_L;
+            if (ai->torsoState == TORSO_LOOKING_R) ai->torsoState = TORSO_RETURNING_R;
+        }
+    } else {
+        // Move forward
+        phys->velocity = Vector3Scale(desiredDir, AI_MOVE_SPEED * 0.5f); 
 
-  Vector3 newDir = Vector3Lerp(currentForward, desiredDir, AI_TURN_SPEED * dt);
-  if (Vector3LengthSqr(newDir) < 0.001f) newDir = currentForward;
+        // Randomly look around
+        if (ai->torsoState == TORSO_CENTER && ai->torsoTimer <= 0.0f) {
+            if (GetRandomValue(0, 100) < 2) { 
+                if (GetRandomValue(0, 1) == 0) ai->torsoState = TORSO_TWISTING_L;
+                else ai->torsoState = TORSO_TWISTING_R;
+                ai->torsoTimer = (float)GetRandomValue(20, 50) / 10.0f;
+            }
+        }
+        
+        // Handle look timer
+        if (ai->torsoState == TORSO_LOOKING_L || ai->torsoState == TORSO_LOOKING_R) {
+            ai->torsoTimer -= dt;
+            if (ai->torsoTimer <= 0.0f) {
+                if (ai->torsoState == TORSO_LOOKING_L) ai->torsoState = TORSO_RETURNING_L;
+                else ai->torsoState = TORSO_RETURNING_R;
+                ai->torsoTimer = 2.0f; 
+            }
+        } else if (ai->torsoState == TORSO_CENTER && ai->torsoTimer > 0.0f) {
+            ai->torsoTimer -= dt; 
+        }
+    }
+}
 
-  newDir = Vector3Normalize(newDir);
+// Moves directly towards the target
+static void BehaviorChase(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float dt) {
+    Vector3 toPlayer = Vector3Subtract(targetPos, trans->position);
+    toPlayer.y = 0;
+    
+    phys->velocity = Vector3Scale(Vector3Normalize(toPlayer), AI_MOVE_SPEED); 
+    
+    Vector3 currentForward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
+    Vector3 newDir = Vector3Lerp(currentForward, Vector3Normalize(toPlayer), AI_TURN_SPEED * dt);
+    
+    if (Vector3LengthSqr(newDir) > 0.001f) {
+        trans->orientation = QuaternionFromVector3ToVector3((Vector3){0,0,-1}, Vector3Normalize(newDir));
+    }
 
-  trans->orientation = QuaternionFromVector3ToVector3((Vector3){0, 0, 1}, newDir);
+    // Keep torso centered while chasing
+    if (ai->torsoState != TORSO_CENTER && !IsTorsoTransitioning(ai->torsoState)) {
+        if (ai->torsoState == TORSO_LOOKING_L) ai->torsoState = TORSO_RETURNING_L;
+        if (ai->torsoState == TORSO_LOOKING_R) ai->torsoState = TORSO_RETURNING_R;
+    }
+}
 
-  float alignment = Vector3DotProduct(currentForward, desiredDir);
-  float throttle = (alignment > 0.0f) ? alignment : 0.0f;
+// Orbits around the target and aims the torso
+static void BehaviorAttack(AIControlComponent* ai, TransformComponent* trans, PhysicsComponent* phys, Vector3 targetPos, float dt) {
+    Vector3 toPlayer = Vector3Subtract(targetPos, trans->position);
+    toPlayer.y = 0;
+    float dist = Vector3Length(toPlayer);
+    Vector3 dirToPlayer = Vector3Normalize(toPlayer);
 
-  if (alignment > 0.5f) { 
-    throttle = alignment; 
-  }
+    // Calculate orbit direction
+    Vector3 orbitDir = Vector3CrossProduct((Vector3){0,1,0}, dirToPlayer);
+    Vector3 finalMoveDir = orbitDir;
+    
+    // Adjust distance
+    if (dist > AI_ORBIT_DISTANCE + 5.0f) {
+        finalMoveDir = Vector3Add(orbitDir, Vector3Scale(dirToPlayer, 0.5f)); 
+    } else if (dist < AI_ORBIT_DISTANCE - 5.0f) {
+        finalMoveDir = Vector3Add(orbitDir, Vector3Scale(dirToPlayer, -0.5f));
+    }
+    
+    phys->velocity = Vector3Scale(Vector3Normalize(finalMoveDir), AI_MOVE_SPEED);
 
-  phys->velocity = Vector3Scale(newDir, speed * throttle);
+    // Rotate legs to face movement
+    Vector3 currentForward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
+    Vector3 newBodyDir = Vector3Lerp(currentForward, finalMoveDir, AI_TURN_SPEED * dt);
+    
+    if (Vector3LengthSqr(newBodyDir) > 0.001f) {
+        trans->orientation = QuaternionFromVector3ToVector3((Vector3){0,0,-1}, Vector3Normalize(newBodyDir));
+    }
+
+    if (IsTorsoTransitioning(ai->torsoState)) return;
+
+    // Calculate aiming direction
+    Vector3 bodyRight = Vector3CrossProduct(newBodyDir, (Vector3){0,1,0});
+    float sideDot = Vector3DotProduct(bodyRight, dirToPlayer);
+    float frontDot = Vector3DotProduct(newBodyDir, dirToPlayer);
+    
+    TorsoState desiredState = TORSO_CENTER;
+    
+    // If target is not in front, decide which way to look
+    if (frontDot < 0.7f) { 
+        if (sideDot > 0) desiredState = TORSO_LOOKING_R;
+        else desiredState = TORSO_LOOKING_L;
+    }
+
+    // Apply state transitions
+    if (ai->torsoState == TORSO_CENTER && desiredState != TORSO_CENTER) {
+        if (desiredState == TORSO_LOOKING_L) ai->torsoState = TORSO_TWISTING_L;
+        else ai->torsoState = TORSO_TWISTING_R;
+    } else if ((ai->torsoState == TORSO_LOOKING_L || ai->torsoState == TORSO_LOOKING_R) && desiredState == TORSO_CENTER) {
+        if (ai->torsoState == TORSO_LOOKING_L) ai->torsoState = TORSO_RETURNING_L;
+        else ai->torsoState = TORSO_RETURNING_R;
+    } else if (ai->torsoState == TORSO_LOOKING_L && desiredState == TORSO_LOOKING_R) {
+        ai->torsoState = TORSO_RETURNING_L;
+    } else if (ai->torsoState == TORSO_LOOKING_R && desiredState == TORSO_LOOKING_L) {
+        ai->torsoState = TORSO_RETURNING_R;
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Helper Functions
+// ----------------------------------------------------------------------------
+
+static Entity FindPlayer(EntityManager* em, Vector3* outPos) {
+    for (int i = 0; i < em->numEntities; i++) {
+        if ((em->componentMasks[i] & COMPONENT_PLAYER_CONTROL) == COMPONENT_PLAYER_CONTROL) {
+            *outPos = em->transformComponents[i].position;
+            return i;
+        }
+    }
+    *outPos = (Vector3){0};
+    return MAX_ENTITIES;
+}
+
+static bool IsAnimFinished(AnimationComponent* anim, ResourceManager* rm) {
+    if (anim->modelId < 0) return true;
+    ModelAnimation* anims = rm->modelAnimations[anim->modelId];
+    int count = rm->modelAnimCounts[anim->modelId];
+    int idx = anim->currentAnim;
+    
+    if (!anims || count <= 0 || idx < 0 || idx >= count) return true;
+    
+    // Safety check for start of animation
+    if (anims[idx].frameCount > 0 && anim->currentTime <= 0.1f) return false;
+
+    return anim->currentTime >= (float)anims[idx].frameCount;
+}
+
+// Adjust angle based on torso state
+static Vector3 GetTorsoForward(TransformComponent* trans, TorsoState torsoState) {
+    Vector3 legsForward = Vector3RotateByQuaternion((Vector3){0, 0, -1}, trans->orientation);
+    float angleOffset = 0.0f;
+    
+    if (torsoState == TORSO_LOOKING_L || torsoState == TORSO_TWISTING_L) angleOffset = 90.0f * DEG2RAD;
+    else if (torsoState == TORSO_LOOKING_R || torsoState == TORSO_TWISTING_R) angleOffset = -90.0f * DEG2RAD;
+
+    if (fabsf(angleOffset) > 0.001f) {
+        return Vector3RotateByAxisAngle(legsForward, (Vector3){0,1,0}, angleOffset);
+    }
+    return legsForward;
+}
+
+static bool CheckFOV(TransformComponent* trans, TorsoState torsoState, Vector3 targetPos, float sightRadius) {
+    Vector3 toTarget = Vector3Normalize(Vector3Subtract(targetPos, trans->position));
+    Vector3 torsoFwd = GetTorsoForward(trans, torsoState);
+    
+    float threshold;
+    if (torsoState == TORSO_CENTER) threshold = AI_FOV_THRESHOLD;
+    else threshold = AI_FOV_EXTENDED;
+    
+    return Vector3DotProduct(torsoFwd, toTarget) > threshold;
+}
+
+static bool IsTorsoTransitioning(TorsoState state) {
+    return (state == TORSO_TWISTING_L || state == TORSO_TWISTING_R || 
+            state == TORSO_RETURNING_L || state == TORSO_RETURNING_R);
+}
+
+// Maps the current state to the correct animation ID
+static int GetExpectedAnim(TorsoState state, bool isMoving) {
+    switch (state) {
+        case TORSO_CENTER: 
+            if (isMoving) return MECHA_ANIM_WALK;
+            return MECHA_ANIM_IDLE;
+        
+        case TORSO_TWISTING_L: 
+            if (isMoving) return MECHA_ANIM_WALK_TWIST_C_TO_L;
+            return MECHA_ANIM_IDLE_TWIST_C_TO_L;
+        
+        case TORSO_LOOKING_L: 
+            if (isMoving) return MECHA_ANIM_WALK_LOOKING_L;
+            return MECHA_ANIM_IDLE_LOOKING_L;
+        
+        case TORSO_RETURNING_L: 
+            if (isMoving) return MECHA_ANIM_WALK_TWIST_L_TO_C;
+            return MECHA_ANIM_IDLE_TWIST_L_TO_C;
+        
+        case TORSO_TWISTING_R: 
+            if (isMoving) return MECHA_ANIM_WALK_TWIST_C_TO_R;
+            return MECHA_ANIM_IDLE_TWIST_C_TO_R;
+        
+        case TORSO_LOOKING_R: 
+            if (isMoving) return MECHA_ANIM_WALK_LOOKING_R;
+            return MECHA_ANIM_IDLE_LOOKING_R;
+        
+        case TORSO_RETURNING_R: 
+            if (isMoving) return MECHA_ANIM_WALK_TWIST_R_TO_C;
+            return MECHA_ANIM_IDLE_TWIST_R_TO_C;
+            
+        default: return MECHA_ANIM_IDLE;
+    }
+}
+
+// Determines if frame time can be kept when switching animations
+static bool CanPreserveFrame(int current, int expected) {
+    // Check Walk/Idle pairs for Left Twist
+    if ((expected == MECHA_ANIM_WALK_TWIST_C_TO_L && current == MECHA_ANIM_IDLE_TWIST_C_TO_L) ||
+        (expected == MECHA_ANIM_IDLE_TWIST_C_TO_L && current == MECHA_ANIM_WALK_TWIST_C_TO_L)) return true;
+        
+    if ((expected == MECHA_ANIM_WALK_TWIST_C_TO_R && current == MECHA_ANIM_IDLE_TWIST_C_TO_R) ||
+        (expected == MECHA_ANIM_IDLE_TWIST_C_TO_R && current == MECHA_ANIM_WALK_TWIST_C_TO_R)) return true;
+        
+    if ((expected == MECHA_ANIM_WALK_TWIST_L_TO_C && current == MECHA_ANIM_IDLE_TWIST_L_TO_C) ||
+        (expected == MECHA_ANIM_IDLE_TWIST_L_TO_C && current == MECHA_ANIM_WALK_TWIST_L_TO_C)) return true;
+        
+    if ((expected == MECHA_ANIM_WALK_TWIST_R_TO_C && current == MECHA_ANIM_IDLE_TWIST_R_TO_C) ||
+        (expected == MECHA_ANIM_IDLE_TWIST_R_TO_C && current == MECHA_ANIM_WALK_TWIST_R_TO_C)) return true;
+    
+    if ((expected == MECHA_ANIM_WALK_LOOKING_L && current == MECHA_ANIM_IDLE_LOOKING_L) ||
+        (expected == MECHA_ANIM_IDLE_LOOKING_L && current == MECHA_ANIM_WALK_LOOKING_L)) return true;
+        
+    if ((expected == MECHA_ANIM_WALK_LOOKING_R && current == MECHA_ANIM_IDLE_LOOKING_R) ||
+        (expected == MECHA_ANIM_IDLE_LOOKING_R && current == MECHA_ANIM_WALK_LOOKING_R)) return true;
+        
+    if ((expected == MECHA_ANIM_WALK && current == MECHA_ANIM_IDLE) ||
+        (expected == MECHA_ANIM_IDLE && current == MECHA_ANIM_WALK)) return true;
+        
+    return false;
+}
+
+/*
+ * 1. Find the correct animation for the current state and movement.
+ * 2. Switch animation immediately if it does not match. Exit to play one frame.
+ * 3. Only check if the transition finished if the correct animation is playing.
+ */
+static void ManageTorsoAnimation(AnimationComponent* anim, PhysicsComponent* phys, TorsoState* tState, float dt, ResourceManager* rm) {
+    bool isMoving = Vector3LengthSqr(phys->velocity) > 0.1f;
+    int expectedAnim = GetExpectedAnim(*tState, isMoving);
+
+    // Force Animation Switch
+    if (anim->currentAnim != expectedAnim) {
+        bool preserve = CanPreserveFrame(anim->currentAnim, expectedAnim);
+        anim->currentAnim = expectedAnim;
+        
+        if (!preserve) {
+            anim->currentTime = 0.0f;
+        }
+        return; 
+    }
+
+    // Check for Completion
+    if (IsTorsoTransitioning(*tState)) {
+        if (IsAnimFinished(anim, rm)) {
+            if (*tState == TORSO_TWISTING_L) *tState = TORSO_LOOKING_L;
+            else if (*tState == TORSO_TWISTING_R) *tState = TORSO_LOOKING_R;
+            else if (*tState == TORSO_RETURNING_L || *tState == TORSO_RETURNING_R) *tState = TORSO_CENTER;
+        }
+    }
 }
