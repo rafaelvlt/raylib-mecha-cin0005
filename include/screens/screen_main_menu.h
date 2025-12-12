@@ -8,7 +8,6 @@ struct Systems;
 typedef enum MenuButton{
     BUTTON_NONE = 0,
     BUTTON_START_GAME,
-    BUTTON_LOADOUT,
     BUTTON_OPTIONS,
     BUTTON_CREDITS,
     BUTTON_EXIT,
@@ -32,6 +31,8 @@ typedef struct {
     RenderTexture* splitScreenMenuPtr;
     RenderTexture* splitScreenMechaPtr;
     Music* menuMusicPtr;
+    Texture2D cinLogo;
+    Texture2D raylibLogo;
 } MainMenuData;
 
 

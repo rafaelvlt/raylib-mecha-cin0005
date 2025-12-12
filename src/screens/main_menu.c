@@ -87,6 +87,10 @@ void InitMainMenuScreen(struct Systems* systems, MainMenuData* data)
     data->fontSpacing = 2.0f;
     EnableCursor();
     data->mousePos = GetMousePosition();
+    data->cinLogo = LoadTexture("resources/images/cin.png");
+    data->raylibLogo = LoadTexture("resources/images/raylib_logo.png");
+    SetTextureFilter(data->cinLogo, TEXTURE_FILTER_BILINEAR);
+    SetTextureFilter(data->raylibLogo, TEXTURE_FILTER_BILINEAR);
 }
 
 void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
@@ -158,11 +162,6 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
         data->buttonPressed = BUTTON_NONE;
         RequestScreenChange(systems, SCREEN_DEBRIEFING);
     }
-    if (data->buttonPressed == BUTTON_LOADOUT)
-    {
-        data->buttonPressed = BUTTON_NONE;
-        RequestScreenChange(systems, SCREEN_LOADOUT);
-    }
     if (data->buttonPressed == BUTTON_OPTIONS)
     {
         data->buttonPressed = BUTTON_NONE;
@@ -215,7 +214,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
 
     // ------- Menu Panel Specs ----------
     const float panelMarginTop = screenHeightMenu * 0.25f; 
-    const float panelWidth = screenWidthMenu * 0.40f;     
+    const float panelWidth = screenWidthMenu * 0.60f;     
     const float panelHeight = screenHeightMenu * 0.60f;  
     const float panelX = screenWidthMenu * 0.05f;        
     const float panelY = panelMarginTop;
@@ -232,7 +231,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     const float contentAreaY = panelY + contentPaddingY;
     const float contentAreaWidth = panelWidth - (contentPaddingX * 2);
     const float contentAreaHeight = panelHeight - (contentPaddingY * 2);
-    const int numButtons = 5;
+    const int numButtons = 4;
     const float slotHeight = contentAreaHeight / numButtons;
     const float buttonToSlotRatio = 0.8f; 
     const float singleButtonHeight = slotHeight * buttonToSlotRatio;
@@ -246,13 +245,35 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
     }
     
     const bool lang = systems->configManager.language;
-    // Draw Buttons (Maybe change to draw in a better way)
+    //------ Draw Buttons (Maybe change to draw in a better way) ----------
     DrawMenuButton(data, data->buttonRects[BUTTON_START_GAME], lang?"COMECAR JOGO":"START GAME", BUTTON_START_GAME);
-    DrawMenuButton(data, data->buttonRects[BUTTON_LOADOUT], lang?"EQUIPAMENTOS":"LOADOUT", BUTTON_LOADOUT);
     DrawMenuButton(data, data->buttonRects[BUTTON_OPTIONS], lang?"OPCOES":"OPTIONS", BUTTON_OPTIONS);
     DrawMenuButton(data, data->buttonRects[BUTTON_CREDITS], lang?"CREDITOS":"CREDITS", BUTTON_CREDITS);
     DrawMenuButton(data, data->buttonRects[BUTTON_EXIT], lang?"SAIR":"EXIT", BUTTON_EXIT);
     
+    //---------- Draw Logos ----------
+    
+    float logoHeightTarget = screenHeightMenu * 0.12f; 
+    
+    const float fixedMargin = 20.0f; 
+
+    float currentXPos = fixedMargin; 
+
+    //---------- Draw CIn logo ----------
+    if (data->cinLogo.id > 0) { 
+        float scaleCin = logoHeightTarget / (float)data->cinLogo.height;
+        Vector2 cinPos = { currentXPos, screenHeightMenu - (data->cinLogo.height * scaleCin) - fixedMargin };
+        DrawTextureEx(data->cinLogo, cinPos, 0.0f, scaleCin, WHITE); 
+        currentXPos += (data->cinLogo.width * scaleCin) + fixedMargin; 
+    }
+
+    // Draw Raylib logo
+    if (data->raylibLogo.id > 0) { 
+        float scaleRay = logoHeightTarget / (float)data->raylibLogo.height;
+        Vector2 rayPos = { currentXPos, screenHeightMenu - (data->raylibLogo.height * scaleRay) - fixedMargin };
+        DrawTextureEx(data->raylibLogo, rayPos, 0.0f, scaleRay, WHITE);
+    }
+
     EndTextureMode();
 
     // -------- Draw both screens ----------
@@ -280,5 +301,7 @@ void DrawMainMenuScreen(struct Systems* systems, MainMenuData* data)
 
 void DestroyMainMenuScreen(struct Systems* systems, MainMenuData* data)
 {
-
+    // Limpar as texturas da memória quando sair
+    UnloadTexture(data->cinLogo);
+    UnloadTexture(data->raylibLogo);
 }
