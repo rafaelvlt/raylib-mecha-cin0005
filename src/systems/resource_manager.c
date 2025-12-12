@@ -42,6 +42,13 @@ static void LoadModels(ResourceManager* rm) {
   rm->models[MODEL_ID_ENEMY_SCOUT].transform = MatrixMultiply(MatrixScale(0.25f, 0.25f, 0.25f), MatrixRotateY(PI));
   rm->modelAnimations[MODEL_ID_ENEMY_SCOUT] = LoadModelAnimations("resources/models/enemies/enemy_scout.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_SCOUT]);
 
+  rm->models[MODEL_ID_ENEMY_FIGHTER] = LoadModel("resources/models/enemies/enemy_fighter.glb");
+  rm->models[MODEL_ID_ENEMY_FIGHTER].transform = MatrixMultiply(MatrixScale(0.35f, 0.35f, 0.35f), MatrixRotateY(PI));
+  rm->modelAnimations[MODEL_ID_ENEMY_FIGHTER] = LoadModelAnimations("resources/models/enemies/enemy_fighter.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_FIGHTER]);
+
+  rm->models[MODEL_ID_ENEMY_BOSS] = LoadModel("resources/models/enemies/enemy_scout.glb");
+  rm->models[MODEL_ID_ENEMY_BOSS].transform = MatrixMultiply(MatrixScale(0.40f, 0.40f, 0.40f), MatrixRotateY(PI));
+  rm->modelAnimations[MODEL_ID_ENEMY_BOSS] = LoadModelAnimations("resources/models/enemies/enemy_boss.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_BOSS]);
 
   rm->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
   rm->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(24.0f, 24.0f, 24.0f);

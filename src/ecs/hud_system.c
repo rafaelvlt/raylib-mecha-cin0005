@@ -23,7 +23,6 @@ static void DrawLBracket(Vector3 corner, Vector3 rightEnd, Vector3 upEnd, Color 
 static Vector3 FindPlayerPosition(EntityManager* em, float* outYaw, Camera* camera);
 static void DrawMinimapBackground(int mapCenterX, int mapCenterY, int mapSize, int mapX, int mapY);
 static void DrawMinimapEntities(EntityManager* em, Entity player, Vector3 playerPos, float cosYaw, float sinYaw, float scaleFactor, int mapCenterX, int mapCenterY, int mapSize);
-static void DrawWeaponBox(int x, int y, int width, int height, Color fill, Color border, const char* text, float currentCooldown, float maxCooldown);
 
 
 // Target lock helper functions
@@ -376,17 +375,15 @@ void DrawLevelMessage(struct Systems* systems) {
 void DrawWeaponGroups(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   WeaponControlComponent* wp_control = NULL;
-  Entity playerEntity = MAX_ENTITIES;
 
   //Look for the player
   uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_WEAPON_CONTROL;
   for (Entity e = 0; e < em->numEntities; e++) {
     if ((em->componentMasks[e] & neededMask) == neededMask) {
       wp_control = &em->weaponControlComponents[e];
-      playerEntity = e;
       break;
-      }
     }
+  }
   
   if (wp_control == NULL) return;
 

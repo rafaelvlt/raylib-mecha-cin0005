@@ -59,8 +59,8 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
           Model* m = GetModel(rm, modelId);
           if (m) {
             AddRenderComponent(em, currentEntity, m, (Color){r,g,b,a});
-            if (modelId == MODEL_ID_ENEMY_SCOUT) {
-              AddAnimationComponent(em, currentEntity, MODEL_ID_ENEMY_SCOUT, 0, 48.0f, true);
+            if (modelId == MODEL_ID_ENEMY_SCOUT || modelId == MODEL_ID_ENEMY_FIGHTER || modelId == MODEL_ID_ENEMY_BOSS) {
+              AddAnimationComponent(em, currentEntity, modelId, 0, 48.0f, true);
             }
           }
         }
