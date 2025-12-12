@@ -48,10 +48,27 @@ void UpdateOptionsScreen(struct Systems* systems, OptionsData* data)
         
     if (IsKeyPressed(KEY_DOWN))  if (data->selectedOption < OPTION_LINE_COUNT -1) data->selectedOption++;
     
-    if (IsKeyPressed(KEY_LEFT)) if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
-    
-    if (IsKeyPressed(KEY_RIGHT)) if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
-    
+    if (data->selectedOption == 3){ 
+        if (IsKeyDown(KEY_LEFT)){
+            if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
+        }
+    }
+    else{
+        if (IsKeyPressed(KEY_LEFT)){ 
+            if (data->selectedOptions[data->selectedOption] > 0) data->selectedOptions[data->selectedOption]--;
+        }
+    }
+
+    if (data->selectedOption == 3){
+        if (IsKeyDown(KEY_RIGHT)){ 
+            if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
+        }
+    }
+    else{
+        if (IsKeyPressed(KEY_RIGHT)){
+            if (data->selectedOptions[data->selectedOption] < data->rangeOptions[data->selectedOption] - 1) data->selectedOptions[data->selectedOption]++;
+        }
+    }
     if (IsKeyPressed(KEY_ENTER)) optionSelect(systems, data);
         
     
