@@ -166,4 +166,6 @@ static void LoadConfigFile(struct Systems* systems){
       }
     }
   }
+  
+  fclose(configFile);
 }

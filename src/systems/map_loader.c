@@ -121,6 +121,10 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
               em->aiControlComponents[currentEntity].patrolPoints = points;
               em->aiControlComponents[currentEntity].numPatrolPoints = count;
             }
+            else{
+              TraceLog(LOG_WARNING, "AI_PATROL specified but entity %d lacks AI_CONTROL component. Freeing patrol points.", currentEntity);
+              free(points);
+            }
           }
       }
       else if (strcmp(command, "WEAPON") == 0) {
