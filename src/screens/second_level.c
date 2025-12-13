@@ -213,7 +213,7 @@ static void ProcessGameplaySystems(struct Systems* systems) {
   WeaponSystem(systems);
   CollisionSystem(systems);
   HealthSystem(systems);
-  
+  HeatSystemUpdate(systems);
   if (currentLevelState == STATE_GAMEPLAY) {
       PlayerAudioSystem(systems);
   }
