@@ -1,7 +1,7 @@
 #ifndef STATE_MANAGER_H
 #define STATE_MANAGER_H
 
-#include "screens/screen_debriefing.h"
+#include "screens/screen_mission_briefing.h"
 struct Systems;
 
 #include <raylib.h>
@@ -16,6 +16,7 @@ struct Systems;
 #include "screens/screen_end_game.h"
 
 
+
 // Enum for all Game States
 typedef enum GameScreen {
   SCREEN_NONE = 0,
@@ -24,7 +25,7 @@ typedef enum GameScreen {
   SCREEN_LOADOUT,
   SCREEN_OPTIONS,
   SCREEN_CREDITS,
-  SCREEN_DEBRIEFING,
+  SCREEN_MISSION_BRIEFING,
   SCREEN_FIRST_LEVEL,
   SCREEN_SECOND_LEVEL,
   SCREEN_DEATH,
@@ -41,7 +42,7 @@ typedef union {
   LoadoutData loadout;
   OptionsData options;
   CreditsData credits;
-  DebriefingData debriefing;
+  MissionBriefingData missionBriefing;
   FirstLevelData firstLevel;
   SecondLevelData secondLevel;
   DeathData death;

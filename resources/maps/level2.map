@@ -3,7 +3,7 @@
 # ==========================================
 ENTITY player
 # TRANSFORM: posX posY posZ [yaw] - Posição inicial e rotação opcional (yaw em radianos, pode usar "PI")
-TRANSFORM 0.0 0.0 0.0
+TRANSFORM 0.0 0.0 120.0
 # PHYSICS: velX velY velZ drag - Velocidade inicial e coeficiente de arrasto (0.0-1.0)
 PHYSICS 0.0 0.0 0.0 0.90
 # COLLISION: minX minY minZ maxX maxY maxZ isStatic isTrigger - Bounding box e flags
@@ -78,14 +78,14 @@ HEALTH 5000.0
 # RENDER 13 = MODEL_ID_ENEMY_BOSS
 RENDER 13 255 200 200 255
 # AI: Vision 800m, Attack 600m
-AI_CONTROL 800.0 150.0
+AI_CONTROL 350.0 125.0
 
 # --- BOSS WEAPONS ---
 
 ENTITY boss_gun_L
 TRANSFORM 0 0 0
 # Damage 25, Range 900
-WEAPON WEAPON_PULSE_LASER 0.8 250.0 5000.0 500.0 5.0 3 0.15
+WEAPON WEAPON_PULSE_LASER 0.8 250.0 5.0 500.0 5.0 3 0.15
 # Z Offset increased to 35.0 to clear hitbox
 ATTACHMENT boss_unit -18.5 36.0 13.0
 LINK_WEAPON boss_unit 0 boss_gun_L 0 1

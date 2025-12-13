@@ -160,7 +160,7 @@ void UpdateMainMenuScreen(struct Systems* systems, MainMenuData* data)
     if (data->buttonPressed == BUTTON_START_GAME)
     {
         data->buttonPressed = BUTTON_NONE;
-        RequestScreenChange(systems, SCREEN_DEBRIEFING);
+        RequestScreenChange(systems, SCREEN_MISSION_BRIEFING);
     }
     if (data->buttonPressed == BUTTON_OPTIONS)
     {

@@ -35,14 +35,14 @@ void AudioManagerOnEvent(struct Systems* systems, Event event) {
 void UpdateAudioManager(struct Systems* systems){
   // Determine target music based on current screen
   Music* targetMusic = NULL;
-  if (systems->stateManager.currentScreen < SCREEN_DEBRIEFING) {
+  if (systems->stateManager.currentScreen < SCREEN_MISSION_BRIEFING) {
     targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_MENU);
   }
   else if (systems->stateManager.currentScreen == SCREEN_FIRST_LEVEL) {
     targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_FIRST_LEVEL);
   }
   else if( systems->stateManager.currentScreen == SCREEN_SECOND_LEVEL) {
-    targetMusic = GetMusic(&systems->resourceManager, MUSIC_ID_SECOND_LEVEL);
+    targetMusic = systems->audioManager.playingNow;
   }
 
   Music* currentMusic = systems->audioManager.playingNow;

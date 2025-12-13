@@ -34,8 +34,8 @@ static void LoadModels(ResourceManager* rm) {
   // Player Models
   rm->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
 
-  rm->models[MODEL_ID_DEBRIEFING] = LoadModel("resources/models/player/debriefing.glb");
-  rm->models[MODEL_ID_DEBRIEFING].transform = MatrixMultiply(MatrixScale(3.5f, 3.5f, 3.5f), MatrixRotateY(0.0f));
+  rm->models[MODEL_ID_MISSION_BRIEFING] = LoadModel("resources/models/player/debriefing.glb");
+  rm->models[MODEL_ID_MISSION_BRIEFING].transform = MatrixMultiply(MatrixScale(3.5f, 3.5f, 3.5f), MatrixRotateY(0.0f));
 
   // Enemy Models
   rm->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/enemy_scout.glb");
@@ -120,6 +120,7 @@ static void LoadSounds(ResourceManager* rm) {
   // Event Sounds
   rm->sounds[SOUND_ID_ENEMY_MECH_DESTROYED] = LoadSound("resources/sounds/enemy_mech_death.wav");
   rm->sounds[SOUND_ID_ENEMY_TARGET_DESTROYED] = LoadSound("resources/sounds/target_destroyed.wav");
+  rm->sounds[SOUND_ID_BOSS_BRIEFING] = LoadSound("resources/sounds/boss-briefing.wav");
   rm->sounds[SOUND_ID_MISSION_SUCCESS] = LoadSound("resources/sounds/mission_success.wav");
   rm->sounds[SOUND_ID_END_GAME] = LoadSound("resources/sounds/audio_end_game.wav");
   // Ambient/Sequence Sounds
@@ -138,7 +139,7 @@ static void LoadMusic(ResourceManager* rm) {
   rm->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
   rm->musics[MUSIC_ID_FIRST_LEVEL] = LoadMusicStream("resources/musics/first_level_music.mp3");
   rm->musics[MUSIC_ID_SECOND_LEVEL] = LoadMusicStream("resources/musics/second_level_music.mp3");
-  rm->musics[MUSIC_ID_DEBRIEFING] = LoadMusicStream("resources/musics/debriefing.mp3");
+  rm->musics[MUSIC_ID_MISSION_BRIEFING] = LoadMusicStream("resources/musics/debriefing.mp3");
 
   for (int i = 0; i < MUSIC_ID_COUNT; i++) {
       if (rm->musics[i].stream.buffer == NULL) {

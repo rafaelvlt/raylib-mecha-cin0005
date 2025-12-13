@@ -24,8 +24,8 @@ void DestroyCurrentScreen(struct Systems* systems) {
     case SCREEN_CREDITS:
       DestroyCreditsScreen(systems, &stateManager->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      DestroyDebriefingScreen(systems, &stateManager->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      DestroyMissionBriefingScreen(systems, &stateManager->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
@@ -68,8 +68,8 @@ void SwitchScreen(struct Systems* systems) {
     case SCREEN_CREDITS:
       InitCreditsScreen(systems, &stateManager->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      InitDebriefingScreen(systems, &stateManager->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      InitMissionBriefingScreen(systems, &stateManager->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       InitFirstLevelScreen(systems, &stateManager->data.firstLevel);
@@ -116,8 +116,8 @@ void UpdateStateManager(struct Systems* systems) {
     case SCREEN_CREDITS:
       UpdateCreditsScreen(systems, &sm->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      UpdateDebriefingScreen(systems, &sm->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      UpdateMissionBriefingScreen(systems, &sm->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       UpdateFirstLevelScreen(systems, &sm->data.firstLevel);
@@ -165,8 +165,8 @@ void DrawStateManager(struct Systems* systems) {
     case SCREEN_CREDITS:
       DrawCreditsScreen(systems, &stateManager->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      DrawDebriefingScreen(systems, &stateManager->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      DrawMissionBriefingScreen(systems, &stateManager->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       DrawFirstLevelScreen(systems, &stateManager->data.firstLevel);
