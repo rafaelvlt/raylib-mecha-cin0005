@@ -1,4 +1,4 @@
-# MECHA GAME
+# NEPTUNE's SPEAR
 
 [🇧🇷 Português](#português) | [🇺🇸 English](#english)
 
@@ -10,7 +10,7 @@ Jogo de ação em primeira pessoa desenvolvido em C com Raylib, focado em combat
 
 > **Inspirado na franquia MechWarrior**
 
-![Mecha Game](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow)
+![NEPTUNE's SPEAR](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow)
 ![C](https://img.shields.io/badge/Language-C-blue)
 ![Raylib](https://img.shields.io/badge/Framework-Raylib-red)
 
@@ -30,7 +30,7 @@ Jogo de ação em primeira pessoa desenvolvido em C com Raylib, focado em combat
 
 ## 🎮 Sobre
 
-MECHA GAME é um jogo de combate tático em primeira pessoa onde você pilota um mecha em batalhas contra inimigos controlados por IA. O jogo apresenta um sistema de combate baseado em armas com diferentes características, sistema de mira e lock-on, animações fluidas, e uma arquitetura ECS (Entity-Component-System) para gerenciamento eficiente de entidades.
+NEPTUNE's SPEAR é um jogo de combate tático em primeira pessoa onde você pilota um mecha em batalhas contra inimigos controlados por IA. O jogo apresenta um sistema de combate baseado em armas com diferentes características, sistema de mira e lock-on, animações fluidas, e uma arquitetura ECS (Entity-Component-System) para gerenciamento eficiente de entidades.
 
 Este projeto foi desenvolvido como trabalho final para a disciplina de Programação Imperativa (CIN0005/06) do Centro de Informática da UFPE.
 
@@ -339,7 +339,7 @@ First-person action game developed in C with Raylib, focused on mech combat. Fin
 
 > **Inspired by the MechWarrior franchise**
 
-![Mecha Game](https://img.shields.io/badge/Status-In%20Development-yellow)
+![NEPTUNE's SPEAR](https://img.shields.io/badge/Status-In%20Development-yellow)
 ![C](https://img.shields.io/badge/Language-C-blue)
 ![Raylib](https://img.shields.io/badge/Framework-Raylib-red)
 
@@ -359,7 +359,7 @@ First-person action game developed in C with Raylib, focused on mech combat. Fin
 
 ## 🎮 About
 
-MECHA GAME is a tactical first-person combat game where you pilot a mech in battles against AI-controlled enemies. The game features a combat system based on weapons with different characteristics, aiming and lock-on system, fluid animations, and an ECS (Entity-Component-System) architecture for efficient entity management.
+NEPTUNE's SPEAR is a tactical first-person combat game where you pilot a mech in battles against AI-controlled enemies. The game features a combat system based on weapons with different characteristics, aiming and lock-on system, fluid animations, and an ECS (Entity-Component-System) architecture for efficient entity management.
 
 This project was developed as a final project for the Imperative Programming course (CIN0005/06) at the Informatics Center of UFPE.
 
