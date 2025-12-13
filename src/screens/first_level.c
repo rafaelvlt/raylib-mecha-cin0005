@@ -133,7 +133,7 @@ static void CheckLevelCompletion(struct Systems* systems, FirstLevelData* data) 
     Event event = em->eventQueue[i];
     if (event.type == EVENT_ENTITY_DEATH && event.data.deathEvent.type == ENTITY_OBJECTIVE) {
       data->levelFinished = true;
-      data->finishTimer = 5.0f;
+      data->finishTimer = 3.5f;
     }
   }
 }

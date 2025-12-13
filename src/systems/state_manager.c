@@ -33,6 +33,12 @@ void DestroyCurrentScreen(struct Systems* systems) {
     case SCREEN_SECOND_LEVEL:
       DestroySecondLevelScreen(systems, &stateManager->data.secondLevel);
       break;
+    case SCREEN_DEATH:
+      DeathUnload(systems, &stateManager->data.death);
+      break;
+    case SCREEN_END_GAME:
+      DestroyEndGameScreen(systems, &stateManager->data.endGame);
+      break;
     default:
       break;
   }
@@ -70,6 +76,12 @@ void SwitchScreen(struct Systems* systems) {
       break;
     case SCREEN_SECOND_LEVEL:
       InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      break;
+    case SCREEN_DEATH:
+      DeathInit(systems, &stateManager->data.death);
+      break;
+    case SCREEN_END_GAME:
+      InitEndGameScreen(systems, &stateManager->data.endGame);
       break;
     default:
       break;
@@ -113,6 +125,12 @@ void UpdateStateManager(struct Systems* systems) {
     case SCREEN_SECOND_LEVEL:
       UpdateSecondLevelScreen(systems, &sm->data.secondLevel);
       break;
+    case SCREEN_DEATH:
+      UpdateDeathScreen(systems, &sm->data.death);
+      break;
+    case SCREEN_END_GAME:
+      UpdateEndGameScreen(systems, &sm->data.endGame);
+      break;
     default:
       break;
   }
@@ -155,8 +173,13 @@ void DrawStateManager(struct Systems* systems) {
       break;
     case SCREEN_SECOND_LEVEL:
       DrawSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      break;
     case SCREEN_DEATH:
-      DrawDeathScreen(&stateManager->data.death);
+      DrawDeathScreen(systems, &stateManager->data.death);
+      break;
+    case SCREEN_END_GAME:
+      DrawEndGameScreen(systems, &stateManager->data.endGame);
+      break;
     default:
       break;
   }

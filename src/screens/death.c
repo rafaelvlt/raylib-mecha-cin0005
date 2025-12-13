@@ -1,10 +1,10 @@
 #include <raylib.h>
 #include "systems.h"
-#include "screens/screen_death.h"
 #include "state_manager.h"
+#include "screens/screen_death.h"
 #include <stdio.h>
 
-// Constantes de Tela
+// Screen constants
 #define FADE_SPEED 2.0f
 #define GAME_OVER_TEXT_SIZE 80
 #define RESTART_TEXT_SIZE 40
@@ -12,62 +12,63 @@
 #define BUTTON_HEIGHT 70
 
 // --------------------------------------------------------------------------------------------------
-// Inicialização
+// Initialization
 // --------------------------------------------------------------------------------------------------
-void DeathInit(DeathData *data) {
-    // Inicializa os textos e o tamanho da fonte
+void DeathInit(struct Systems *systems, DeathData *data) {
+    (void)systems;
     data->gameOverText = "GAME OVER";
-    data->restartText = "REINICIAR";
+    data->restartText = "RESTART";
     data->fontSize = GAME_OVER_TEXT_SIZE;
-    
-    // Inicializa o estado de hover
-    data->isButtonHovered = false;
-    
-    // Inicializa o alfa para o efeito de fade-in
-    data->alpha = 0.0f; 
 
-    // Calcula a posição do botão no centro da tela
+    data->isButtonHovered = false;
+    data->alpha = 0.0f;
+
     int screenW = GetScreenWidth();
     int screenH = GetScreenHeight();
-    
     data->restartButtonBounds = (Rectangle){
-        (float)screenW / 2 - BUTTON_WIDTH / 2, // X centralizado
-        (float)screenH / 2 + 50,              // Y abaixo do texto "GAME OVER"
+        (float)screenW / 2 - BUTTON_WIDTH / 2,
+        (float)screenH / 2 + 50,
         BUTTON_WIDTH,
         BUTTON_HEIGHT
     };
-    
-    // Configuração inicial
-    TraceLog(LOG_INFO, "SCREEN_DEATH: Inicializada.");
+
+    EnableCursor();
+    TraceLog(LOG_INFO, "SCREEN_DEATH: Initialized");
 }
 
 // --------------------------------------------------------------------------------------------------
-// Atualização
+// Update
 // --------------------------------------------------------------------------------------------------
-void DeathUpdate(DeathData *data, struct Systems *systems) {
-    // Efeito de Fade-in
+void UpdateDeathScreen(struct Systems *systems, DeathData *data) {
+    // Fade-in effect
     if (data->alpha < 1.0f) {
         data->alpha += GetFrameTime() * FADE_SPEED;
         if (data->alpha > 1.0f) data->alpha = 1.0f;
     }
 
-    // Lógica do Botão
+    // Keep button centered if resolution changes
+    int screenW = GetScreenWidth();
+    int screenH = GetScreenHeight();
+    data->restartButtonBounds.x = (float)screenW / 2 - BUTTON_WIDTH / 2;
+    data->restartButtonBounds.y = (float)screenH / 2 + 50;
+
+    // Button logic
     if (data->alpha >= 1.0f) {
-        // Verifica se o mouse está sobre o botão
+        // Check hover
         data->isButtonHovered = CheckCollisionPointRec(GetMousePosition(), data->restartButtonBounds);
 
         if (data->isButtonHovered) {
-            // Verifica o clique do mouse
+            // Check click
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                // Se clicado, retorna a ação de reiniciar
-                TraceLog(LOG_INFO, "SCREEN_DEATH: Botão REINICIAR pressionado.");
+                // Restart on click
+                TraceLog(LOG_INFO, "SCREEN_DEATH: Restart clicked.");
                 RequestScreenChange(systems, SCREEN_SECOND_LEVEL);
             }
         }
         
-        // Permitir sair da tela de morte com ESC
+        // Exit death screen with ESC
         if (IsKeyPressed(KEY_ESCAPE)) {
-            TraceLog(LOG_INFO, "SCREEN_DEATH: ESC pressionado. Sair/Voltar ao Menu Principal.");
+            TraceLog(LOG_INFO, "SCREEN_DEATH: ESC pressed. Returning to main menu.");
             RequestScreenChange(systems, SCREEN_MAIN_MENU);
         }
     }
@@ -75,10 +76,11 @@ void DeathUpdate(DeathData *data, struct Systems *systems) {
 }
 
 // --------------------------------------------------------------------------------------------------
-// Desenho
+// Draw
 // --------------------------------------------------------------------------------------------------
-void DrawDeathScreen(const DeathData *data) {
-    // Desenha o fundo da tela de morte
+void DrawDeathScreen(struct Systems *systems, DeathData *data) {
+    (void)systems;
+    // Draw background
     ClearBackground(BLACK);
 
     Color primaryColor = Fade(RED, data->alpha);
@@ -87,7 +89,7 @@ void DrawDeathScreen(const DeathData *data) {
     
     int screenW = GetScreenWidth();
     
-    // Desenha o texto "GAME OVER"
+    // Draw game over text
     int textWidth = MeasureText(data->gameOverText, GAME_OVER_TEXT_SIZE);
     DrawText(data->gameOverText, 
              screenW / 2 - textWidth / 2, 
@@ -95,14 +97,14 @@ void DrawDeathScreen(const DeathData *data) {
              GAME_OVER_TEXT_SIZE, 
              primaryColor);
              
-    // Desenha o Botão de Reiniciar
+    // Draw restart button
     Rectangle button = data->restartButtonBounds;
     
-    // Desenha o fundo do botão
+    // Draw button background
     DrawRectangleRounded(button, 0.5f, 8, buttonColor);
     DrawRectangleRoundedLines(button, 0.5f, 8, Fade(LIME, data->alpha));
 
-    // Desenha o texto do botão
+    // Draw button text
     int restartTextWidth = MeasureText(data->restartText, RESTART_TEXT_SIZE);
     DrawText(data->restartText, 
              (int)(button.x + button.width / 2 - restartTextWidth / 2), 
@@ -110,8 +112,8 @@ void DrawDeathScreen(const DeathData *data) {
              RESTART_TEXT_SIZE, 
              Fade(WHITE, data->alpha));
 
-    // Desenha uma instrução secundária
-    const char *hintText = "Pressione ESC para sair.";
+    // Draw secondary hint
+    const char *hintText = "Press ESC to leave.";
     int hintWidth = MeasureText(hintText, 20);
     DrawText(hintText, 
              screenW / 2 - hintWidth / 2, 
@@ -121,10 +123,10 @@ void DrawDeathScreen(const DeathData *data) {
 }
 
 // --------------------------------------------------------------------------------------------------
-// Descarregamento (Unload)
+// Unload
 // --------------------------------------------------------------------------------------------------
-void DeathUnload(DeathData *data) {
-    // Aqui seria onde você liberaria texturas, sons ou memória alocada dinamicamente.
-    // Como estamos usando apenas dados estáticos, não há muito a fazer.
-    TraceLog(LOG_INFO, "SCREEN_DEATH: Descarregada.");
+void DeathUnload(struct Systems *systems, DeathData *data) {
+    (void)systems;
+    (void)data;
+    TraceLog(LOG_INFO, "SCREEN_DEATH: Unloaded.");
 }

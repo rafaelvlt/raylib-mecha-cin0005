@@ -18,7 +18,7 @@
 #define SQUARE_SIDE 75.0f
 #define SPACE_BTW_SQUARES 15.0f
 #define MARGIN_TOP 15.0f
-#define COOLDOWN_BAR_HEIGHT 5.0f // Nova constante para a altura da barra de cooldown
+#define COOLDOWN_BAR_HEIGHT 5.0f // Cooldown bar height
 #define TARGET_MARKER_HEIGHT_OFFSET 2.0f
 
 // Helper Functions
@@ -245,15 +245,15 @@ static void DrawMinimapEntities(EntityManager* em, Entity player, Vector3 player
 // Minimap system (Player-Centered)
 void DrawMinimapSystem(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
-  //Agora chama stateManager para poder depender da screen (level) atual
+  // Pick the active level camera via state manager
   StateManager* state = &systems->stateManager;
   Camera* currentCamera = NULL;
 
   if (state->currentScreen == SCREEN_FIRST_LEVEL) {
-        //Camera level one
+        // Level-one camera
         currentCamera = &state->data.firstLevel.camera;
     } else if (state->currentScreen == SCREEN_SECOND_LEVEL) {
-        //Camera level two
+        // Level-two camera
         currentCamera = &state->data.secondLevel.camera;
     } else {
         return;

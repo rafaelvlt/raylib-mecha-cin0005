@@ -6,22 +6,22 @@
 
 
 
-struct Systems; // Declaração forward para uso nas funções de tela
+struct Systems;
 
-// Estrutura de dados da Tela de Morte
+// Death screen data
 typedef struct {
-    Rectangle restartButtonBounds;  // Limites do botão de reiniciar
-    bool isButtonHovered;           // Estado de hover do botão
-    float alpha;                    // Valor de transparência para efeito de fade
-    const char *gameOverText;       // Texto "GAME OVER"
-    const char *restartText;        // Texto do botão
-    int fontSize;                   // Tamanho da fonte
+    Rectangle restartButtonBounds;  // Restart button bounds
+    bool isButtonHovered;           // Hover state
+    float alpha;                    // Fade alpha
+    const char *gameOverText;       // "GAME OVER" text
+    const char *restartText;        // Restart button text
+    int fontSize;                   // Title font size
 } DeathData;
 
 // Funções de ciclo de vida da tela
-void DeathInit(DeathData *data);
-void DeathUpdate(DeathData *data, struct Systems *systems);
-void DrawDeathScreen(const DeathData *data);
-void DeathUnload(DeathData *data);
+void DeathInit(struct Systems *systems, DeathData *data);
+void UpdateDeathScreen(struct Systems *systems, DeathData *data);
+void DrawDeathScreen(struct Systems *systems, DeathData *data);
+void DeathUnload(struct Systems *systems, DeathData *data);
 
 #endif

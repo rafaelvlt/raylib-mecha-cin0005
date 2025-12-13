@@ -119,8 +119,10 @@ void RenderSystem(struct Systems* systems) {
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(transform->orientation, &axis, &angle);
-
-        DrawModelEx(*(render->model), transform->position, axis, angle * RAD2DEG, (Vector3){ 1.0f, 1.0f, 1.0f }, render->tint);
+        
+        if (render->model && render->model->meshCount > 0){
+          DrawModelEx(*(render->model), transform->position, axis, angle * RAD2DEG, (Vector3){ 1.0f, 1.0f, 1.0f }, render->tint);
+        }
       }
     }
   } 

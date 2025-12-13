@@ -39,12 +39,9 @@ static void ProcessWeapon(EntityManager* em, struct Systems* systems, Entity mec
 
   UpdateWeaponCooldowns(weapon, dt);
 
-  // Se estiver superaquecida, impede o disparo e zera os contadores de burst.
+  // Skip firing while overheated.
   if ((em->componentMasks[mecha] & COMPONENT_HEAT) && hc->isOverheated) {
-      if (hc->isOverheated) {
-          // Impede o processamento e disparo da arma se superaquecido.
-          return; 
-      }
+      return;
   }
 
 

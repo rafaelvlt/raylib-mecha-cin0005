@@ -74,7 +74,6 @@ static void ProcessFirstPass(FILE* file, EntityManager* em, ResourceManager* rm,
             }
         }
       }
-      // ... (Resto igual: COLLISION, PLAYER_CONTROL, HUD, HEALTH, AI_CONTROL, AI_PATROL, WEAPON)
       else if (strcmp(command, "COLLISION") == 0) {
           Vector3 min, max; int isStat, isTrig;
           sscanf(line, "%*s %f %f %f %f %f %f %d %d", &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &isStat, &isTrig);

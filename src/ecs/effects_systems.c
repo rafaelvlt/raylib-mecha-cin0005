@@ -116,7 +116,8 @@ static void SpawnWinExplosion(struct Systems* systems, Vector3 position){
   if (effect == MAX_ENTITIES) return;
 
   Vector3 explosionPos = position;
-  explosionPos.y += 8.0f;
+  if (systems->stateManager.currentScreen == SCREEN_FIRST_LEVEL) explosionPos.y += 100.0f;
+  else explosionPos.y += 20.0f;
 
   AddTransformComponent(em, effect, explosionPos);
 
