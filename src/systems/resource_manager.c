@@ -34,8 +34,8 @@ static void LoadModels(ResourceManager* rm) {
   // Player Models
   rm->models[MODEL_ID_MENU] = LoadModel("resources/models/player/mechafullmenu.obj");
 
-  rm->models[MODEL_ID_DEBRIEFING] = LoadModel("resources/models/player/debriefing.glb");
-  rm->models[MODEL_ID_DEBRIEFING].transform = MatrixMultiply(MatrixScale(3.5f, 3.5f, 3.5f), MatrixRotateY(0.0f));
+  rm->models[MODEL_ID_MISSION_BRIEFING] = LoadModel("resources/models/player/debriefing.glb");
+  rm->models[MODEL_ID_MISSION_BRIEFING].transform = MatrixMultiply(MatrixScale(3.5f, 3.5f, 3.5f), MatrixRotateY(0.0f));
 
   // Enemy Models
   rm->models[MODEL_ID_ENEMY_SCOUT] = LoadModel("resources/models/enemies/enemy_scout.glb");
@@ -46,9 +46,9 @@ static void LoadModels(ResourceManager* rm) {
   rm->models[MODEL_ID_ENEMY_FIGHTER].transform = MatrixMultiply(MatrixScale(0.35f, 0.35f, 0.35f), MatrixRotateY(PI));
   rm->modelAnimations[MODEL_ID_ENEMY_FIGHTER] = LoadModelAnimations("resources/models/enemies/enemy_fighter.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_FIGHTER]);
 
-  rm->models[MODEL_ID_ENEMY_BOSS] = LoadModel("resources/models/enemies/enemy_scout.glb");
-  rm->models[MODEL_ID_ENEMY_BOSS].transform = MatrixMultiply(MatrixScale(0.40f, 0.40f, 0.40f), MatrixRotateY(PI));
-  rm->modelAnimations[MODEL_ID_ENEMY_BOSS] = LoadModelAnimations("resources/models/enemies/enemy_boss.glb",&rm->modelAnimCounts[MODEL_ID_ENEMY_BOSS]);
+  rm->models[MODEL_ID_ENEMY_BOSS] = LoadModel("resources/models/enemies/enemy_boss.glb");
+  rm->models[MODEL_ID_ENEMY_BOSS].transform = MatrixMultiply(MatrixScale(0.40f, 0.40f, 0.40f), MatrixRotateY(0.0f));
+  rm->modelAnimations[MODEL_ID_ENEMY_BOSS] = LoadModelAnimations("resources/models/enemies/enemy_boss.glb", &rm->modelAnimCounts[MODEL_ID_ENEMY_BOSS]);
 
   rm->models[MODEL_ID_TURRET_STRUCTURE] = LoadModel("resources/models/enemies/turret.glb");
   rm->models[MODEL_ID_TURRET_STRUCTURE].transform = MatrixScale(24.0f, 24.0f, 24.0f);
@@ -83,12 +83,26 @@ static void LoadModels(ResourceManager* rm) {
     groundMesh.texcoords[i] *= TEXTURE_REPEAT;
   }
   rm->models[MODEL_ID_TERRAIN] = LoadModelFromMesh(groundMesh);
+
+  AssetModelID animatedEnemies[] = {MODEL_ID_ENEMY_BOSS, MODEL_ID_ENEMY_SCOUT, MODEL_ID_ENEMY_FIGHTER};
+  for (int i = 0; i < (int)(sizeof(animatedEnemies)/sizeof(animatedEnemies[0])); i++) {
+    AssetModelID id = animatedEnemies[i];
+    if (rm->modelAnimations[id] == NULL || rm->modelAnimCounts[id] <= 0) {
+      TraceLog(LOG_WARNING, "RM: Missing animations for model ID %d", id);
+    }
+  }
 }
 
 static void LoadFonts(ResourceManager* rm) {
   rm->fonts[FONT_ID_OXIDO_ERODE] = LoadFontEx("resources/fonts/oxido_erode.ttf", 150, NULL, 0);
   rm->fonts[FONT_ID_CODE_PREDATORS] = LoadFontEx("resources/fonts/code_predators.ttf", 150, NULL, 0);
   rm->fonts[FONT_ID_CAPTURE_IT] = LoadFontEx("resources/fonts/capture_it.ttf", 150, NULL, 0);
+
+  for (int i = 0; i < FONT_ID_COUNT; i++) {
+      if (rm->fonts[i].baseSize == 0) {
+          TraceLog(LOG_WARNING, "RM: Font ID %d failed to load", i);
+      }
+  }
 }
 
 static void LoadSounds(ResourceManager* rm) {
@@ -106,18 +120,32 @@ static void LoadSounds(ResourceManager* rm) {
   // Event Sounds
   rm->sounds[SOUND_ID_ENEMY_MECH_DESTROYED] = LoadSound("resources/sounds/enemy_mech_death.wav");
   rm->sounds[SOUND_ID_ENEMY_TARGET_DESTROYED] = LoadSound("resources/sounds/target_destroyed.wav");
+  rm->sounds[SOUND_ID_BOSS_BRIEFING] = LoadSound("resources/sounds/boss-briefing.wav");
   rm->sounds[SOUND_ID_MISSION_SUCCESS] = LoadSound("resources/sounds/mission_success.wav");
-
+  rm->sounds[SOUND_ID_END_GAME] = LoadSound("resources/sounds/audio_end_game.wav");
   // Ambient/Sequence Sounds
   rm->sounds[SOUND_ID_HUMAN_FOOTSTEP] = LoadSound("resources/sounds/human_footstep.wav");
   rm->sounds[SOUND_ID_SKYDROP] = LoadSound("resources/sounds/skydrop.wav");
   rm->sounds[SOUND_ID_STARTUP_SEQUENCE] = LoadSound("resources/sounds/startup_sequence.wav");
+
+  for (int i = 0; i < SOUND_ID_COUNT; i++) {
+      if (rm->sounds[i].frameCount == 0) {
+          TraceLog(LOG_WARNING, "RM: Sound ID %d failed to load", i);
+      }
+  }
 }
 
 static void LoadMusic(ResourceManager* rm) {
   rm->musics[MUSIC_ID_MENU] = LoadMusicStream("resources/musics/menu_music.mp3");
   rm->musics[MUSIC_ID_FIRST_LEVEL] = LoadMusicStream("resources/musics/first_level_music.mp3");
-  rm->musics[MUSIC_ID_DEBRIEFING] = LoadMusicStream("resources/musics/debriefing.mp3");
+  rm->musics[MUSIC_ID_SECOND_LEVEL] = LoadMusicStream("resources/musics/second_level_music.mp3");
+  rm->musics[MUSIC_ID_MISSION_BRIEFING] = LoadMusicStream("resources/musics/debriefing.mp3");
+
+  for (int i = 0; i < MUSIC_ID_COUNT; i++) {
+      if (rm->musics[i].stream.buffer == NULL) {
+           TraceLog(LOG_WARNING, "RM: Music ID %d failed to load", i);
+      }
+  }
 }
 
 static void LoadTextures(ResourceManager* rm) {
@@ -143,11 +171,23 @@ static void LoadTextures(ResourceManager* rm) {
 
   // Apply terrain texture to terrain model
   rm->models[MODEL_ID_TERRAIN].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = rm->textures[TEXTURE_ID_SAND];
+
+  for (int i = 0; i < TEXTURE_ID_COUNT; i++) {
+      if (rm->textures[i].id == 0) {
+          TraceLog(LOG_WARNING, "RM: Texture ID %d failed to load", i);
+      }
+  }
 }
 
 static void LoadRenderTextures(ResourceManager* rm, Vector2 screenResolution) {
   rm->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MENU] = LoadRenderTexture(screenResolution.x/2, screenResolution.y);
   rm->renderTextures[RENDERTEXTURE_ID_SPLITSCREEN_MECHA] = LoadRenderTexture(screenResolution.x/2, screenResolution.y);
+
+  for (int i = 0; i < RENDERTEXTURE_ID_COUNT; i++) {
+      if (rm->renderTextures[i].id == 0) {
+          TraceLog(LOG_WARNING, "RM: RenderTexture ID %d failed to load", i);
+      }
+  }
 }
 
 void ShutdownResourceManager(ResourceManager* rm) {

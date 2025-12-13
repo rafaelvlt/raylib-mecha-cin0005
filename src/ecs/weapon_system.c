@@ -35,8 +35,15 @@ static Entity SpawnMissileProjectile(struct Systems* systems, Vector3 position, 
 static void ProcessWeapon(EntityManager* em, struct Systems* systems, Entity mecha, Entity weaponID, int weaponIndex, float dt) {
   WeaponControlComponent* wc = &em->weaponControlComponents[mecha];
   WeaponComponent* weapon = &em->weaponComponents[weaponID];
+  HeatComponent* hc = &em->heatComponents[mecha];
 
   UpdateWeaponCooldowns(weapon, dt);
+
+  // Skip firing while overheated.
+  if ((em->componentMasks[mecha] & COMPONENT_HEAT) && hc->isOverheated) {
+      return;
+  }
+
 
   int group = wc->weaponsGroupMap[weaponIndex];
 
@@ -103,7 +110,7 @@ void WeaponSystem(struct Systems* systems) {
 static bool ValidateMissileFire(EntityManager* em, WeaponControlComponent* wc, Entity mecha, struct Systems* systems) {
   if (wc->lockedTarget >= MAX_ENTITIES) {
     Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED);
-    float finalVolume = GetAudioVolume(&systems->configManager);
+    float finalVolume = GetSoundVolume(&systems->configManager);
     SetSoundVolume(failSound, finalVolume);
     float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
     SetSoundPitch(failSound, pitch);
@@ -118,7 +125,7 @@ static bool ValidateMissileFire(EntityManager* em, WeaponControlComponent* wc, E
 
   if (distSq < minRangeSq) {
     Sound failSound = *GetSound(&systems->resourceManager, SOUND_ID_MISSILE_FAILED);
-    float finalVolume = GetAudioVolume(&systems->configManager);
+    float finalVolume = GetSoundVolume(&systems->configManager);
     SetSoundVolume(failSound, finalVolume);
     float pitch = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
     SetSoundPitch(failSound, pitch);
@@ -188,7 +195,18 @@ static Vector3 CalculateProjectileDirection(EntityManager* em, WeaponControlComp
     Vector3 aimPoint = Vector3Add(pc->camera->position, Vector3Scale(wc->aimDirection, CONVERGENCE_POINT));
     return Vector3Normalize(Vector3Subtract(aimPoint, spawnPos));
   }
-  else return wc->aimDirection;
+  else {
+    if (wc->lockedTarget != MAX_ENTITIES) {
+        Vector3 targetPos = em->transformComponents[wc->lockedTarget].position;
+
+        targetPos.y += 10.0;
+        Vector3 trueDirection = Vector3Subtract(targetPos, spawnPos);
+        
+        return Vector3Normalize(trueDirection);
+    }
+    
+    return wc->aimDirection;
+  }
 }
 
 // Processes weapon fire event and spawns projectile

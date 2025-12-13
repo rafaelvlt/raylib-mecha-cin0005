@@ -116,7 +116,8 @@ static void SpawnWinExplosion(struct Systems* systems, Vector3 position){
   if (effect == MAX_ENTITIES) return;
 
   Vector3 explosionPos = position;
-  explosionPos.y += 8.0f;
+  if (systems->stateManager.currentScreen == SCREEN_FIRST_LEVEL) explosionPos.y += 100.0f;
+  else explosionPos.y += 20.0f;
 
   AddTransformComponent(em, effect, explosionPos);
 
@@ -146,7 +147,7 @@ void EffectSystemOnEvent(struct Systems* systems, Event event){
     }
   }
   if (event.type == EVENT_ENTITY_DEATH){
-    if (event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) SpawnWinExplosion(systems, event.data.deathEvent.pos);
+    if (event.data.deathEvent.type == ENTITY_OBJECTIVE) SpawnWinExplosion(systems, event.data.deathEvent.pos);
     else SpawnDeathExplosion(systems, event.data.deathEvent.pos);
   }
 }

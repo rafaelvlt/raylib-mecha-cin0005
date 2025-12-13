@@ -101,6 +101,16 @@ typedef struct  {
   float damageReactionTimer;  
 }  HealthComponent;
 
+//Heat control components
+typedef struct HeatComponent {
+    float currentHeat;          // Nível atual de calor (0 a maxHeat)
+    float maxHeat;              // Capacidade máxima antes de superaquecer
+    float dissipationRate;      // Taxa de dissipação de calor por segundo
+    float heatPenaltyDuration;  // Duração da penalidade (e.g., desativação) em caso de superaquecimento
+    float penaltyTimer;         // Timer ativo quando superaquecido (0.0 = Não penalizado)
+    bool isOverheated;          // Flag para saber se está no estado de penalidade
+} HeatComponent;
+
 // Used for stats about a weapon
 typedef struct  {
   WeaponType type;
@@ -110,7 +120,6 @@ typedef struct  {
   int burstCount;
   float burstTimer;
 
-
   // Attributes
   float firingRate;
   float projectileSpeed;
@@ -119,7 +128,7 @@ typedef struct  {
   float burstTotal;
   float burstRate;
 
-  // TBD HEAT
+  // HEAT
   float heatGenerated;
 }  WeaponComponent;
 
@@ -233,6 +242,7 @@ typedef enum {
   COMPONENT_EFFECT = 1 << 13,
   COMPONENT_HOMING = 1 << 14,
   COMPONENT_ANIMATION = 1 << 15,
+  COMPONENT_HEAT = 1 << 16
 } ComponentMask;
 
 #endif //components.h

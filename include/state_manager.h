@@ -1,7 +1,7 @@
 #ifndef STATE_MANAGER_H
 #define STATE_MANAGER_H
 
-#include "screens/screen_debriefing.h"
+#include "screens/screen_mission_briefing.h"
 struct Systems;
 
 #include <raylib.h>
@@ -12,6 +12,9 @@ struct Systems;
 #include "screens/screen_credits.h"
 #include "screens/screen_first_level.h"
 #include "screens/screen_second_level.h"
+#include "screens/screen_death.h"
+#include "screens/screen_end_game.h"
+
 
 
 // Enum for all Game States
@@ -22,9 +25,11 @@ typedef enum GameScreen {
   SCREEN_LOADOUT,
   SCREEN_OPTIONS,
   SCREEN_CREDITS,
-  SCREEN_DEBRIEFING,
+  SCREEN_MISSION_BRIEFING,
   SCREEN_FIRST_LEVEL,
   SCREEN_SECOND_LEVEL,
+  SCREEN_DEATH,
+  SCREEN_END_GAME
 } GameScreen;
 
 
@@ -37,9 +42,11 @@ typedef union {
   LoadoutData loadout;
   OptionsData options;
   CreditsData credits;
-  DebriefingData debriefing;
+  MissionBriefingData missionBriefing;
   FirstLevelData firstLevel;
   SecondLevelData secondLevel;
+  DeathData death;
+  EndGameData endGame;
 } ScreenData;
 
 // The state manager hold the union to the screen data, the current state and the next state for switches

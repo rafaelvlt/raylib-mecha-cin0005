@@ -3,7 +3,7 @@
 #include <raymath.h>
 #include <math.h>
 #include "resource_manager.h"
-#include "screens/screen_debriefing.h"
+#include "screens/screen_mission_briefing.h"
 #include "systems.h"
 
 // Positions
@@ -26,7 +26,7 @@
 
 #define STEP_VOL  0.5f   // Volume
 
-void InitDebriefingScreen(struct Systems* systems, DebriefingData* data) {
+void InitMissionBriefingScreen(struct Systems* systems, MissionBriefingData* data) {
   // Reset
   data->timer = 0.0f;
   data->audioStarted = false;
@@ -41,7 +41,9 @@ void InitDebriefingScreen(struct Systems* systems, DebriefingData* data) {
   DisableCursor();
 }
 
-void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
+void UpdateMissionBriefingScreen(struct Systems* systems, MissionBriefingData* data) {
+  float soundVolume = systems->configManager.soundVolume;
+  
   //Timers
   float dt = systems->delta_time;
   float tNow = data->timer;
@@ -58,12 +60,12 @@ void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
 
   // Audio Logic
   if (data->timer >= DELAY_AUDIO_START && !data->audioStarted) {
-    PlayMusicStream(systems->resourceManager.musics[MUSIC_ID_DEBRIEFING]);
+    PlayMusicStream(systems->resourceManager.musics[MUSIC_ID_MISSION_BRIEFING]);
     data->audioStarted = true;
   }
 
   if (data->audioStarted) {
-    UpdateMusicStream(systems->resourceManager.musics[MUSIC_ID_DEBRIEFING]);
+    UpdateMusicStream(systems->resourceManager.musics[MUSIC_ID_MISSION_BRIEFING]);
   }
 
   // Movement logic
@@ -80,7 +82,7 @@ void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
     if (prevBob > -0.95f && currentBob <= -0.95f) { 
       Sound* step = GetSound(&systems->resourceManager, SOUND_ID_HUMAN_FOOTSTEP); 
       SetSoundPitch(*step, 0.9f + ((float)GetRandomValue(-5, 5) / 100.0f)); 
-      SetSoundVolume(*step, STEP_VOL); 
+      SetSoundVolume(*step, STEP_VOL * soundVolume); 
       PlaySound(*step);
     }
   }
@@ -90,20 +92,20 @@ void UpdateDebriefingScreen(struct Systems* systems, DebriefingData* data) {
   }
 
   // Audio stop
-  float audioLen = GetMusicTimeLength(systems->resourceManager.musics[MUSIC_ID_DEBRIEFING]);
-  float audioPos = GetMusicTimePlayed(systems->resourceManager.musics[MUSIC_ID_DEBRIEFING]);
+  float audioLen = GetMusicTimeLength(systems->resourceManager.musics[MUSIC_ID_MISSION_BRIEFING]);
+  float audioPos = GetMusicTimePlayed(systems->resourceManager.musics[MUSIC_ID_MISSION_BRIEFING]);
 
   // End of cutscene logic (Audio & Screen change) 
   if (audioPos >= audioLen - 0.2f || data->timer >= TIME_CUTSCENE_END) {
-    StopMusicStream(systems->resourceManager.musics[MUSIC_ID_DEBRIEFING]);
+    StopMusicStream(systems->resourceManager.musics[MUSIC_ID_MISSION_BRIEFING]);
   }
   if (data->timer > TIME_CUTSCENE_END || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
-    StopMusicStream(systems->resourceManager.musics[MUSIC_ID_DEBRIEFING]);
+    StopMusicStream(systems->resourceManager.musics[MUSIC_ID_MISSION_BRIEFING]);
     RequestScreenChange(systems, SCREEN_FIRST_LEVEL);
   }
 }
 
-void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
+void DrawMissionBriefingScreen(struct Systems* systems, MissionBriefingData* data) {
   bool lang = systems->configManager.language;
   const char* skipText = lang?"PRESS SPACE TO SKIP":"PRESSIONE ESPACO PARA PULAR";
 
@@ -114,7 +116,7 @@ void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
   if (hangar) {
     DrawModel(*hangar, (Vector3){0, 0, 0}, HANGAR_SCALE, WHITE);
   }
-  Model* mecha = GetModel(&systems->resourceManager, MODEL_ID_DEBRIEFING);
+  Model* mecha = GetModel(&systems->resourceManager, MODEL_ID_MISSION_BRIEFING);
   if (mecha) {
     Vector3 mechaPos = {CENTER_OFFSET_X, 0.0f, MECHA_Z}; 
     DrawModel(*mecha, mechaPos, MECHA_SCALE, WHITE);
@@ -142,4 +144,4 @@ void DrawDebriefingScreen(struct Systems* systems, DebriefingData* data) {
   }
 }
 
-void DestroyDebriefingScreen(struct Systems* systems, DebriefingData* data) {}
+void DestroyMissionBriefingScreen(struct Systems* systems, MissionBriefingData* data) {}

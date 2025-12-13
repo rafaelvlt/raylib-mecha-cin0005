@@ -1,12 +1,16 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h> 
+#include <string.h>
 #include "event_manager.h"
 #include "resource_manager.h"
 #include "systems.h"
 #include "utility.h"
 #include <stdio.h>
 #include "ecs/components.h"
+#include "state_manager.h"
+#include "screens/screen_first_level.h"
+#include "screens/screen_second_level.h"
 
 // HUD Visuals
 #define BAR_WIDTH 400.0f
@@ -14,11 +18,11 @@
 #define SQUARE_SIDE 75.0f
 #define SPACE_BTW_SQUARES 15.0f
 #define MARGIN_TOP 15.0f
-#define COOLDOWN_BAR_HEIGHT 5.0f // Nova constante para a altura da barra de cooldown
+#define COOLDOWN_BAR_HEIGHT 5.0f // Cooldown bar height
 #define TARGET_MARKER_HEIGHT_OFFSET 2.0f
 
 // Helper Functions
-static void DrawBar(float x, float y, float width, float height, float current, float max, Color fillColor, Color outlineColor, Color background, const char* label, const char* unit);
+static void DrawBar(float x, float y, float width, float height, float current, float max, Color fillColor, Color outlineColor, Color background, const char* label, float fontSize, const char* unit);
 static void DrawLBracket(Vector3 corner, Vector3 rightEnd, Vector3 upEnd, Color color, float lineThickness, Vector3 camUp, Vector3 camRight, float groundLevel);
 static Vector3 FindPlayerPosition(EntityManager* em, float* outYaw, Camera* camera);
 static void DrawMinimapBackground(int mapCenterX, int mapCenterY, int mapSize, int mapX, int mapY);
@@ -30,8 +34,14 @@ static void CalculateCameraBasis(Camera* camera, Vector3* outForward, Vector3* o
 static Vector3 ClampToGround(Vector3 pos, float minHeight);
 static void DrawCornerBracket(Vector3 center, Vector3 rightDir, Vector3 upDir, float rightScale, float upScale, float bracketLength, Color color, float lineThickness, Vector3 camUp, Vector3 camRight, float groundLevel, float minHeight);
 
-// Draws HP bar
-void DrawHUDSystem(struct Systems* systems) {
+
+
+//  =======
+//  HP BAR
+//  =======
+
+
+void DrawHPBar(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_HEALTH;
 
@@ -55,13 +65,54 @@ void DrawHUDSystem(struct Systems* systems) {
         outlineColor = RED;
       }
 
-      DrawBar(x_center, y_pos, BAR_WIDTH, BAR_HEIGHT, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, Fade(BLACK, 0.6f), "HP", "%");
+      DrawBar(x_center, y_pos, BAR_WIDTH, BAR_HEIGHT, hp->currentHealth, hp->maxHealth, fillColor, outlineColor, Fade(BLACK, 0.6f), "HP", 20.0, "%");
     }
   }
 }
 
-// Helper to draw a progress bar
-static void DrawBar(float x, float y, float width, float height, float current, float max, Color fillColor, Color outlineColor, Color background, const char* label, const char* unit) {
+
+//  ========
+//  HEAT BAR
+//  ========
+
+
+void DrawHeatBar(struct Systems* systems) {
+  EntityManager* em = &systems->entityManager;
+  uint32_t neededMask = COMPONENT_PLAYER_CONTROL | COMPONENT_HEALTH;
+
+  for (Entity e = 0; e < em->numEntities; e++) {
+    if ((em->componentMasks[e] & neededMask) == neededMask) {
+      CockpitHUDComponent* cock = &em->cockpitHUDComponents[e];
+      float screenW = (float)GetScreenWidth();
+      float x_center = (screenW - BAR_WIDTH) / 2.0f;
+      float y_pos =  (float)GetScreenHeight() - 3 * MARGIN_TOP;
+
+      Color outlineColor = WHITE;
+      Color fillColor = HUD_GRAY_FILL;
+
+      if (cock->currentHeat >= cock->maxHeat * 0.75f) {
+        fillColor = HUD_ORANGE_FILL;
+        outlineColor = RED;
+      }
+
+      if (cock->currentHeat < cock->maxHeat * 0.75f) {
+        fillColor = HUD_ORANGE_FILL;
+        outlineColor = ORANGE;
+      }
+
+      DrawBar(x_center, y_pos, BAR_WIDTH, BAR_HEIGHT / 2.0, cock->currentHeat, cock->maxHeat, fillColor, outlineColor, Fade(BLACK, 0.6f), "HEAT", 14.0, "%");
+    }
+  }
+}
+
+
+
+//  ==============================
+//  AUXILIARY BAR DRAWING FUNCTION
+//  ==============================
+
+
+static void DrawBar(float x, float y, float width, float height, float current, float max, Color fillColor, Color outlineColor, Color background, const char* label, float fontSize, const char* unit) {
   if (max <= 0.0f) max = 1.0f;
   float percentage = current / max;
   if (percentage < 0.0f) percentage = 0.0f;
@@ -95,12 +146,16 @@ static void DrawBar(float x, float y, float width, float height, float current, 
   float value = percentage * 100.0f;
   snprintf(text, 64, "%s %.0f%s", label, value, unit);
 
-  int fontSize = 20;
   int textWidth = MeasureText(text, fontSize);
   // Draw text with shadow then white text on top
   DrawText(text, x + (width / 2) - (textWidth / 2) + 1, y + (height / 2) - (fontSize / 2) + 1, fontSize, BLACK);
   DrawText(text, x + (width / 2) - (textWidth / 2), y + (height / 2) - (fontSize / 2), fontSize, WHITE);
 }
+
+
+//  ==========
+//  CROSSHAIR
+//  ==========
 
 // Simple crosshair draw
 void DrawCrosshair(struct Systems* systems){
@@ -112,6 +167,12 @@ void DrawCrosshair(struct Systems* systems){
 
   DrawTexture(crosshair, screenW/2 - crosshair.width/2, screenH/2 - crosshair.height/2, WHITE);
 }
+
+
+//  ================
+//  MINIMAP SYSTEMS
+//  ================
+
 
 // Finds player position and calculates yaw from camera
 static Vector3 FindPlayerPosition(EntityManager* em, float* outYaw, Camera* camera) {
@@ -180,14 +241,27 @@ static void DrawMinimapEntities(EntityManager* em, Entity player, Vector3 player
   }
 }
 
+
 // Minimap system (Player-Centered)
-void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data) {
+void DrawMinimapSystem(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
+  // Pick the active level camera via state manager
+  StateManager* state = &systems->stateManager;
+  Camera* currentCamera = NULL;
+
+  if (state->currentScreen == SCREEN_FIRST_LEVEL) {
+        // Level-one camera
+        currentCamera = &state->data.firstLevel.camera;
+    } else if (state->currentScreen == SCREEN_SECOND_LEVEL) {
+        // Level-two camera
+        currentCamera = &state->data.secondLevel.camera;
+    } else {
+        return;
+    }
 
   // Get player position and camera yaw for rotation calculations
   float playerYaw = 0.0f;
-  Vector3 playerPos = FindPlayerPosition(em, &playerYaw, &data->camera);
-  if (Vector3LengthSqr(playerPos) < 0.001f) return;
+  Vector3 playerPos = FindPlayerPosition(em, &playerYaw, currentCamera);
 
   // Find player entity ID
   Entity player = MAX_ENTITIES;
@@ -231,6 +305,10 @@ void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data) {
 }
 
 
+//  =========================================
+//  TARGET LOCK SYSTEMS & AUXILIAR FUNCTIONS
+//  =========================================
+
 
 // Calculates camera-relative coordinate system (forward, right, up vectors)
 static void CalculateCameraBasis(Camera* camera, Vector3* outForward, Vector3* outRight, Vector3* outUp) {
@@ -263,6 +341,7 @@ static void DrawLBracket(Vector3 corner, Vector3 rightEnd, Vector3 upEnd, Color 
     DrawLine3D(cornerOffset, upEndOffset, color);
   }
 }
+
 
 // Draws a corner bracket at the specified position relative to center
 // rightScale and upScale determine which corner (positive/negative values)
@@ -346,6 +425,10 @@ void Hud3DSystem(struct Systems* systems) {
 }
 
 
+//  ===============
+//  LEVEL MESSAGES
+//  ===============
+
 
 void DrawLevelMessage(struct Systems* systems) {
   StateManager* state = &systems->stateManager;
@@ -372,6 +455,29 @@ void DrawLevelMessage(struct Systems* systems) {
 //  WEAPONS GROUP BOX
 //  ===================
 
+
+// Auxiliary function to translate enum -> str
+const char* GetWeaponTypeName(WeaponType type) {
+    const char* names[] = {
+        "NONE",              // WEAPON_NONE
+        "Laser Pulse",       // WEAPON_LASER_PULSE
+        "Missile Launcher",  // WEAPON_MISSILE_LAUNCHER
+        "Auto Cannon",       // WEAPON_AUTO_CANNON
+        "Weapon Type 4",
+        "Weapon Type 5"
+    };
+
+    size_t nameCount = sizeof(names) / sizeof(names[0]);
+
+
+    if (type >= 0 && type < nameCount) {
+        return names[type];
+    }
+    
+    return "UNKNOWN";
+}
+
+
 void DrawWeaponGroups(struct Systems* systems) {
   EntityManager* em = &systems->entityManager;
   WeaponControlComponent* wp_control = NULL;
@@ -388,12 +494,15 @@ void DrawWeaponGroups(struct Systems* systems) {
   if (wp_control == NULL) return;
 
   //Calcula o tamanho total da area dos groups
-  float x_total = (float) MAX_WEAPONS_GROUPS * SQUARE_SIDE + (float) (MAX_WEAPONS_GROUPS - 1) * SPACE_BTW_SQUARES;
-  float x_inicial = ((float)GetScreenWidth() - x_total) / 2.0f;
-  float y_pos = ((float)GetScreenHeight() - (SQUARE_SIDE + MARGIN_TOP));
+  float x_size = (float) BAR_WIDTH / 2.0;
+  float x_pos = MARGIN_TOP;
+  float y_pos = 2.5 * MARGIN_TOP;
 
-  float current_x = x_inicial;
-    char label[4];
+  float currentY = y_pos;
+
+  char label[25];
+  const char* weaponNameStr = "";
+
 
   for (int i = 0; i < MAX_WEAPONS_GROUPS; i++) {
     Color fillColor = HUD_BLUE_FILL;
@@ -403,16 +512,33 @@ void DrawWeaponGroups(struct Systems* systems) {
     float currentCooldown = 0.0f;
     float maxCooldown = 0.0f;
 
-    // Tenta encontrar a arma ativa no grupo
+    //  Clean label at each weapon found
+    label[0] = '\0';
+
+    // Try to locate the active weapons
     Entity weaponEntity = MAX_ENTITIES;
     for (int j = 0; j < MAX_WEAPONS_EQUIP; j++) {
         if (wp_control->weaponsGroupMap[j] == i && wp_control->activeGroup[i]) {
             weaponEntity = wp_control->weaponsSlots[j];
             if (weaponEntity != MAX_ENTITIES && (em->componentMasks[weaponEntity] & COMPONENT_WEAPON)) {
                 WeaponComponent* wc = &em->weaponComponents[weaponEntity];
+                
+                if (wp_control->activeGroup[i] && wc->type == WEAPON_MISSILE_LAUNCHER) {
+                  DrawText("Press TAB to lock target for Missel Launcher", 
+                  (GetScreenWidth() - MeasureText("Press TAB to lock target for Missel Launcher", 18)) / 2.0,
+                  GetScreenHeight() - 5.3 * MARGIN_TOP, 18, WHITE);
+                }
+                
+                // Transform weapon type from enum to string
+                weaponNameStr = GetWeaponTypeName(wc->type);
+
+                // Grant a null termination in label
+                strncpy(label, weaponNameStr, sizeof(label) - 1);
+                label[sizeof(label) - 1] = '\0';
+
                 currentCooldown = wc->cooldownTimer;
                 maxCooldown = wc->firingRate;
-                break; // Assume uma arma por grupo para o cooldown
+                break; 
             }
         }
     }
@@ -422,38 +548,17 @@ void DrawWeaponGroups(struct Systems* systems) {
       borderColor = HUD_GREEN_FILL;
     }
 
-    //Cores bonitinhas para o cooldown
-    if (currentCooldown > 0.85 * maxCooldown) {
+    //Cor bonitinhas para o cooldown
+    if (currentCooldown > 0.0 * maxCooldown) {
       fillColor = HUD_RED_FILL;
       backgroundcolor = HUD_GRAY_FILL;
     }
-    else if (currentCooldown > 0.7 * maxCooldown) {
-      fillColor = HUD_ORANGE_FILL;
-      backgroundcolor = HUD_GRAY_FILL;
-    }
-    else if (currentCooldown > 0.55 * maxCooldown) {
-      fillColor = HUD_YELLOW_FILL;
-      backgroundcolor = HUD_GRAY_FILL;
-    }
-    else if (currentCooldown > 0.30 * maxCooldown) {
-      fillColor = HUD_GREEN_FILL;
-      backgroundcolor = HUD_GRAY_FILL;
-    }
-    else if (currentCooldown > 0.0 * maxCooldown) {
-      fillColor = HUD_CYAN_FILL;
-      backgroundcolor = HUD_GRAY_FILL;
-    }
+    
     else backgroundcolor = HUD_BLUE_FILL;
-    
-    
-    
-    
-
-    snprintf(label, 4, "W%d", i + 1);
-    
-    DrawBar(current_x, y_pos, SQUARE_SIDE, SQUARE_SIDE, currentCooldown, maxCooldown, fillColor, borderColor, backgroundcolor, label, "");
+        
+    DrawBar(x_pos, currentY, x_size, BAR_HEIGHT, currentCooldown, maxCooldown, fillColor, borderColor, backgroundcolor, label, 18.0, "");
     //Dá espaço para o proximo group
-    current_x += SQUARE_SIDE + SPACE_BTW_SQUARES;
+    currentY += BAR_HEIGHT + MARGIN_TOP;
   }
 }
 

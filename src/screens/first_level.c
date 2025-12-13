@@ -58,9 +58,9 @@ void InitFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
   data->canControl = false;
   Sound* skySound = GetSound(&systems->resourceManager, SOUND_ID_SKYDROP);
   if (skySound) {
-    float volume = GetAudioVolume(&systems->configManager);
+    float soundVolume = GetSoundVolume(&systems->configManager);
     StopSound(*skySound); 
-    SetSoundVolume(*skySound, volume); 
+    SetSoundVolume(*skySound, soundVolume); 
     PlaySound(*skySound);
   }
 }
@@ -79,7 +79,7 @@ static void ProcessStartupSequence(struct Systems* systems, FirstLevelData* data
       StopSound(*GetSound(&systems->resourceManager, SOUND_ID_SKYDROP));
       StopMusicStream(*bgm);
       PlayMusicStream(*bgm);
-      SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+      SetMusicVolume(*bgm, GetMusicVolume(&systems->configManager));
     }
     return;
   }
@@ -103,7 +103,7 @@ static void ProcessStartupSequence(struct Systems* systems, FirstLevelData* data
     if (bgm) {
       StopMusicStream(*bgm);
       PlayMusicStream(*bgm);
-      SetMusicVolume(*bgm, GetAudioVolume(&systems->configManager));
+      SetMusicVolume(*bgm, GetMusicVolume(&systems->configManager));
     }
   }
 }
@@ -121,6 +121,7 @@ static void ProcessGameplaySystems(struct Systems* systems) {
   CollisionSystem(systems);
   HealthSystem(systems);
   PlayerAudioSystem(systems);
+  HeatSystemUpdate(systems);
 }
 
 // Checks if level completion conditions are met
@@ -130,9 +131,9 @@ static void CheckLevelCompletion(struct Systems* systems, FirstLevelData* data) 
   EventManager* em = &systems->eventManager;
   for (int i = 0; i < em->eventCounter; i++) {
     Event event = em->eventQueue[i];
-    if (event.type == EVENT_ENTITY_DEATH && event.data.deathEvent.type == ENTITY_TURRET_STRUCTURE) {
+    if (event.type == EVENT_ENTITY_DEATH && event.data.deathEvent.type == ENTITY_OBJECTIVE) {
       data->levelFinished = true;
-      data->finishTimer = 5.0f;
+      data->finishTimer = 3.5f;
     }
   }
 }
@@ -145,7 +146,7 @@ static void ProcessLevelFinish(struct Systems* systems, FirstLevelData* data) {
 
   if (data->finishTimer <= 2.5f && data->finishTimer > 2.4f) {
     Sound* endSfx = GetSound(&systems->resourceManager, SOUND_ID_MISSION_SUCCESS);
-    SetSoundVolume(*endSfx, GetAudioVolume(&systems->configManager));
+    SetSoundVolume(*endSfx, GetSoundVolume(&systems->configManager));
     PlaySound(*endSfx);
   }
 
@@ -211,10 +212,12 @@ void DrawFirstLevelScreen(struct Systems* systems, FirstLevelData* data)
 
   // Desenha o HUD e minimapa
   if (bootTime > BOOT_TIME_CROSSHAIR) DrawCrosshair(systems);
-  if (bootTime > BOOT_TIME_HUD) DrawHUDSystem(systems);
-  if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems, data);
+  if (bootTime > BOOT_TIME_HUD) DrawHPBar(systems);
+  if (bootTime > BOOT_TIME_RADAR) DrawMinimapSystem(systems);
   if (bootTime > BOOT_TIME_MSG) DrawLevelMessage(systems);
   if (bootTime > BOOT_TIME_GROUPS) DrawWeaponGroups(systems);
+  if (bootTime > BOOT_TIME_GROUPS) DrawHeatBar(systems);
+
   
 
   DrawFPS(10, 10);

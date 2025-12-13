@@ -92,7 +92,7 @@ void PlayerAudioSystem(struct Systems* systems) {
 
         if (p->isMoving) {
           float stepVolume = 0.3f + (intensity * 0.3f); 
-          SetSoundVolume(sfxFootstep, stepVolume * GetAudioVolume(&systems->configManager));
+          SetSoundVolume(sfxFootstep, stepVolume * GetSoundVolume(&systems->configManager));
 
           // Randomized pitch for variance in sound
           float pitchVar = 0.95f + ((float)GetRandomValue(-5, 5) / 100.0f);
@@ -104,7 +104,7 @@ void PlayerAudioSystem(struct Systems* systems) {
 
       if (p->isZooming && !p->wasZooming) {
 
-        float vol = GetAudioVolume(&systems->configManager);
+        float vol = GetSoundVolume(&systems->configManager);
         SetSoundVolume(sfxZoom, vol);
         SetSoundPitch(sfxZoom, 1.0f + ((float)GetRandomValue(-5, 5)/100.0f));
 

@@ -1,6 +1,7 @@
 #ifndef ECS_SYSTEMS_H
 #define ECS_SYSTEMS_H
 #include "screens/screen_first_level.h"
+#include "../event_manager.h"
 
 struct Systems;
 
@@ -15,9 +16,10 @@ void AnimationSystem(struct Systems* systems);
 void EffectSystem(struct Systems* systems, Camera* camera);
 
 //Draw HUD
-void DrawHUDSystem(struct Systems* systems);
+void DrawHPBar(struct Systems* systems);
+void DrawHeatBar(struct Systems* systems);
 void DrawCrosshair(struct Systems* systems);
-void DrawMinimapSystem(struct Systems* systems, FirstLevelData* data);
+void DrawMinimapSystem(struct Systems* systems);
 void Hud3DSystem(struct Systems* systems);
 void DrawLevelMessage(struct Systems* systems);
 void DrawWeaponGroups(struct Systems* systems);
@@ -39,6 +41,12 @@ void WeaponSystem(struct Systems* systems);
 void ProjectileSystem(struct Systems* systems);
 void MissileSystem(struct Systems* systems);
 void HealthSystem(struct Systems* systems);
+void InitHeatSystem(struct Systems* systems);
+void HeatSystemUpdate(struct Systems* systems);
+void HeatSystemOnEvent(struct Systems* systems, Event event);
+
+// Função de utilidade para adicionar calor que pode ser chamada por outros sistemas (e.g., WeaponSystem)
+void AddHeat(struct Systems* systems, Entity entity, float amount);
 
 //Player Systems
 void PlayerControlSystem(struct Systems* systems);

@@ -18,23 +18,26 @@ void DestroyCurrentScreen(struct Systems* systems) {
     case SCREEN_MAIN_MENU:
       DestroyMainMenuScreen(systems, &stateManager->data.mainMenu);
       break;
-    case SCREEN_LOADOUT:
-      DestroyLoadoutScreen(systems, &stateManager->data.loadout);
-      break;
     case SCREEN_OPTIONS:
       DestroyOptionsScreen(systems, &stateManager->data.options);
       break;
     case SCREEN_CREDITS:
       DestroyCreditsScreen(systems, &stateManager->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      DestroyDebriefingScreen(systems, &stateManager->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      DestroyMissionBriefingScreen(systems, &stateManager->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       DestroyFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
       DestroySecondLevelScreen(systems, &stateManager->data.secondLevel);
+      break;
+    case SCREEN_DEATH:
+      DeathUnload(systems, &stateManager->data.death);
+      break;
+    case SCREEN_END_GAME:
+      DestroyEndGameScreen(systems, &stateManager->data.endGame);
       break;
     default:
       break;
@@ -59,23 +62,26 @@ void SwitchScreen(struct Systems* systems) {
     case SCREEN_MAIN_MENU:
       InitMainMenuScreen(systems, &stateManager->data.mainMenu);
       break;
-    case SCREEN_LOADOUT:
-      InitLoadoutScreen(systems, &stateManager->data.loadout);
-      break;
     case SCREEN_OPTIONS:
       InitOptionsScreen(systems, &stateManager->data.options);
       break;
     case SCREEN_CREDITS:
       InitCreditsScreen(systems, &stateManager->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      InitDebriefingScreen(systems, &stateManager->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      InitMissionBriefingScreen(systems, &stateManager->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       InitFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
       InitSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      break;
+    case SCREEN_DEATH:
+      DeathInit(systems, &stateManager->data.death);
+      break;
+    case SCREEN_END_GAME:
+      InitEndGameScreen(systems, &stateManager->data.endGame);
       break;
     default:
       break;
@@ -104,23 +110,26 @@ void UpdateStateManager(struct Systems* systems) {
     case SCREEN_MAIN_MENU:
       UpdateMainMenuScreen(systems, &sm->data.mainMenu);
       break;
-    case SCREEN_LOADOUT:
-      UpdateLoadoutScreen(systems, &sm->data.loadout);
-      break;
     case SCREEN_OPTIONS:
       UpdateOptionsScreen(systems, &sm->data.options);
       break;
     case SCREEN_CREDITS:
       UpdateCreditsScreen(systems, &sm->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      UpdateDebriefingScreen(systems, &sm->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      UpdateMissionBriefingScreen(systems, &sm->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       UpdateFirstLevelScreen(systems, &sm->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
       UpdateSecondLevelScreen(systems, &sm->data.secondLevel);
+      break;
+    case SCREEN_DEATH:
+      UpdateDeathScreen(systems, &sm->data.death);
+      break;
+    case SCREEN_END_GAME:
+      UpdateEndGameScreen(systems, &sm->data.endGame);
       break;
     default:
       break;
@@ -150,23 +159,27 @@ void DrawStateManager(struct Systems* systems) {
     case SCREEN_MAIN_MENU:
       DrawMainMenuScreen(systems, &stateManager->data.mainMenu);
       break;
-    case SCREEN_LOADOUT:
-      DrawLoadoutScreen(systems, &stateManager->data.loadout);
-      break;
     case SCREEN_OPTIONS:
       DrawOptionsScreen(systems, &stateManager->data.options);
       break;
     case SCREEN_CREDITS:
       DrawCreditsScreen(systems, &stateManager->data.credits);
       break;
-    case SCREEN_DEBRIEFING:
-      DrawDebriefingScreen(systems, &stateManager->data.debriefing);
+    case SCREEN_MISSION_BRIEFING:
+      DrawMissionBriefingScreen(systems, &stateManager->data.missionBriefing);
       break;
     case SCREEN_FIRST_LEVEL:
       DrawFirstLevelScreen(systems, &stateManager->data.firstLevel);
       break;
     case SCREEN_SECOND_LEVEL:
       DrawSecondLevelScreen(systems, &stateManager->data.secondLevel);
+      break;
+    case SCREEN_DEATH:
+      DrawDeathScreen(systems, &stateManager->data.death);
+      break;
+    case SCREEN_END_GAME:
+      DrawEndGameScreen(systems, &stateManager->data.endGame);
+      break;
     default:
       break;
   }
