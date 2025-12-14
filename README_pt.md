@@ -9,6 +9,16 @@
 ![Raylib](https://img.shields.io/badge/Framework-Raylib-red)
 
 ---
+## 🎬 Preview
+
+![Missile lock-on and salvo](./images/missile-salvo.gif)
+*Travando um alvo e disparando uma salva de mísseis guiados do mecha do jogador.*
+
+![Second level gameplay](./images/boss-img.png)
+*Encontro no segundo nível mostrando o ambiente 3D e o mecha inimigo.*
+
+![Main menu](./images/main-menu.png)
+*Layout do menu principal com visualização 3D do mecha e opções de navegação.*
 
 ## 🎮 Sobre
 
