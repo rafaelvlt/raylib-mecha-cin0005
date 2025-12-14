@@ -40,7 +40,7 @@
 
 # Build Files
 *.exe
-mechaGame
+neptune_spear
 *.o
 
 # Debug files
