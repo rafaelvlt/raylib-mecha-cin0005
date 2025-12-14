@@ -51,11 +51,13 @@ void DrawTitleScreen(struct Systems* systems, TitleData* data)
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
 
     //Draw Title on the screen
-    Vector2 textSize = MeasureTextEx(*data->titleFontPtr, GAME_TITLE, 150.0f, 20.0f);
+    const float titleFontSize = 120.0f;
+    const float titleSpacing  = 12.0f;
+    Vector2 textSize = MeasureTextEx(*data->titleFontPtr, GAME_TITLE, titleFontSize, titleSpacing);
     Vector2 titlePosition;
     titlePosition.x = (GetScreenWidth() / 2.0f) - (textSize.x / 2.0f);
     titlePosition.y = (GetScreenHeight() / 2.0f) - (textSize.y / 2.0f);
-    DrawTextEx(*data->titleFontPtr, GAME_TITLE, titlePosition, 150.0f, 20.0f, Fade(WHITE, alphaValue));
+    DrawTextEx(*data->titleFontPtr, GAME_TITLE, titlePosition, titleFontSize, titleSpacing, Fade(WHITE, alphaValue));
 }
 
 void DestroyTitleScreen(struct Systems* systems, TitleData* data)
