@@ -3,7 +3,7 @@
 
 #include <raylib.h>
 
-#define GAME_TITLE "NEPTUNE SPEAR"
+#define GAME_TITLE "NEPTUNE'S SPEAR"
 
 // Colors
 #define GREENISH_BLACK      (Color){ 0, 25, 0, 255 }

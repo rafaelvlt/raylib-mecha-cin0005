@@ -6,7 +6,7 @@
 # =============================================================================
 
 # Executable Name
-PROJECT_NAME := mechaGame
+PROJECT_NAME := neptune_spear
 
 # Project Folders
 SRC_DIR := src
