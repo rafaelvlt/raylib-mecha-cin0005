@@ -1,6 +1,6 @@
 # NEPTUNE'S SPEAR
 
-[🇧🇷 Leia em português](./README_pt.md)
+[Leia em português](./README_pt.md)
 
 # English
 
@@ -12,7 +12,7 @@ Neptune's Spear is a first-person 3D mech project built in pure C with Raylib. I
 ![C](https://img.shields.io/badge/Language-C-blue)
 ![Raylib](https://img.shields.io/badge/Framework-Raylib-red)
 
-## 🎬 Preview
+## Preview
 
 ![Missile lock-on and salvo](./images/missile-salvo.gif)
 *Locking a target and firing a guided missile salvo from the player's mech.*
@@ -23,7 +23,7 @@ Neptune's Spear is a first-person 3D mech project built in pure C with Raylib. I
 ![Main menu](./images/main-menu.png)
 *Main menu layout with the 3D mech preview and navigation options.*
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [About](#about)
 - [Technologies](#technologies)
@@ -37,7 +37,7 @@ Neptune's Spear is a first-person 3D mech project built in pure C with Raylib. I
 - [Authors](#authors)
 - [License](#license)
 
-## 🎮 About
+## About
 
 NEPTUNE'S SPEAR is primarily a programming project about how to structure a small 3D first-person mech game in C. The basic FPS mechanics exist mainly to exercise the architecture: a custom Entity Component System (ECS), explicit state machines for enemy behaviour, decoupled systems (rendering, movement, combat, HUD) and centralized managers for resources, events and game state.
 
@@ -55,7 +55,7 @@ This project was developed as a final project for the Imperative Programming cou
 - **Blender**: 3D modeling and mech animations
 - **Audacity**: Audio editing and sound effects
 
-## 📦 Requirements
+## Requirements
 
 ### Linux
 
@@ -78,7 +78,7 @@ sudo apt-get install build-essential libgl1-mesa-dev libx11-dev libxrandr-dev li
 brew install raylib
 ```
 
-## 🚀 Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -108,7 +108,7 @@ cd ../../..
 make run
 ```
 
-## 🔨 Compilation
+## Compilation
 
 ### Compile the project
 
@@ -130,7 +130,7 @@ make clean
 
 The executable will be generated as `neptune_spear` (Linux/macOS) or `neptune_spear.exe` (Windows).
 
-## 🎯 How to Play
+## How to Play
 
 ### Controls
 
@@ -149,7 +149,7 @@ The executable will be generated as `neptune_spear` (Linux/macOS) or `neptune_sp
 - **C**: Center torso to legs
 - **F**: Center legs to torso
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 raylib-mecha-cin0005/
@@ -194,7 +194,7 @@ raylib-mecha-cin0005/
 └── README.md        # This file
 ```
 
-## 🏗 Architecture
+## Architecture
 
 The project uses an **ECS (Entity-Component-System)** architecture to manage entities efficiently and modularly.
 
@@ -262,7 +262,7 @@ main
       └── Event Manager (Clear)
 ```
 
-## 🗺 Roadmap
+## Roadmap
 
 ### In Development
 
@@ -297,7 +297,7 @@ main
    - Improved visual effects
    - CIn and Raylib logos on splash screen
 
-## 👥 Authors
+## Authors
 
 Project developed as a final project for the Imperative Programming course (CIN0005/06) at the Informatics Center of UFPE.
 
@@ -351,10 +351,7 @@ Project developed as a final project for the Imperative Programming course (CIN0
   </tr>
 </table>
 
-## 📄 License
+## License
 
 This project is licensed under the terms specified in the `LICENSE` file.
 
----
-
-**Desenvolvido com ❤️ usando Raylib** | **Developed with ❤️ using Raylib**
