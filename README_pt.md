@@ -2,14 +2,14 @@
 
 > Projeto de mecha 3D em primeira pessoa desenvolvido em C puro com Raylib, focado em arquitetura de engine em baixo nível: ECS próprio, gerenciamento explícito de recursos e sistemas modulares coordenados por gerenciadores centrais.
 
-[🇺🇸 Versão em inglês](./README.md)
+[Versão em inglês](./README.md)
 
 ![NEPTUNE'S SPEAR](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow)
 ![C](https://img.shields.io/badge/Language-C-blue)
 ![Raylib](https://img.shields.io/badge/Framework-Raylib-red)
 
 ---
-## 🎬 Preview
+## Preview
 
 ![Missile lock-on and salvo](./images/missile-salvo.gif)
 *Travando um alvo e disparando uma salva de mísseis guiados do mecha do jogador.*
@@ -20,13 +20,13 @@
 ![Main menu](./images/main-menu.png)
 *Layout do menu principal com visualização 3D do mecha e opções de navegação.*
 
-## 🎮 Sobre
+## Sobre
 
 NEPTUNE'S SPEAR é, antes de tudo, um projeto de programação sobre como estruturar um pequeno jogo 3D de mecha em primeira pessoa em C. As mecânicas básicas de FPS existem principalmente para exercitar a arquitetura: um sistema ECS próprio, máquinas de estado explícitas para o comportamento dos inimigos, sistemas desacoplados (renderização, movimento, combate, HUD) e gerenciadores centralizados para recursos, eventos e estado de jogo.
 
 Este projeto foi desenvolvido como trabalho final para a disciplina de Programação Imperativa (CIN0005/06) do Centro de Informática da UFPE.
 
-## 🛠 Tecnologias
+## Tecnologias
 
 ### Desenvolvimento
 - **C (C99)**
@@ -38,7 +38,7 @@ Este projeto foi desenvolvido como trabalho final para a disciplina de Programa�
 - **Blender**: modelagem 3D e animações
 - **Audacity**: edição de áudio e efeitos sonoros
 
-## 📦 Requisitos
+## Requisitos
 
 ### Linux
 
@@ -59,7 +59,7 @@ sudo apt-get install build-essential libgl1-mesa-dev libx11-dev libxrandr-dev li
 brew install raylib
 ```
 
-## 🚀 Instalação
+## Instalação
 
 1. Clone o repositório:
 
@@ -92,7 +92,7 @@ cd ../../..
 make run
 ```
 
-## 🎯 Como Jogar
+## Como Jogar
 
 ### Controles
 
@@ -111,7 +111,7 @@ make run
 - **C**: Centralizar torso nas pernas
 - **F**: Centralizar pernas no torso
 
-## 👥 Autores
+## Autores
 
 Projeto desenvolvido como trabalho final para a disciplina de Programação Imperativa (CIN0005/06) do Centro de Informática da UFPE.
 
@@ -165,10 +165,6 @@ Projeto desenvolvido como trabalho final para a disciplina de Programação Impe
   </tr>
 </table>
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença especificada no arquivo `LICENSE`.
-
----
-
-**Desenvolvido com ❤️ usando Raylib**
